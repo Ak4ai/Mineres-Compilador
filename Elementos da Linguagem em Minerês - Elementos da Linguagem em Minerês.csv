@@ -1,0 +1,120 @@
+,,,,,
+,"ELEMENTOS DA LINGUAGEM DE PROGRAMAÇÃO ""MINERÊS""",,,,Exemplo de Implementação:
+,Categoria,Elementos Específicos,ESCOLHA,,"bora cumpade fibonacci(trem_di_numeru n)
+simbora
+
+    trem_di_numeru a fica_assim_entao 0 uai
+    trem_di_numeru b fica_assim_entao 1 uai
+    trem_di_numeru i fica_assim_entao 0 uai
+
+    enquanto_tiver_trem (i < n)
+    simbora
+
+        trem_di_numeru temp fica_assim_entao a + b uai
+        a fica_assim_entao b uai
+        b fica_assim_entao temp uai
+        i fica_assim_entao i + 1 uai
+
+    cabô
+
+    ta bao a uai
+
+cabô
+
+
+
+bora cumpade analisa_prosa(trem_discrita texto)
+simbora
+
+    oia_proce_ve ""Ocê escreveu:"" uai
+    oia_proce_ve texto uai
+
+    trem_discolhe eh_uai fica_assim_entao texto mema_coisa ""uai"" uai
+
+    uai_se (eh_uai)
+    simbora
+        oia_proce_ve ""Só falou uai sô!"" uai
+    cabô
+    uai_senão
+    simbora
+        oia_proce_ve ""Falou outra coisa diferente."" uai
+    cabô
+
+    ta bao texto uai
+
+cabô
+
+
+
+bora cumpade main()
+simbora
+
+    trem_di_numeru numero fica_assim_entao 10 uai
+    trem_cum_virgula valor fica_assim_entao 3.14 uai
+    trem_discrita mensagem fica_assim_entao ""uai"" uai
+    trosso letra fica_assim_entao 'a' uai
+    trem_discolhe escolha fica_assim_entao 1 uai
+
+    oia_proce_ve ""Calculano fibonacci..."" uai
+
+    trem_di_numeru resultado fica_assim_entao fibonacci(numero) uai
+    oia_proce_ve resultado uai
+
+    oia_proce_ve ""Agora vamo analisá a prosa..."" uai
+    trem_discrita retorno fica_assim_entao analisa_prosa(mensagem) uai
+    oia_proce_ve retorno uai
+
+
+    roda_esse_trem (trem_di_numeru i fica_assim_entao 0 uai i < 5 uai i fica_assim_entao i + 1)
+    simbora
+        oia_proce_ve ""rodano esse trem..."" uai
+    cabô
+
+cabô"
+,Estruturas de Controle,if / else,uai_se / uai_senão,,
+,,for,roda_esse_trem,,
+,,while,enquanto_tiver_trem,,
+,,switch case,dependenu / du_casu,,
+,Fluxo e Funções,return ,ta_bao,,
+,,break,para_o_trem,,
+,,continue,toca_o_trem,,
+,,Declaração de função (inicio programa),bora cumpade ( ),,
+,Variáveis e Dados,int,trem_di_numeru,,
+,,float,trem_cum_virgula,,
+,,string,trem_discrita,,
+,,boolean,trem_discolhe,,
+,,char,trosso,,
+,,TRUE,eh,,
+,,FALSE,num_eh,,
+,Escopo e Sintaxe,Início de Bloco,simbora,,
+,,Fim de Bloco,cabo,,
+,,Símbolo { },{ },,
+,,Símbolo ( ),( ),,
+,,"Símbolo "" """,""" """,,
+,,Símbolo ' ',. .'.,,
+,,Símbolo ;,uai,,
+,,"Símbolo ,",",",,
+,Operadores Relacionais,Operador < >,< >,,
+,,Operador <=  >=,<= =>,,
+,,Operador = (atribuição),fica_assim_entao,,
+,,Operador ≠,neh_nada,,
+,,Operador == (comparação),mema_coisa,,
+,Operadores Lógicos,Operador or,quarque_um,,
+,,Operador not,vam_marca,,
+,,Operador and,tamem,,
+,,Operador xor,um_o_oto,,
+,Operadores Aritméticos,Operador +,+,,
+,,Operador -,-,,
+,,Operador *,veiz,,
+,,Operador /,sob,,
+,,Módulo,%,,
+,,Divisão Inteira %,/,,
+,Entrada e Saída,Entrada de Dados (scan),xove,,
+,,Saída de Dados (print),oia_proce_ve,,
+,Texto e Documentação,Strings ,""" """,,
+,,Comentário Linha Única,//,,
+,,Comentário Multilinha,causo ... fim_do_causo,,
+,Bases Numéricas,Número Real,3.14 | .92 | 0.33,,
+,,Número Decimal,0 | 10 | 32,,
+,,Número Octal,01 | 07 | 017,,
+,,Número Hexadecimal,0x10F,,
