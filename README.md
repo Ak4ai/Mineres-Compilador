@@ -15,6 +15,7 @@ Base organizada para evolucao de um compilador da linguagem Mineres, com foco em
 - Estado atual: [docs/status.md](docs/status.md)
 - Arquitetura alvo: [docs/architecture.md](docs/architecture.md)
 - Roadmap: [docs/roadmap.md](docs/roadmap.md)
+- Documentacao temporaria: [docs/temporary-updates.md](docs/temporary-updates.md)
 - Decisoes tecnicas: [docs/decisions/ADR-0001-estrutura-inicial.md](docs/decisions/ADR-0001-estrutura-inicial.md)
 
 Se o GitHub Pages estiver habilitado com branch main e pasta /docs, a home publica sera:
@@ -53,9 +54,10 @@ Mineres-Compilador/
 Fluxo recomendado para contribuicoes:
 
 1. Atualizar codigo.
-2. Atualizar docs/status.md e docs/roadmap.md.
-3. Registrar decisoes relevantes em docs/decisions.
-4. Abrir PR com descricao objetiva do impacto tecnico.
+2. Se a mudanca for pequena, registrar em docs/temporary-updates.md.
+3. Se a mudanca for final/consolidada, atualizar docs/status.md, docs/architecture.md e docs/roadmap.md.
+4. Registrar decisoes relevantes em docs/decisions.
+5. Abrir PR com descricao objetiva do impacto tecnico.
 
 ## Licenca
 

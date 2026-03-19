@@ -62,6 +62,7 @@ Documentacao oficial do projeto, com foco em organizacao comercial, clareza tecn
 | [Estado Atual](status.md) | O que foi feito, o que falta e riscos |
 | [Arquitetura Alvo](architecture.md) | Estrutura por camadas e principios de projeto |
 | [Roadmap de Entrega](roadmap.md) | Plano por fases com checklists |
+| [Documentacao Temporaria](temporary-updates.md) | Registro de mudancas pequenas e incrementais |
 | [ADR 0001](decisions/ADR-0001-estrutura-inicial.md) | Decisao da estrutura inicial |
 
 ---
@@ -101,3 +102,5 @@ Ao final de cada entrega:
 2. Ajuste a tabela de progresso por fase.
 3. Marque os itens concluidos em roadmap.md.
 4. Atualize status.md com fatos tecnicos e riscos.
+5. Registre mudancas pequenas em temporary-updates.md.
+6. Quando a mudanca for consolidada, promova para status.md, architecture.md, roadmap.md ou ADR.

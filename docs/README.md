@@ -30,10 +30,13 @@ Esta pasta centraliza o estado do projeto, arquitetura, decisoes e plano de entr
 - [Estado Atual](status.md)
 - [Arquitetura Alvo](architecture.md)
 - [Roadmap de Entrega](roadmap.md)
+- [Documentacao Temporaria](temporary-updates.md)
 - [ADR 0001 - Estrutura Inicial](decisions/ADR-0001-estrutura-inicial.md)
 
 ## Como Atualizar o Progresso
 
 1. Atualize a porcentagem no elemento `<progress>` desta pagina.
 2. Atualize os checklists em `status.md` e `roadmap.md`.
-3. Registre decisoes arquiteturais em `docs/decisions`.
+3. Para mudancas pequenas, registre em `temporary-updates.md`.
+4. Para mudancas finais, atualize os documentos oficiais e ADR quando necessario.
+5. Registre decisoes arquiteturais em `docs/decisions`.
