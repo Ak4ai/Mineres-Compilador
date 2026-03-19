@@ -1,0 +1,22 @@
+title: Mineres-Compilador Docs
+description: Documentacao oficial do projeto Mineres-Compilador
+remote_theme: just-the-docs/just-the-docs
+
+plugins:
+  - jekyll-remote-theme
+
+url: https://ak4ai.github.io
+baseurl: /Mineres-Compilador
+
+aux_links:
+  Repositorio no GitHub:
+    - https://github.com/Ak4ai/Mineres-Compilador
+
+nav_external_links:
+  - title: README Principal
+    url: https://github.com/Ak4ai/Mineres-Compilador/blob/main/README.md
+
+back_to_top: true
+back_to_top_text: Voltar ao topo
+
+footer_content: "Copyright &copy; 2026 Mineres-Compilador"

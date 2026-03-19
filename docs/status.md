@@ -1,3 +1,8 @@
+---
+title: Estado Atual
+nav_order: 2
+---
+
 # Estado Atual do Projeto
 
 ## O que foi feito

@@ -1,3 +1,8 @@
+---
+title: Arquitetura Alvo
+nav_order: 3
+---
+
 # Arquitetura Alvo
 
 ## Objetivo

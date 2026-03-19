@@ -1,3 +1,9 @@
+---
+title: ADR 0001 - Estrutura Inicial
+parent: Decisoes
+nav_order: 1
+---
+
 # ADR 0001 - Estrutura Inicial do Projeto
 
 ## Status

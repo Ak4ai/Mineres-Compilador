@@ -1,6 +1,7 @@
 ---
 layout: default
-title: Mineres-Compilador Docs
+title: Home
+nav_order: 1
 ---
 
 # Mineres-Compilador
