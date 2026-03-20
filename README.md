@@ -4,19 +4,32 @@ Base organizada para evolucao de um compilador da linguagem Mineres, com foco em
 
 ## Status
 
-- Fase atual: fundacao de estrutura e contratos lexicos.
-- Progresso geral: 22%.
-- Ultimo marco: criacao da central de documentacao em docs.
+- Fase atual: **Implementação de análise lexical (tutorial)**.
+- Progresso geral: 75%.
+- Último marco: Tutoriais completos para aprendizado auto-guiado e testes funcionais.
 
-## Documentacao
+## 🚀 Comece aqui
 
-- Home local da documentacao: [docs/index.md](docs/index.md)
-- Home no GitHub (renderizada): [docs/README.md](docs/README.md)
+**Novo no projeto?** Leia: [COMECE_AQUI.md](COMECE_AQUI.md) (15 min leitura)
+
+Isso te coloca no caminho para implementar o compilador lexical passo a passo.
+
+## 📚 Documentação
+
+### Tutoriais (para aprender implementando)
+- **[COMECE_AQUI.md](COMECE_AQUI.md)** — Roteiro de aprendizado (~4-6 horas)
+- **[Tutorial Completo](docs/tutorial.md)** — 4 fases de implementação:
+  - [Fase 1: Automato.py](docs/tutorial/01-automato.md) - AFD e reconhecimento
+  - [Fase 2: Lexer.py](docs/tutorial/02-lexer.md) - Tokenização
+  - [Fase 3: Main.py](docs/tutorial/03-main.md) - CLI funcional
+  - [Fase 4: Testes](docs/tutorial/04-teste.md) - Validação completa
+
+### Documentação técnica
+- Home: [docs/index.md](docs/index.md)
 - Estado atual: [docs/status.md](docs/status.md)
-- Arquitetura alvo: [docs/architecture.md](docs/architecture.md)
+- Arquitetura: [docs/architecture.md](docs/architecture.md)
 - Roadmap: [docs/roadmap.md](docs/roadmap.md)
-- Documentacao temporaria: [docs/temporary-updates.md](docs/temporary-updates.md)
-- Decisoes tecnicas: [docs/decisions/ADR-0001-estrutura-inicial.md](docs/decisions/ADR-0001-estrutura-inicial.md)
+- Decisões técnicas: [docs/decisions/ADR-0001-estrutura-inicial.md](docs/decisions/ADR-0001-estrutura-inicial.md)
 
 Se o GitHub Pages estiver habilitado com branch main e pasta /docs, a home publica sera:
 
@@ -35,19 +48,24 @@ Mineres-Compilador/
 	tokentype.py                # enum de tokens e mapas lexicos
 ```
 
-## O que ja foi feito
+## O que já foi feito
 
-- Estrutura base de pastas para crescimento organizado.
-- Modelo de token imutavel em token.py.
-- Catalogo de tipos de token e mapas de palavras em tokentype.py.
-- Home visual para docs em docs/index.md.
+- ✅ Estrutura base de pastas para crescimento organizado
+- ✅ Modelo de token imutável em token.py
+- ✅ Catálogo de tipos de token e mapas lexicos em tokentype.py
+- ✅ Ar quivos de recursos: `grafos/automato_simples.txt`, `exemplos/programa_exemplo.mineires.txt`
+- ✅ Documentação técnica e tutoriais
 
-## Proximos passos
+## Próximos passos (para você implementar!)
 
-- Implementar automato (AFD) no pacote principal.
-- Implementar lexer no pacote principal.
-- Criar camada de aplicacao e CLI.
-- Adicionar testes automatizados e workflow de CI.
+Siga o tutorial em **[COMECE_AQUI.md](COMECE_AQUI.md)**:
+
+1. **Implementar automato.py** - Reconhecer tokens individuais (60-90 min)
+2. **Implementar lexer.py** - Tokenizar fluxos de entrada (60-90 min)
+3. **Implementar main.py** - Interface CLI funcional (30 min)
+4. **Testar** - Validar com testes (30 min)
+
+**Total**: 4-6 horas dedicadas de aprendizado prático!
 
 ## Contribuicao
 
