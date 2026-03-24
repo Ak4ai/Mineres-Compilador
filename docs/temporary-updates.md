@@ -28,6 +28,14 @@ Copie e preencha o bloco abaixo para cada ajuste pequeno:
 
 ## Entradas
 
+### 2026-03-24 - Etapa 1 do nucleo lexico concluida e documentacao consolidada
+
+- Tipo: pequena
+- Arquivos alterados: src/mineres_compilador/automato.py, mineires_token.py, docs/status.md, docs/roadmap.md, README.md
+- Resumo tecnico: conflito de import com modulo padrao `token` corrigido via renomeacao para `mineires_token.py`; automato implementado e validado com casos `certin`, `2` e `@@@`; status e roadmap atualizados removendo pendencia de automato.
+- Impacto: medio
+- Acao futura: promover para documentacao oficial quando lexer e CLI forem concluídos.
+
 ### 2026-03-19 - Padrao de atualizacao de documentacao definido
 
 - Tipo: pequena

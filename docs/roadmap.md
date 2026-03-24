@@ -15,7 +15,7 @@ nav_order: 4
 
 ## Fase 2 - Nucleo Lexico
 
-- [ ] Implementar `automato.py` no pacote principal.
+- [x] Implementar `automato.py` no pacote principal.
 - [ ] Implementar `lexer.py` no pacote principal.
 - [ ] Definir contrato de erro lexico.
 - [ ] Implementar leitura de fonte por arquivo e por string.

@@ -44,26 +44,26 @@ Mineres-Compilador/
 	docs/                       # documentacao viva (status, arquitetura, roadmap, ADR)
 	scripts/                    # automacoes locais
 	src/mineres_compilador/     # pacote principal da aplicacao
-	token.py                    # contrato de token
+	mineires_token.py           # contrato de token
 	tokentype.py                # enum de tokens e mapas lexicos
 ```
 
 ## O que já foi feito
 
 - ✅ Estrutura base de pastas para crescimento organizado
-- ✅ Modelo de token imutável em token.py
+- ✅ Modelo de token imutável em mineires_token.py
 - ✅ Catálogo de tipos de token e mapas lexicos em tokentype.py
-- ✅ Ar quivos de recursos: `grafos/automato_simples.txt`, `exemplos/programa_exemplo.mineires.txt`
+- ✅ Automato lexical implementado e validado em src/mineres_compilador/automato.py
+- ✅ Arquivos de recursos: `grafos/automato_simples.txt`, `exemplos/programa_exemplo.mineires.txt`
 - ✅ Documentação técnica e tutoriais
 
 ## Próximos passos (para você implementar!)
 
 Siga o tutorial em **[COMECE_AQUI.md](COMECE_AQUI.md)**:
 
-1. **Implementar automato.py** - Reconhecer tokens individuais (60-90 min)
-2. **Implementar lexer.py** - Tokenizar fluxos de entrada (60-90 min)
-3. **Implementar main.py** - Interface CLI funcional (30 min)
-4. **Testar** - Validar com testes (30 min)
+1. **Implementar lexer.py** - Tokenizar fluxos de entrada (60-90 min)
+2. **Implementar main.py** - Interface CLI funcional (30 min)
+3. **Testar** - Validar com testes (30 min)
 
 **Total**: 4-6 horas dedicadas de aprendizado prático!
 

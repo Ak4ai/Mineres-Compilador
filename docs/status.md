@@ -14,13 +14,18 @@ nav_order: 2
 
 ### Codigo ja implementado
 
-- `token.py`
+- `mineires_token.py`
   - Classe `Token` com `@dataclass(slots=True, frozen=True)`.
   - Campos: `type`, `lexeme`, `line`, `column`.
   - Metodo `to_output_row()` para serializacao estavel em formato tabular.
 - `tokentype.py`
   - `Enum TokenType` com tipos de token de controle, identificadores, literais, palavras reservadas, operadores e delimitadores.
   - Mapas lexicos: `KEYWORD_TOKENS`, `TYPE_TOKENS`, `BOOLEAN_TOKENS`, `WORD_OPERATOR_TOKENS`, `WORD_DELIMITER_TOKENS`, `ALL_WORD_TOKENS`.
+- `src/mineres_compilador/automato.py`
+  - Estruturas de estado e transicao implementadas (`EstadoTipo`, `Estado`, `Automato`).
+  - Carregamento de AFD por arquivo (`carregar_do_arquivo`) com validacoes de integridade.
+  - Reconhecimento greedy implementado (`reconhecer`) retornando `(aceito, token_type, comprimento)`.
+  - Validado com casos: `certin`, `2`, `@@@`.
 
 ### Configuracao de repositorio
 
@@ -28,7 +33,6 @@ nav_order: 2
 
 ## O que ainda falta
 
-- Implementar modulo de automato no pacote principal.
 - Implementar lexer no pacote principal.
 - Criar ponto de entrada de aplicacao (CLI).
 - Definir estrategia de tratamento de erro lexico.
@@ -44,6 +48,7 @@ nav_order: 2
 
 ## Definicao de pronto da fase atual
 
-- `token.py` e `tokentype.py` mantidos como fonte unica de verdade de contrato lexico.
+- `mineires_token.py` e `tokentype.py` mantidos como fonte unica de verdade de contrato lexico.
+- `automato.py` implementado e validado com testes manuais de carga e reconhecimento.
 - Documentacao minima de status estabelecida.
 - Roadmap de implementacao definido e versionado.
