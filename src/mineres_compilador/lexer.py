@@ -42,6 +42,12 @@ class Lexer:
             else:
                 self.column += 1
 
+    def _emit_error_and_advance(self, lexeme: str, line: int, column: int) -> None:
+        # Emite token de erro e avanca linha/coluna + posicao absoluta.
+        self.tokens.append(Token(TokenType.ERROR, lexeme, line, column))
+        self._advance_position(lexeme)
+        self.pos += len(lexeme)
+
     def tokenize(self) -> list[Token]:
         # Executa o loop principal de analise lexica.
         while not self.is_at_end():
@@ -54,6 +60,20 @@ class Lexer:
             inicio_linha = self.line
             inicio_coluna = self.column
             restante = self.source[self.pos :]
+
+            # Detecta string nao fechada antes do automato.
+            if restante.startswith('"'):
+                fechamento = restante.find('"', 1)
+                if fechamento == -1:
+                    self._emit_error_and_advance(restante, inicio_linha, inicio_coluna)
+                    continue
+
+            # Detecta char nao fechado no formato .'<char>'.
+            if restante.startswith(".'"):
+                fechamento = restante.find("'.", 2)
+                if fechamento == -1:
+                    self._emit_error_and_advance(restante, inicio_linha, inicio_coluna)
+                    continue
 
             # Trata comentario de linha antes do automato.
             if restante.startswith("//"):
@@ -78,11 +98,7 @@ class Lexer:
                 if indice_fim == -1:
                     # Comentario de bloco nao fechado ate EOF.
                     lexeme = restante
-                    self.tokens.append(
-                        Token(TokenType.ERROR, lexeme, inicio_linha, inicio_coluna)
-                    )
-                    self._advance_position(lexeme)
-                    self.pos += len(lexeme)
+                    self._emit_error_and_advance(lexeme, inicio_linha, inicio_coluna)
                     continue
 
                 fim_comentario = indice_fim + len(marcador_fim)
@@ -98,11 +114,7 @@ class Lexer:
 
             # Em falha de reconhecimento, emite erro e avanca um caractere.
             if not ok or tamanho == 0:
-                self.tokens.append(
-                    Token(TokenType.ERROR, char_atual, inicio_linha, inicio_coluna)
-                )
-                self._advance_position(char_atual)
-                self.pos += 1
+                self._emit_error_and_advance(char_atual, inicio_linha, inicio_coluna)
                 continue
 
             lexeme = self.source[self.pos : self.pos + tamanho]
@@ -111,13 +123,39 @@ class Lexer:
             if lexeme in ALL_WORD_TOKENS:
                 token_type = ALL_WORD_TOKENS[lexeme]
             else:
+                # Validacoes extras para numeros mal formados.
+                numero_invalido = False
+
+                if lexeme.startswith("0x"):
+                    try:
+                        int(lexeme, 16)
+                    except ValueError:
+                        numero_invalido = True
+
+                if (
+                    not numero_invalido
+                    and lexeme.startswith("0")
+                    and lexeme.isdigit()
+                    and lexeme != "0"
+                ):
+                    try:
+                        int(lexeme, 8)
+                    except ValueError:
+                        numero_invalido = True
+
+                if not numero_invalido and "." in lexeme:
+                    try:
+                        float(lexeme)
+                    except ValueError:
+                        numero_invalido = True
+
+                if numero_invalido:
+                    self._emit_error_and_advance(lexeme, inicio_linha, inicio_coluna)
+                    continue
+
                 # Valida o token retornado pelo automato antes de converter.
                 if not token_type_str or token_type_str not in TokenType._value2member_map_:
-                    self.tokens.append(
-                        Token(TokenType.ERROR, lexeme, inicio_linha, inicio_coluna)
-                    )
-                    self._advance_position(lexeme)
-                    self.pos += len(lexeme)
+                    self._emit_error_and_advance(lexeme, inicio_linha, inicio_coluna)
                     continue
                 token_type = TokenType(token_type_str)
 
