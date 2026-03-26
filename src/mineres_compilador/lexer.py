@@ -8,6 +8,11 @@ from mineires_token import Token
 from tokentype import ALL_WORD_TOKENS, TokenType
 
 
+class LexicalError(Exception):
+    def __init__(self, lexeme: str, line: int, column: int) -> None:
+        super().__init__(f"Erro lexico: '{lexeme}' na linha {line}, coluna {column}")
+
+
 class Lexer:
     # Tokeniza o codigo-fonte usando o automato carregado.
 
@@ -42,12 +47,6 @@ class Lexer:
             else:
                 self.column += 1
 
-    def _emit_error_and_advance(self, lexeme: str, line: int, column: int) -> None:
-        # Emite token de erro e avanca linha/coluna + posicao absoluta.
-        self.tokens.append(Token(TokenType.ERROR, lexeme, line, column))
-        self._advance_position(lexeme)
-        self.pos += len(lexeme)
-
     def tokenize(self) -> list[Token]:
         # Executa o loop principal de analise lexica.
         while not self.is_at_end():
@@ -64,16 +63,23 @@ class Lexer:
             # Detecta string nao fechada antes do automato.
             if restante.startswith('"'):
                 fechamento = restante.find('"', 1)
-                if fechamento == -1:
-                    self._emit_error_and_advance(restante, inicio_linha, inicio_coluna)
-                    continue
+                fim_linha = restante.find("\n")
 
-            # Detecta char nao fechado no formato .'<char>'.
-            if restante.startswith(".'"):
-                fechamento = restante.find("'.", 2)
+                if fechamento == -1 or (fim_linha != -1 and fim_linha < fechamento):
+                    lexeme = restante[:fim_linha] if fim_linha != -1 else restante
+                    raise LexicalError(lexeme, inicio_linha, inicio_coluna)
+
+            # Valida char no formato canonico 'M' antes do automato.
+            # A validacao so verifica fechamento e cardinalidade do conteudo,
+            # e deixa o reconhecimento final para o AFD.
+            if restante.startswith("'"):
+                fechamento = restante.find("'", 1)
                 if fechamento == -1:
-                    self._emit_error_and_advance(restante, inicio_linha, inicio_coluna)
-                    continue
+                    raise LexicalError(restante, inicio_linha, inicio_coluna)
+
+                conteudo = restante[1:fechamento]
+                if len(conteudo) != 1:
+                    raise LexicalError(restante[: fechamento + 1], inicio_linha, inicio_coluna)
 
             # Trata comentario de linha antes do automato.
             if restante.startswith("//"):
@@ -81,7 +87,7 @@ class Lexer:
                 if fim_linha == -1:
                     lexeme = restante
                 else:
-                    lexeme = restante[:fim_linha]
+                    lexeme = restante[: fim_linha + 1]
 
                 self.tokens.append(
                     Token(TokenType.COMMENT_LINE, lexeme, inicio_linha, inicio_coluna)
@@ -98,8 +104,7 @@ class Lexer:
                 if indice_fim == -1:
                     # Comentario de bloco nao fechado ate EOF.
                     lexeme = restante
-                    self._emit_error_and_advance(lexeme, inicio_linha, inicio_coluna)
-                    continue
+                    raise LexicalError(lexeme, inicio_linha, inicio_coluna)
 
                 fim_comentario = indice_fim + len(marcador_fim)
                 lexeme = restante[:fim_comentario]
@@ -114,8 +119,7 @@ class Lexer:
 
             # Em falha de reconhecimento, emite erro e avanca um caractere.
             if not ok or tamanho == 0:
-                self._emit_error_and_advance(char_atual, inicio_linha, inicio_coluna)
-                continue
+                raise LexicalError(char_atual, inicio_linha, inicio_coluna)
 
             lexeme = self.source[self.pos : self.pos + tamanho]
 
@@ -126,7 +130,7 @@ class Lexer:
                 # Validacoes extras para numeros mal formados.
                 numero_invalido = False
 
-                if lexeme.startswith("0x"):
+                if lexeme.lower().startswith("0x"):
                     try:
                         int(lexeme, 16)
                     except ValueError:
@@ -143,20 +147,19 @@ class Lexer:
                     except ValueError:
                         numero_invalido = True
 
-                if not numero_invalido and "." in lexeme:
+                # Valida float apenas quando o AFD classificar como FLOAT_LITERAL.
+                if not numero_invalido and token_type_str == "FLOAT_LITERAL":
                     try:
                         float(lexeme)
                     except ValueError:
                         numero_invalido = True
 
                 if numero_invalido:
-                    self._emit_error_and_advance(lexeme, inicio_linha, inicio_coluna)
-                    continue
+                    raise LexicalError(lexeme, inicio_linha, inicio_coluna)
 
                 # Valida o token retornado pelo automato antes de converter.
                 if not token_type_str or token_type_str not in TokenType._value2member_map_:
-                    self._emit_error_and_advance(lexeme, inicio_linha, inicio_coluna)
-                    continue
+                    raise LexicalError(lexeme, inicio_linha, inicio_coluna)
                 token_type = TokenType(token_type_str)
 
             self.tokens.append(Token(token_type, lexeme, inicio_linha, inicio_coluna))
