@@ -9,7 +9,12 @@ from .tokentype import TokenType, ALL_WORD_TOKENS
 
 
 class Lexer:
-    def __init__(self, caminho_automato: str) -> None:
+    def __init__(self, caminho_automato: Optional[str] = None) -> None:
+        if caminho_automato is None:
+            caminho_automato = str(
+                Path(__file__).resolve().parents[2] / "grafos" / "automato_simples.txt"
+            )
+
         # Carrega o AFD uma vez na inicializacao do lexer.
         self.automato = Automato()
         self.automato.carregar_do_arquivo(caminho_automato)
@@ -50,7 +55,7 @@ class Lexer:
                 # Quebra de linha muda linha e avanca cursor.
                 self.posicao += 1
                 self.linha += 1
-                self.coluna += 1
+                self.coluna = 1
                 continue
             
             if char in (" ", "\t", "\r"):
@@ -66,31 +71,39 @@ class Lexer:
         return self.tokens
 
     def _reconhecer_proximo_token(self) -> Optional[Token]:
-        """
-        Reconhece um token a partir da posicao atual.
+        linha_inicio = self.linha
+        coluna_inicio = self.coluna
+        restante = self.input_str[self.posicao:]
+        
+        aceito, token_type_nome, comprimento = self.automato.reconhecer(restante)
+        
+        if aceito and comprimento > 0:
+            lexeme = restante[:comprimento]
+            
+            if token_type_nome == "IDENTIFIER":
+                token_type = ALL_WORD_TOKENS.get(lexeme.lower(), TokenType.IDENTIFIER)
+            else:
+                try:
+                    token_type = TokenType[token_type_nome] if token_type_nome else TokenType.ERROR
+                except KeyError:
+                    token_type = TokenType.ERROR
+        
+        else:
+            lexeme = restante[0] if restante else ""
+            token_type = TokenType.ERROR
 
-        O que ainda falta implementar neste metodo:
-        1) Salvar linha/coluna de inicio do token atual.
-        2) Obter a substring restante a partir de self.posicao.
-        3) Chamar self.automato.reconhecer(restante).
-        4) Se aceito e comprimento > 0:
-           - Extrair lexeme com o comprimento reconhecido.
-           - Se token_type_nome for IDENTIFIER, verificar palavra reservada em
-             ALL_WORD_TOKENS (normalmente com lexeme.lower()).
-           - Caso contrario, mapear token_type_nome para TokenType via enum.
-        5) Se nao aceito:
-           - Consumir 1 caractere como erro lexico (TokenType.ERROR).
-        6) Atualizar self.posicao conforme o lexeme consumido.
-        7) Atualizar self.linha/self.coluna caractere a caractere.
-        8) Retornar Token(type=..., lexeme=..., line=..., column=...).
+        self.posicao += len(lexeme)
 
-        Criterio de pronto:
-        - analisar() percorre toda a entrada sem loop infinito.
-        - palavras reservadas nao ficam como IDENTIFIER.
-        - token invalido gera ERROR consumindo 1 caractere.
-        - linha/coluna ficam coerentes para cada token retornado.
-        """
-        raise NotImplementedError("Implemente _reconhecer_proximo_token manualmente")
+        for char in lexeme:
+            if char == "\n":
+                self.linha += 1
+                self.coluna = 1
+            else:
+                self.coluna += 1
 
-
-    
+        return Token(
+            type=token_type,
+            lexeme=lexeme,
+            line=linha_inicio,
+            column=coluna_inicio,
+        )
