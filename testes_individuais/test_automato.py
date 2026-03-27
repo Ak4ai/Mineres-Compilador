@@ -3,14 +3,11 @@
 import sys
 from pathlib import Path
 
-# Garante que o diretório Mineres-Compilador esteja no sys.path quando o teste
-# for executado a partir da raiz do repositório.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.mineres_compilador.automato import Automato
 
 
-# O arquivo do AFD fica em Mineres-Compilador/grafos/, não em testes_individuais/.
 ARQUIVO_AUTOMATO = Path(__file__).resolve().parent.parent / "grafos" / "automato_simples.txt"
 
 

@@ -16,74 +16,114 @@ Validar que automato, lexer e main funcionam juntos corretamente.
 
 Arquivo: `test_automato.py` (na raiz)
 
+Observacao: no nivel do AFD, palavras reservadas ainda retornam `IDENTIFIER`.
+O remapeamento para `CERTIN`, `C_TO_PENSANU`, etc. acontece no Lexer.
+
 ```python
-"""Teste de unidade do Automato"""
+"""Teste de unidade do Automato."""
+
+from pathlib import Path
+
 from src.mineres_compilador.automato import Automato
 
 
-def test_automato_reconhece_certin():
-    """Testa reconhecimento de palavra 'certin' (verdadeiro)"""
+ARQUIVO_AUTOMATO = Path(__file__).resolve().parent / "grafos" / "automato_simples.txt"
+
+
+def _novo_automato() -> Automato:
+    """Cria e carrega uma nova instância do AFD para cada teste."""
     afd = Automato()
-    afd.carregar_do_arquivo("grafos/automato_simples.txt")
-    
+    afd.carregar_do_arquivo(str(ARQUIVO_AUTOMATO))
+    return afd
+
+
+def test_automato_reconhece_identifier_basico() -> None:
+    """No nível do AFD, palavras reservadas ainda são IDENTIFIER."""
+    afd = _novo_automato()
+
     aceito, token_type, comprimento = afd.reconhecer("certin")
-    
-    assert aceito == True, "Deve aceitar 'certin'"
-    assert token_type == "CERTIN", f"Deve ser CERTIN, recebeu {token_type}"
+
+    assert aceito is True, "Deve aceitar 'certin'"
+    assert token_type == "IDENTIFIER", f"Deve ser IDENTIFIER, recebeu {token_type}"
     assert comprimento == 6, f"Comprimento deve ser 6, recebeu {comprimento}"
-    print("✅ test_automato_reconhece_certin passou")
+    print("test_automato_reconhece_identifier_basico passou")
 
 
-def test_automato_reconhece_numero():
-    """Testa reconhecimento de número '123'"""
-    afd = Automato()
-    afd.carregar_do_arquivo("grafos/automato_simples.txt")
-    
-    aceito, token_type, comprimento = afd.reconhecer("123")
-    
-    assert aceito == True, "Deve aceitar '123'"
+def test_automato_reconhece_integer_literal() -> None:
+    """Valida literal inteiro aceito pelo AFD atual."""
+    afd = _novo_automato()
+
+    aceito, token_type, comprimento = afd.reconhecer("2")
+
+    assert aceito is True, "Deve aceitar '2'"
     assert token_type == "INTEGER_LITERAL", f"Deve ser INTEGER_LITERAL, recebeu {token_type}"
-    # Pode ser 1, 2 ou 3 caracteres dependendo de implementação
-    print("✅ test_automato_reconhece_numero passou")
+    assert comprimento == 1, f"Comprimento deve ser 1, recebeu {comprimento}"
+    print("test_automato_reconhece_integer_literal passou")
 
 
-def test_automato_reconhece_palavra_chave():
-    """Testa reconhecimento de palavra reservada"""
-    afd = Automato()
-    afd.carregar_do_arquivo("grafos/automato_simples.txt")
-    
-    palavras = [
-        ("c_to_pensanu", "C_TO_PENSANU"),
-        ("simbora", "SIMBORA"),
-        ("cabou", "CABOU"),
-        ("uai", "UAI"),
-    ]
-    
-    for palavra, tipo_esperado in palavras:
-        aceito, token_type, _ = afd.reconhecer(palavra)
-        assert aceito == True, f"Deve aceitar '{palavra}'"
-        assert token_type == tipo_esperado, f"'{palavra}' deve ser {tipo_esperado}, recebeu {token_type}"
-    
-    print("✅ test_automato_reconhece_palavra_chave passou")
+def test_automato_reconhece_palavras_reservadas_como_identifier() -> None:
+    """Palavras reservadas são classificadas como IDENTIFIER no AFD."""
+    afd = _novo_automato()
+
+    palavras = ["c_to_pensanu", "simbora", "cabou", "uai", "eradin"]
+
+    for palavra in palavras:
+        aceito, token_type, comprimento = afd.reconhecer(palavra)
+        assert aceito is True, f"Deve aceitar '{palavra}'"
+        assert token_type == "IDENTIFIER", (
+            f"'{palavra}' deve ser IDENTIFIER no AFD, recebeu {token_type}"
+        )
+        assert comprimento == len(palavra), (
+            f"'{palavra}' deve consumir {len(palavra)} caracteres, recebeu {comprimento}"
+        )
+
+    print("test_automato_reconhece_palavras_reservadas_como_identifier passou")
 
 
-def test_automato_rejeita_invalido():
-    """Testa rejeição de entrada inválida"""
-    afd = Automato()
-    afd.carregar_do_arquivo("grafos/automato_simples.txt")
-    
-    aceito, _, _ = afd.reconhecer("@@@")
-    
-    assert aceito == False, "Deve rejeitar '@@@'"
-    print("✅ test_automato_rejeita_invalido passou")
+def test_automato_aplica_maximo_prefixo_valido() -> None:
+    """Se houver sufixo inválido, o AFD devolve o último estado final válido."""
+    afd = _novo_automato()
+
+    aceito, token_type, comprimento = afd.reconhecer("certin@@")
+
+    assert aceito is True, "Deve aceitar prefixo válido de 'certin@@'"
+    assert token_type == "IDENTIFIER", f"Deve ser IDENTIFIER, recebeu {token_type}"
+    assert comprimento == 6, f"Deve consumir apenas 'certin', recebeu {comprimento}"
+    print("test_automato_aplica_maximo_prefixo_valido passou")
+
+
+def test_automato_rejeita_inicio_invalido() -> None:
+    """Se o primeiro caractere não possui transição, deve rejeitar."""
+    afd = _novo_automato()
+
+    aceito, token_type, comprimento = afd.reconhecer("@@@")
+
+    assert aceito is False, "Deve rejeitar '@@@'"
+    assert token_type is None, "Token type deve ser None em rejeição"
+    assert comprimento == 0, "Comprimento deve ser 0 em rejeição"
+    print("test_automato_rejeita_inicio_invalido passou")
+
+
+def test_automato_rejeita_entrada_vazia() -> None:
+    """Entrada vazia não pode formar token."""
+    afd = _novo_automato()
+
+    aceito, token_type, comprimento = afd.reconhecer("")
+
+    assert aceito is False, "Deve rejeitar entrada vazia"
+    assert token_type is None, "Token type deve ser None em rejeição"
+    assert comprimento == 0, "Comprimento deve ser 0 em rejeição"
+    print("test_automato_rejeita_entrada_vazia passou")
 
 
 if __name__ == "__main__":
-    test_automato_reconhece_certin()
-    test_automato_reconhece_numero()
-    test_automato_reconhece_palavra_chave()
-    test_automato_rejeita_invalido()
-    print("\n✅ Todos os testes de Automato passaram!")
+    test_automato_reconhece_identifier_basico()
+    test_automato_reconhece_integer_literal()
+    test_automato_reconhece_palavras_reservadas_como_identifier()
+    test_automato_aplica_maximo_prefixo_valido()
+    test_automato_rejeita_inicio_invalido()
+    test_automato_rejeita_entrada_vazia()
+    print("\nTodos os testes de Automato passaram!")
 ```
 
 Execute:
