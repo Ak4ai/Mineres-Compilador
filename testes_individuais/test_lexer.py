@@ -7,6 +7,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.mineres_compilador.lexer import Lexer
 from src.mineres_compilador.tokentype import TokenType
 
+ARQUIVO_EXEMPLO = (
+    Path(__file__).resolve().parent.parent / "exemplos" / "programa_exemplo.mineires.txt"
+)
+
 
 def test_lexer_reconhece_string_simples():
     """Testa tokenização de string simples"""
@@ -50,7 +54,7 @@ def test_lexer_reconhece_multiplos_tokens():
 def test_lexer_arquivo():
     """Testa carregamento de arquivo"""
     lexer = Lexer()
-    lexer.carregar_arquivo("exemplos/programa_exemplo.mineires.txt")
+    lexer.carregar_arquivo(str(ARQUIVO_EXEMPLO))
     tokens = lexer.analisar()
     
     # Deve reconhecer muitos tokens
