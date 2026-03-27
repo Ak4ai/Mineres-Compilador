@@ -4,12 +4,14 @@ from pathlib import Path
 from typing import Dict, Optional, Set, Tuple
 
 
+# Tipos de estado aceitos no arquivo de definicao do AFD.
 class EstadoTipo(Enum):
     INICIAL = "INICIAL"
     INTERMEDIARIO = "INTERMEDIARIO"
     FINAL = "FINAL"
 
 
+# Representa um estado do automato e o token associado (quando final).
 @dataclass(slots=True)
 class Estado:
     nome: str
@@ -17,14 +19,20 @@ class Estado:
     token_type: Optional[str] = None
 
 
+# Estrutura principal do AFD usado pelo lexer.
 class Automato:
     def __init__(self) -> None:
+        # Mapa nome_estado -> Estado.
         self.estados: Dict[str, Estado] = {}
+        # Mapa (estado_origem, caractere) -> estado_destino.
         self.transicoes: Dict[Tuple[str, str], str] = {}
+        # Nome do estado inicial unico do automato.
         self.estado_inicial: Optional[str] = None
+        # Conjunto para consulta rapida de estados finais.
         self.estados_finais: Set[str] = set()
 
     def carregar_do_arquivo(self, caminho: str) -> None:
+        # Le e valida o arquivo-texto com secoes [ESTADOS] e [TRANSICOES].
         path = Path(caminho)
         if not path.exists():
             raise FileNotFoundError(
@@ -57,12 +65,14 @@ class Automato:
         self._processar_estados(linhas_estados)
         self._processar_transicoes(linhas_transicoes)
 
+        # O automato so e valido se houver exatamente um estado inicial.
         if self.estado_inicial is None:
             raise ValueError(
                 "Definicao do automato invalida: estado inicial nao definido."
             )
 
     def _processar_estados(self, linhas: list[str]) -> None:
+        # Formato esperado por linha: nome tipo [token_type].
         for linha in linhas:
             partes = linha.split()
             if len(partes) < 2:
@@ -79,6 +89,7 @@ class Automato:
             token_type = partes[2] if len(partes) >= 3 else None
             self.estados[nome] = Estado(nome=nome, tipo=tipo, token_type=token_type)
 
+            # Garante unicidade do estado inicial.
             if tipo == EstadoTipo.INICIAL:
                 if self.estado_inicial is not None:
                     raise ValueError(
@@ -86,10 +97,12 @@ class Automato:
                     )
                 self.estado_inicial = nome
 
+            # Guarda estados finais para validacao rapida no reconhecimento.
             if tipo == EstadoTipo.FINAL:
                 self.estados_finais.add(nome)
 
     def _processar_transicoes(self, linhas: list[str]) -> None:
+        # Formato esperado por linha: origem destino char.
         for linha in linhas:
             partes = linha.split()
             if len(partes) != 3:
@@ -102,6 +115,7 @@ class Automato:
             if destino not in self.estados:
                 raise ValueError(f"Estado de destino nao definido: {destino}")
 
+            # Nao pode haver duas transicoes para o mesmo par (estado, char).
             chave = (origem, char)
             if chave in self.transicoes:
                 raise ValueError(
@@ -121,6 +135,8 @@ class Automato:
         return estado_obj.token_type if estado_obj else None
 
     def reconhecer(self, entrada: str) -> tuple[bool, Optional[str], int]:
+        # Reconhecimento maximal munch: para no primeiro bloqueio,
+        # mas retorna o ultimo estado final alcançado.
         if not entrada or self.estado_inicial is None:
             return (False, None, 0)
 
@@ -139,6 +155,7 @@ class Automato:
                 ultimo_estado_final = estado_atual
                 ultimo_indice_final = i
 
+        # Se nenhum estado final foi visitado, nao existe token valido.
         if ultimo_estado_final is None:
             return (False, None, 0)
 

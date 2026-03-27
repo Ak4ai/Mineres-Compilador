@@ -8,16 +8,15 @@ from enum import Enum
 
 
 class TokenType(Enum):
-    """Enumeracao de todos os tipos de token reconhecidos pelo lexer."""
-
-    # Tokens especiais de controle
+    
+    # CONTROLE
     EOF = "EOF"
     ERROR = "ERROR"
 
-    # Identificadores genericos
+    # IDENTIFICADORES
     IDENTIFIER = "IDENTIFIER"
 
-    # Literais
+    # LITERAIS
     INTEGER_LITERAL = "INTEGER_LITERAL"
     FLOAT_LITERAL = "FLOAT_LITERAL"
     HEX_LITERAL = "HEX_LITERAL"
@@ -25,105 +24,100 @@ class TokenType(Enum):
     STRING_LITERAL = "STRING_LITERAL"
     CHAR_LITERAL = "CHAR_LITERAL"
 
-    # Condicionais
-    C_TO_PENSANU = "C_TO_PENSANU"
-    C_NAO = "C_NAO"
-    C_NAO_C_TO_PENSANU = "C_NAO_C_TO_PENSANU"
+    # PALAVRAS RESERVADAS
+    BORA_CUMPADE = "bora_cumpade"
+    SIMBORA = "simbora"
+    CABO = "cabo"
 
-    # Laços
-    RODA_ESSE_TREM = "RODA_ESSE_TREM"
-    ENQUANTO_TIVER_TREM = "ENQUANTO_TIVER_TREM"
+    UAI_SE = "uai_se"
+    UAI_SENAO = "uai_senao"
 
-    # Switch/Case
-    DEPENDENU = "DEPENDENU"
-    DU_CASU = "DU_CASU"
+    ENQUANTO_TIVER_TREM = "enquanto_tiver_trem"
+    RODA_ESSE_TREM = "roda_esse_trem"
 
-    # Fluxo
-    TA_BAO = "TA_BAO"
-    PARA_O_TREM = "PARA_O_TREM"
-    TOCA_O_TREM = "TOCA_O_TREM"
+    DEPENDENU = "dependenu"
+    DU_CASU = "du_casu"
 
-    # Main
-    BORA_CUMPADE = "BORA_CUMPADE"
+    TA_BAO = "ta_bao"
+    PARA_O_TREM = "para_o_trem"
+    TOCA_O_TREM = "toca_o_trem"
 
-    # Escopo
-    SIMBORA = "SIMBORA"
-    CABOU = "CABOU"
+    XOVE = "xove"
+    OIA_PROCE_VE = "oia_proce_ve"
 
-    # Entrada/Saída
-    XOVE = "XOVE"
-    OIA_PROCE_VE = "OIA_PROCE_VE"
+    # TIPOS    
+    TREM_DI_NUMERU = "trem_di_numeru"
+    TREM_CUM_VIRGULA = "trem_cum_virgula"
+    TREM_DISCRITA = "trem_discrita"
+    TREM_DISCOLHE = "trem_discolhe"
+    TROSSO = "trosso"
 
-    # Condicionais legado
-    UAI_SE = "UAI_SE"
-    UAI_SENAO = "UAI_SENAO"
+    # BOOLEANOS
+    EH = "eh"
+    NUM_EH = "num_eh"
 
-    # Nomes de tipos
-    TREM_DI_NUMERU = "TREM_DI_NUMERU"
-    TREM_CUM_VIRGULA = "TREM_CUM_VIRGULA"
-    TREM_DISCRITA = "TREM_DISCRITA"
-    TREM_DISCOLHE = "TREM_DISCOLHE"
-    TROSSO = "TROSSO"
+    # OPERADORES (PALAVRA)    
+    FICA_ASSIM_ENTAO = "fica_assim_entao"
+    MEMA_COISA = "mema_coisa"
+    NEH_NADA = "neh_nada"
 
-    # Literais booleanos
-    CERTIN = "CERTIN"
-    ERADIN = "ERADIN"
+    QUARQUE_UM = "quarque_um"
+    TAMEM = "tamem"
+    VAM_MARCA = "vam_marca"
+    UM_O_OTO = "um_o_oto"
 
-    # Comentários
+    VEIZ = "veiz"
+    SOB = "sob"
+
+    # OPERADORES (SÍMBOLO)
+    PLUS = "+"
+    MINUS = "-"
+    INT_DIV = "/"     # divisão inteira
+    MOD = "%"         # módulo
+
+    LT = "<"
+    GT = ">"
+    LE = "<="
+    GE = ">="
+    
+    # DELIMITADORES    
+    LEFT_PAREN = "("
+    RIGHT_PAREN = ")"
+    LEFT_BRACE = "{"
+    RIGHT_BRACE = "}"
+    COMMA = ","
+    UAI = "uai"   # equivalente a ;
+    
+    # COMENTÁRIOS
     COMMENT_LINE = "COMMENT_LINE"
-    COMMENT_START = "COMMENT_START"
-    COMMENT_END = "COMMENT_END"
-
-    # Operadores por palavra
-    FICA_ASSIM_ENTAO = "FICA_ASSIM_ENTAO"
-    MEMA_COISA = "MEMA_COISA"
-    NEH_NADA = "NEH_NADA"
-    QUARQUE_UM = "QUARQUE_UM"
-    TAMEM = "TAMEM"
-    VAM_MARCA = "VAM_MARCA"
-    UM_O_OTO = "UM_O_OTO"
-    VEIZ = "VEIZ"
-    SOB = "SOB"
-
-    # Operadores por simbolo
-    PLUS = "PLUS"
-    MINUS = "MINUS"
-    INT_DIV = "INT_DIV"
-    LT = "LT"
-    GT = "GT"
-    LE = "LE"
-    GE = "GE"
-
-    # Delimitadores
-    LEFT_PAREN = "LEFT_PAREN"
-    RIGHT_PAREN = "RIGHT_PAREN"
-    LEFT_BRACE = "LEFT_BRACE"
-    RIGHT_BRACE = "RIGHT_BRACE"
-    COMMA = "COMMA"
-    UAI = "UAI"
-
-
+    COMMENT_BLOCK = "COMMENT_BLOCK"
+    
+    # MAIN
+    MAIN = "main"
+    
 KEYWORD_TOKENS = {
-    "c_to_pensanu": TokenType.C_TO_PENSANU,
-    "c_nao": TokenType.C_NAO,
-    "c_nao_c_to_pensanu": TokenType.C_NAO_C_TO_PENSANU,
-    "roda_esse_trem": TokenType.RODA_ESSE_TREM,
+    "bora_cumpade": TokenType.BORA_CUMPADE,
+    "main": TokenType.MAIN,
+    "simbora": TokenType.SIMBORA,
+    "cabo": TokenType.CABO,
+
+    "uai_se": TokenType.UAI_SE,
+    "uai_senao": TokenType.UAI_SENAO,
+
     "enquanto_tiver_trem": TokenType.ENQUANTO_TIVER_TREM,
+    "roda_esse_trem": TokenType.RODA_ESSE_TREM,
+
     "dependenu": TokenType.DEPENDENU,
     "du_casu": TokenType.DU_CASU,
+
     "ta_bao": TokenType.TA_BAO,
     "para_o_trem": TokenType.PARA_O_TREM,
     "toca_o_trem": TokenType.TOCA_O_TREM,
-    "bora_cumpade": TokenType.BORA_CUMPADE,
-    "simbora": TokenType.SIMBORA,
-    "cabou": TokenType.CABOU,
+
     "xove": TokenType.XOVE,
     "oia_proce_ve": TokenType.OIA_PROCE_VE,
-    "uai_se": TokenType.UAI_SE,
-    "uai_senao": TokenType.UAI_SENAO,
 }
-
-
+    
 TYPE_TOKENS = {
     "trem_di_numeru": TokenType.TREM_DI_NUMERU,
     "trem_cum_virgula": TokenType.TREM_CUM_VIRGULA,
@@ -131,19 +125,11 @@ TYPE_TOKENS = {
     "trem_discolhe": TokenType.TREM_DISCOLHE,
     "trosso": TokenType.TROSSO,
 }
-
-
+    
 BOOLEAN_TOKENS = {
-    "certin": TokenType.CERTIN,
-    "eradin": TokenType.ERADIN,
+    "eh": TokenType.EH,
+    "num_eh": TokenType.NUM_EH,
 }
-
-
-COMMENT_TOKENS = {
-    "causo": TokenType.COMMENT_START,
-    "fim_do_causo": TokenType.COMMENT_END,
-}
-
 
 WORD_OPERATOR_TOKENS = {
     "fica_assim_entao": TokenType.FICA_ASSIM_ENTAO,
@@ -157,17 +143,14 @@ WORD_OPERATOR_TOKENS = {
     "sob": TokenType.SOB,
 }
 
-
 WORD_DELIMITER_TOKENS = {
     "uai": TokenType.UAI,
 }
-
 
 ALL_WORD_TOKENS = {
     **KEYWORD_TOKENS,
     **TYPE_TOKENS,
     **BOOLEAN_TOKENS,
-    **COMMENT_TOKENS,
     **WORD_OPERATOR_TOKENS,
     **WORD_DELIMITER_TOKENS,
 }
