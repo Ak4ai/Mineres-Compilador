@@ -26,6 +26,18 @@ nav_order: 2
   - Carregamento de AFD por arquivo (`carregar_do_arquivo`) com validacoes de integridade.
   - Reconhecimento greedy implementado (`reconhecer`) retornando `(aceito, token_type, comprimento)`.
   - Validado com casos: `certin`, `2`, `@@@`.
+- `src/mineres_compilador/token.py` e `src/mineres_compilador/tokentype.py`
+  - Modulos consolidados dentro do pacote principal para imports relativos estaveis.
+  - `TokenType` e `ALL_WORD_TOKENS` usados diretamente pelo lexer do pacote.
+- `src/mineres_compilador/lexer.py`
+  - API implementada com `carregar_arquivo`, `carregar_string` e `analisar`.
+  - Reconhecimento token a token com apoio do `Automato`.
+  - Diferenciacao de `IDENTIFIER` para palavras reservadas via `ALL_WORD_TOKENS`.
+  - Rastreamento de posicao (`line`, `column`) por token.
+  - Fallback de erro lexico com `TokenType.ERROR` ao falhar reconhecimento.
+- `testes_individuais/test_automato.py` e `testes_individuais/test_lexer.py`
+  - Casos de validacao para automato e lexer passando localmente.
+  - Testes com prints detalhados de debug para facilitar diagnostico.
 
 ### Configuracao de repositorio
 
@@ -33,22 +45,24 @@ nav_order: 2
 
 ## O que ainda falta
 
-- Implementar lexer no pacote principal.
-- Criar ponto de entrada de aplicacao (CLI).
-- Definir estrategia de tratamento de erro lexico.
-- Criar testes unitarios e de integracao.
+- Criar ponto de entrada de aplicacao (CLI/Main) no pacote principal.
+- Definir contrato final de erro lexico para uso externo (ex.: excecao vs token de erro).
+- Garantir e padronizar emissao de token `EOF` no fluxo final de tokenizacao.
+- Expandir cobertura com testes de integracao orientados a CLI.
 - Criar workflow de CI em `.github/workflows`.
 - Completar README principal com guia de uso e contribuicao.
 
 ## Riscos atuais
 
-- Ausencia de testes automatizados pode mascarar regressao.
-- Sem CI, qualidade depende de execucao manual local.
-- Contrato de entrada/saida ainda nao formalizado para uso externo.
+- Sem CI, qualidade ainda depende de execucao manual local.
+- Contrato de erro lexico e de `EOF` ainda pode divergir entre uso interno e CLI.
+- Ausencia de CLI impede validacao ponta a ponta via linha de comando.
 
 ## Definicao de pronto da fase atual
 
 - `mineires_token.py` e `tokentype.py` mantidos como fonte unica de verdade de contrato lexico.
 - `automato.py` implementado e validado com testes manuais de carga e reconhecimento.
-- Documentacao minima de status estabelecida.
+- `lexer.py` implementado e validado com `test_lexer.py`.
+- Testes de automato e lexer executando com sucesso localmente.
+- Documentacao minima de status estabelecida e sincronizada.
 - Roadmap de implementacao definido e versionado.

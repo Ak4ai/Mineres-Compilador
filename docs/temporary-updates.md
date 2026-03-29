@@ -28,6 +28,14 @@ Copie e preencha o bloco abaixo para cada ajuste pequeno:
 
 ## Entradas
 
+### 2026-03-29 - Documentacao sincronizada com estado real do lexer
+
+- Tipo: pequena
+- Arquivos alterados: docs/status.md, docs/roadmap.md, docs/tutorial.md
+- Resumo tecnico: status atualizado com `lexer.py` e testes do lexer concluidos; roadmap marcou itens de fase 2 e testes iniciais como feitos; tutorial ajustado para indicar Fase 3 (Main/CLI) e expansao de testes como proximos passos.
+- Impacto: medio
+- Acao futura: promover para documentacao oficial final apos conclusao da CLI e padronizacao de erro lexico/EOF.
+
 ### 2026-03-24 - Etapa 1 do nucleo lexico concluida e documentacao consolidada
 
 - Tipo: pequena

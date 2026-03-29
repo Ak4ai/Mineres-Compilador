@@ -26,8 +26,8 @@ Um **compilador lexical funcional** para Minerês em 4 fases:
  │
  ├─ Fase 1: Automato ✅ → test_automato.py passa
  ├─ Fase 2: Lexer ✅ → test_lexer.py passa
- ├─ Fase 3: Main.py ✅ → CLI funcional
- └─ Fase 4: Testes ✅ → 38 tokens reconhecidos
+ ├─ Fase 3: Main.py ⏳ → CLI pendente
+ └─ Fase 4: Testes ⏳ → expandir integracao/qualidade
 ```
 
 ## 📚 Fases do tutorial
@@ -48,13 +48,13 @@ Um **compilador lexical funcional** para Minerês em 4 fases:
 - CLI para testar seu compilador
 - Aceitar arquivo ou string
 - Exibição formatada de tokens
-- Resultado: `python main.py programa.txt` ✅
+- Resultado esperado: `python main.py programa.txt`
 
 ### [Fase 4: Testes →](tutorial/04-teste.md)
 - Testes unitários
 - Testes de integração
 - Validação completa
-- Resultado: 38 tokens de `exemplos/programa_exemplo.mineires.txt` ✅
+- Resultado atual: validação parcial concluída (automato + lexer)
 
 ## ⏱️ Tempo total
 

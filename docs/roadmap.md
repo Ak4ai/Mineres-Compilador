@@ -16,9 +16,9 @@ nav_order: 4
 ## Fase 2 - Nucleo Lexico
 
 - [x] Implementar `automato.py` no pacote principal.
-- [ ] Implementar `lexer.py` no pacote principal.
+- [x] Implementar `lexer.py` no pacote principal.
 - [ ] Definir contrato de erro lexico.
-- [ ] Implementar leitura de fonte por arquivo e por string.
+- [x] Implementar leitura de fonte por arquivo e por string.
 - [ ] Garantir token `EOF` consistente.
 
 ## Fase 3 - Aplicacao e CLI
@@ -30,8 +30,8 @@ nav_order: 4
 
 ## Fase 4 - Qualidade e Governanca
 
-- [ ] Criar testes unitarios de tokenizacao.
-- [ ] Criar testes de integracao com exemplos da linguagem.
+- [x] Criar testes unitarios de tokenizacao.
+- [x] Criar testes de integracao com exemplos da linguagem (escopo inicial via `test_lexer.py`).
 - [ ] Configurar lint e format.
 - [ ] Configurar type checking.
 - [ ] Criar workflow de CI em `.github/workflows`.
@@ -46,6 +46,7 @@ nav_order: 4
 
 - Lexer processa casos principais sem erro.
 - Saida de tokens reproduzivel.
+- CLI/Main funcional para uso externo.
 - Cobertura minima de testes definida e atingida.
 - CI obrigatorio para merge.
 - Documentacao de uso e arquitetura atualizada.
