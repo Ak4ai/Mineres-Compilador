@@ -34,16 +34,16 @@ def _debug_tokens(nome_teste: str, entrada: str, tokens: list) -> None:
 def test_lexer_reconhece_string_simples():
     """Testa tokenização de string simples"""
     lexer = _novo_lexer()
-    entrada = "certin"
+    entrada = "simbora"
     lexer.carregar_string(entrada)
     tokens = lexer.analisar()
 
     _debug_tokens("test_lexer_reconhece_string_simples", entrada, tokens)
-    print("[DEBUG] esperado: 1 token CERTIN em L1:C1")
+    print("[DEBUG] esperado: 1 token SIMBORA em L1:C1")
 
     assert len(tokens) == 1, f"Deve haver 1 token, recebeu {len(tokens)}"
-    assert tokens[0].type == TokenType.CERTIN
-    assert tokens[0].lexeme == "certin"
+    assert tokens[0].type == TokenType.SIMBORA
+    assert tokens[0].lexeme == "simbora"
     assert tokens[0].line == 1
     assert tokens[0].column == 1
     print("test_lexer_reconhece_string_simples passou")
@@ -52,31 +52,31 @@ def test_lexer_reconhece_string_simples():
 def test_lexer_rastreia_posicao():
     """Testa rastreamento correto de linha/coluna"""
     lexer = _novo_lexer()
-    entrada = "certin eradin"
+    entrada = "simbora uai"
     lexer.carregar_string(entrada)
     tokens = lexer.analisar()
 
     _debug_tokens("test_lexer_rastreia_posicao", entrada, tokens)
-    print("[DEBUG] esperado: token[0] em L1:C1 e token[1] em L1:C8")
+    print("[DEBUG] esperado: token[0] em L1:C1 e token[1] em L1:C9")
 
     assert len(tokens) == 2
     assert tokens[0].line == 1 and tokens[0].column == 1
-    assert tokens[1].line == 1 and tokens[1].column == 8
+    assert tokens[1].line == 1 and tokens[1].column == 9
     print("test_lexer_rastreia_posicao passou")
 
 
 def test_lexer_reconhece_multiplos_tokens():
     """Testa tokenização de múltiplos tokens"""
     lexer = _novo_lexer()
-    entrada = "c_to_pensanu 2 uai"
+    entrada = "simbora 2 uai"
     lexer.carregar_string(entrada)
     tokens = lexer.analisar()
 
     _debug_tokens("test_lexer_reconhece_multiplos_tokens", entrada, tokens)
-    print("[DEBUG] esperado: C_TO_PENSANU, INTEGER_LITERAL, UAI")
+    print("[DEBUG] esperado: SIMBORA, INTEGER_LITERAL, UAI")
 
     assert len(tokens) == 3
-    assert tokens[0].type == TokenType.C_TO_PENSANU
+    assert tokens[0].type == TokenType.SIMBORA
     assert tokens[1].type == TokenType.INTEGER_LITERAL
     assert tokens[2].type == TokenType.UAI
     print("test_lexer_reconhece_multiplos_tokens passou")

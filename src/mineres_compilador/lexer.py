@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from .automato import Automato
-from .token import Token
+from .mineires_token import Token
 from .tokentype import ALL_WORD_TOKENS, TokenType
 
 

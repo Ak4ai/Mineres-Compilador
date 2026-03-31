@@ -38,15 +38,15 @@ def test_automato_reconhece_identifier_basico() -> None:
     """No nível do AFD, palavras reservadas ainda são IDENTIFIER."""
     afd = _novo_automato()
 
-    resultado = afd.reconhecer("certin")
-    _debug_result("test_automato_reconhece_identifier_basico", "certin", resultado)
+    resultado = afd.reconhecer("simbora")
+    _debug_result("test_automato_reconhece_identifier_basico", "simbora", resultado)
     aceito, token_type, comprimento = resultado
 
-    print("[DEBUG] esperado: aceito=True, token_type='IDENTIFIER', comprimento=6")
+    print("[DEBUG] esperado: aceito=True, token_type='IDENTIFIER', comprimento=7")
 
-    assert aceito is True, "Deve aceitar 'certin'"
+    assert aceito is True, "Deve aceitar 'simbora'"
     assert token_type == "IDENTIFIER", f"Deve ser IDENTIFIER, recebeu {token_type}"
-    assert comprimento == 6, f"Comprimento deve ser 6, recebeu {comprimento}"
+    assert comprimento == 7, f"Comprimento deve ser 7, recebeu {comprimento}"
     print("test_automato_reconhece_identifier_basico passou")
 
 
@@ -70,7 +70,7 @@ def test_automato_reconhece_palavras_reservadas_como_identifier() -> None:
     """Palavras reservadas são classificadas como IDENTIFIER no AFD."""
     afd = _novo_automato()
 
-    palavras = ["c_to_pensanu", "simbora", "cabou", "uai", "eradin"]
+    palavras = ["bora_cumpade", "simbora", "dependenu", "uai", "toca_o_trem"]
 
     for palavra in palavras:
         resultado = afd.reconhecer(palavra)
@@ -95,16 +95,16 @@ def test_automato_aplica_maximo_prefixo_valido() -> None:
     """Se houver sufixo inválido, o AFD devolve o último estado final válido."""
     afd = _novo_automato()
 
-    resultado = afd.reconhecer("certin@@")
-    _debug_result("test_automato_aplica_maximo_prefixo_valido", "certin@@", resultado)
+    resultado = afd.reconhecer("simbora@@")
+    _debug_result("test_automato_aplica_maximo_prefixo_valido", "simbora@@", resultado)
     aceito, token_type, comprimento = resultado
 
-    print("[DEBUG] esperado: aceito=True, token_type='IDENTIFIER', comprimento=6")
-    print("[DEBUG] observacao: deve consumir apenas o prefixo valido 'certin'")
+    print("[DEBUG] esperado: aceito=True, token_type='IDENTIFIER', comprimento=7")
+    print("[DEBUG] observacao: deve consumir apenas o prefixo valido 'simbora'")
 
-    assert aceito is True, "Deve aceitar prefixo válido de 'certin@@'"
+    assert aceito is True, "Deve aceitar prefixo válido de 'simbora@@'"
     assert token_type == "IDENTIFIER", f"Deve ser IDENTIFIER, recebeu {token_type}"
-    assert comprimento == 6, f"Deve consumir apenas 'certin', recebeu {comprimento}"
+    assert comprimento == 7, f"Deve consumir apenas 'simbora', recebeu {comprimento}"
     print("test_automato_aplica_maximo_prefixo_valido passou")
 
 
