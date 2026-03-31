@@ -39,13 +39,14 @@ def test_lexer_reconhece_string_simples():
     tokens = lexer.analisar()
 
     _debug_tokens("test_lexer_reconhece_string_simples", entrada, tokens)
-    print("[DEBUG] esperado: 1 token SIMBORA em L1:C1")
+    print("[DEBUG] esperado: SIMBORA seguido de EOF")
 
-    assert len(tokens) == 1, f"Deve haver 1 token, recebeu {len(tokens)}"
+    assert len(tokens) == 2, f"Deve haver 2 tokens (incluindo EOF), recebeu {len(tokens)}"
     assert tokens[0].type == TokenType.SIMBORA
     assert tokens[0].lexeme == "simbora"
     assert tokens[0].line == 1
     assert tokens[0].column == 1
+    assert tokens[1].type == TokenType.EOF
     print("test_lexer_reconhece_string_simples passou")
 
 
@@ -57,11 +58,12 @@ def test_lexer_rastreia_posicao():
     tokens = lexer.analisar()
 
     _debug_tokens("test_lexer_rastreia_posicao", entrada, tokens)
-    print("[DEBUG] esperado: token[0] em L1:C1 e token[1] em L1:C9")
+    print("[DEBUG] esperado: token[0] em L1:C1, token[1] em L1:C9 e EOF no final")
 
-    assert len(tokens) == 2
+    assert len(tokens) == 3
     assert tokens[0].line == 1 and tokens[0].column == 1
     assert tokens[1].line == 1 and tokens[1].column == 9
+    assert tokens[2].type == TokenType.EOF
     print("test_lexer_rastreia_posicao passou")
 
 
@@ -73,12 +75,13 @@ def test_lexer_reconhece_multiplos_tokens():
     tokens = lexer.analisar()
 
     _debug_tokens("test_lexer_reconhece_multiplos_tokens", entrada, tokens)
-    print("[DEBUG] esperado: SIMBORA, INTEGER_LITERAL, UAI")
+    print("[DEBUG] esperado: SIMBORA, INTEGER_LITERAL, UAI, EOF")
 
-    assert len(tokens) == 3
+    assert len(tokens) == 4
     assert tokens[0].type == TokenType.SIMBORA
     assert tokens[1].type == TokenType.INTEGER_LITERAL
     assert tokens[2].type == TokenType.UAI
+    assert tokens[3].type == TokenType.EOF
     print("test_lexer_reconhece_multiplos_tokens passou")
 
 
@@ -93,6 +96,7 @@ def test_lexer_arquivo():
 
     # Deve reconhecer muitos tokens
     assert len(tokens) > 0, "Deve haver tokens"
+    assert tokens[-1].type == TokenType.EOF, "Ultimo token deve ser EOF"
     print(f"test_lexer_arquivo passou ({len(tokens)} tokens reconhecidos)")
 
 
