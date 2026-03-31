@@ -10,8 +10,8 @@ Documentacao oficial do projeto, com foco em organizacao comercial, clareza tecn
 
 <p>
   <img src="https://img.shields.io/badge/status-em%20evolucao-1f6feb" alt="status" />
-  <img src="https://img.shields.io/badge/fase-fundacao-0a7f5a" alt="fase" />
-  <img src="https://img.shields.io/badge/progresso-22%25-f59e0b" alt="progresso" />
+  <img src="https://img.shields.io/badge/fase-aplicacao%20e%20CLI-0a7f5a" alt="fase" />
+  <img src="https://img.shields.io/badge/progresso-65%25-f59e0b" alt="progresso" />
 </p>
 
 ---
@@ -25,11 +25,11 @@ Documentacao oficial do projeto, com foco em organizacao comercial, clareza tecn
   </tr>
   <tr>
     <td><strong>Etapa Atual</strong></td>
-    <td>Fundacao de dominio e organizacao estrutural.</td>
+    <td>Implementacao da camada de aplicacao e CLI.</td>
   </tr>
   <tr>
     <td><strong>Proxima Etapa</strong></td>
-    <td>Implementacao do nucleo lexico no pacote principal.</td>
+    <td>Criar CLI funcional com servico de analise lexica e suporte a saida JSON/texto.</td>
   </tr>
 </table>
 
@@ -39,18 +39,18 @@ Documentacao oficial do projeto, com foco em organizacao comercial, clareza tecn
 
 ### Progresso Global
 
-<progress value="22" max="100">22%</progress>
+<progress value="65" max="100">65%</progress>
 
-**22% concluido**
+**65% concluido**
 
 ### Progresso por Fase
 
 | Fase | Progresso | Status |
 |---|---:|---|
-| Fundacao | 70% | Em andamento |
-| Nucleo Lexico | 0% | Nao iniciado |
+| Fundacao | 90% | Quase completa |
+| Nucleo Lexico | 85% | Quase completa |
 | Aplicacao e CLI | 0% | Nao iniciado |
-| Qualidade e Governanca | 0% | Nao iniciado |
+| Qualidade e Governanca | 20% | Em andamento |
 | Release Inicial | 0% | Nao iniciado |
 
 ---
@@ -72,16 +72,20 @@ Documentacao oficial do projeto, com foco em organizacao comercial, clareza tecn
 ### Ja concluido
 
 - Estrutura base de pastas para crescimento organizado.
-- Modelo de token definido em token.py.
-- Catalogo de token types e mapas lexicos em tokentype.py.
-- Documentacao tecnica inicial criada em docs.
+- Modelo de token imutavel em `mineires_token.py`.
+- Catalogo de token types e mapas lexicos em `tokentype.py`.
+- Automato (AFD) implementado e validado em `src/mineres_compilador/automato.py`.
+- Lexer implementado com rastreamento de linha/coluna em `src/mineres_compilador/lexer.py`.
+- Testes unitarios de automato e lexer passando (`testes_individuais/`).
+- Documentacao tecnica e tutoriais criados em docs.
 
 ### Em aberto
 
-- Implementar automato (AFD) no pacote principal.
-- Implementar lexer no pacote principal.
-- Criar CLI de execucao com contratos de entrada e saida.
-- Adicionar testes, CI e politicas de qualidade.
+- Definir contrato final de erro lexico (excecao vs token de erro).
+- Garantir emissao de token `EOF` consistente.
+- Criar `application/lexical_analysis_service.py`.
+- Criar CLI (`main.py`) com suporte a `--input`, `--output`, `--format`.
+- Configurar lint, format, type checking e CI/CD.
 
 ---
 

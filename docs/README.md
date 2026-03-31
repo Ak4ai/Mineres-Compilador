@@ -4,25 +4,26 @@ Esta pasta centraliza o estado do projeto, arquitetura, decisoes e plano de entr
 
 ## Progresso Geral
 
-<progress value="22" max="100">22%</progress>
+<progress value="65" max="100">65%</progress>
 
-**22% concluido**
+**65% concluido**
 
-- Etapa atual: fundacao de dominio e organizacao estrutural.
-- Proxima etapa: implementar o nucleo lexico em `src/mineres_compilador`.
+- Etapa atual: implementacao da camada de aplicacao e CLI.
+- Proxima etapa: criar CLI funcional com servico de analise lexica.
 
 ## Mapa de Status
 
 | Area | Status | Observacao |
 |---|---|---|
 | Estrutura de pastas | Concluido | Layout inicial comercial criado |
-| Modelo de token | Concluido | `token.py` com dataclass imutavel |
+| Modelo de token | Concluido | `mineires_token.py` com dataclass imutavel |
 | Catalogo de token types | Concluido | `tokentype.py` com enum e mapas |
-| Documentacao tecnica | Em progresso | Esta pasta foi iniciada |
-| Lexer | Nao iniciado | Ainda nao existe modulo no pacote principal |
-| Automato (AFD) | Nao iniciado | Ainda nao existe modulo no pacote principal |
-| CLI/entrada da aplicacao | Nao iniciado | Sem ponto de entrada definido |
-| Testes automatizados | Nao iniciado | Suite ainda nao criada |
+| Automato (AFD) | Concluido | `automato.py` implementado e validado |
+| Lexer | Concluido | `lexer.py` implementado com rastreamento de posicao |
+| Testes unitarios | Em progresso | Automato e lexer cobertos; integracao CLI pendente |
+| Documentacao tecnica | Em progresso | Docs criados; alguns arquivos com info desatualizada |
+| CLI/entrada da aplicacao | Nao iniciado | `main.py` e service de analise ainda nao existem |
+| Lint/format/typecheck | Nao iniciado | Sem configuracao de qualidade ainda |
 | CI/CD | Nao iniciado | Workflow vazio |
 
 ## Leitura Rapida
