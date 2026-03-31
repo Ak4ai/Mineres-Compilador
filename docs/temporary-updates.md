@@ -28,6 +28,16 @@ Copie e preencha o bloco abaixo para cada ajuste pequeno:
 
 ## Entradas
 
+### 2026-03-31 - Documentacao sincronizada com estado real do projeto (nucleo lexico completo)
+
+- Tipo: pequena
+- Arquivos alterados: docs/index.md, docs/README.md, docs/architecture.md
+- Resumo tecnico: progresso global atualizado de 22% para 65%; fase atual ajustada para "Aplicacao e CLI"; tabelas de status atualizadas para refletir `automato.py`, `lexer.py` e testes unitarios como concluidos; snapshot de itens em aberto revisado para listar apenas pendencias reais (EOF, erro lexico, CLI, lint, CI).
+- Impacto: medio
+- Acao futura: promover para documentacao oficial final apos conclusao da CLI e padronizacao de erro lexico/EOF.
+
+---
+
 ### 2026-03-29 - Documentacao sincronizada com estado real do lexer
 
 - Tipo: pequena

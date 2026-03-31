@@ -66,8 +66,8 @@ Componentes esperados:
 
 | Item | Estado atual | Estado alvo |
 |---|---|---|
-| Domain | Parcial | Completo |
-| Application | Estrutura vazia | Casos de uso implementados |
+| Domain | Quase completo (`token`, `tokentype`, `automato`, `lexer` implementados) | Completo |
+| Application | Estrutura vazia (`application/` sem arquivos) | Casos de uso implementados |
 | Interface | Nao iniciado | CLI funcional |
 | Infrastructure | Nao iniciado | IO/log/config isolados |
-| Testes | Nao iniciado | Unitario + Integracao |
+| Testes | Unitarios de dominio criados e passando | Unitario + Integracao |
