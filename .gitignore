@@ -1,0 +1,36 @@
+# Python bytecode e cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Ferramentas de teste e cobertura
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Build / empacotamento
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Saidas geradas pelo projeto
+saida/
+
+# Arquivos de editor e sistema
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

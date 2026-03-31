@@ -54,7 +54,7 @@ Mineres-Compilador/
 - ✅ Modelo de token imutável em mineires_token.py
 - ✅ Catálogo de tipos de token e mapas lexicos em tokentype.py
 - ✅ Automato lexical implementado e validado em src/mineres_compilador/automato.py
-- ✅ Arquivos de recursos: `grafos/automato_simples.txt`, `exemplos/programa_exemplo.mineires.txt`
+- ✅ Arquivos de recursos: `automatos/automato.txt`, `entradas/programa_exemplo.mineires.txt`
 - ✅ Documentação técnica e tutoriais
 
 ## Próximos passos (para você implementar!)

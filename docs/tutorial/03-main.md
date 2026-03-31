@@ -151,7 +151,7 @@ def main():
         print("      python main.py -s '<codigo>'")
         sys.exit(1)
     
-    lexer = Lexer(caminho_automato="grafos/automato_simples.txt")
+    lexer = Lexer(caminho_automato="automatos/automato.txt")
     
     try:
         # Carregar entrada
@@ -208,7 +208,7 @@ python main.py -s "certin"
 # Total: 1 tokens reconhecidos
 
 # Teste 2: Arquivo
-python main.py exemplos/programa_exemplo.mineires.txt
+python main.py entradas/programa_exemplo.mineires.txt
 
 # Saída esperada: ~38 tokens (verifique em Fase 4)
 ```

@@ -8,7 +8,7 @@ from src.mineres_compilador.lexer import Lexer
 from src.mineres_compilador.tokentype import TokenType
 
 ARQUIVO_EXEMPLO = (
-    Path(__file__).resolve().parent.parent / "exemplos" / "programa_exemplo.mineires.txt"
+    Path(__file__).resolve().parent.parent / "entradas" / "programa_exemplo.mineires.txt"
 )
 
 

@@ -46,7 +46,7 @@ Um **Autômato Finito Determinístico** é um modelo matemático com:
 
 ## 📝 Seu arquivo de entrada
 
-Abra: `grafos/automato_simples.txt`
+Abra: `automatos/automato.txt`
 
 Este arquivo tem 2 seções:
 
@@ -292,7 +292,7 @@ from src.mineres_compilador.automato import Automato
 
 # Teste
 afd = Automato()
-afd.carregar_do_arquivo("grafos/automato_simples.txt")
+afd.carregar_do_arquivo("automatos/automato.txt")
 
 # Deve reconhecer "certin" como CERTIN
 aceito, token_type, comprimento = afd.reconhecer("certin")
@@ -324,7 +324,7 @@ Execute: `python test_automato.py`
 
 - Imprima `self.estados` e `self.transicoes` para debug
 - Teste manualmente: `print(afd.transicoes.get(('q0', 'c')))`
-- Leia o arquivo `grafos/automato_simples.txt` manualmente para entender formato
+- Leia o arquivo `automatos/automato.txt` manualmente para entender formato
 
 ## 📚 Próximo passo
 

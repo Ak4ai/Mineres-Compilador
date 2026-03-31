@@ -21,7 +21,7 @@ class Lexer:
     def __init__(self, caminho_automato: Optional[str] = None) -> None:
         if caminho_automato is None:
             caminho_automato = str(
-                Path(__file__).resolve().parents[2] / "grafos" / "automato_simples.txt"
+                Path(__file__).resolve().parents[2] / "automatos" / "automato.txt"
             )
 
         self.automato = Automato()

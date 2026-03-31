@@ -55,8 +55,8 @@ Mineres-Compilador/
 ### Fase 1: Entender o contexto (15 min) 📚
 
 1. Leia o [README.md](../README.md) para entender visão geral
-2. Abra `grafos/automato_simples.txt` para ver o AFD (não precisa entender tudo)
-3. Abra `exemplos/programa_exemplo.mineires.txt` para ver código Minerês de exemplo
+2. Abra `automatos/automato.txt` para ver o AFD (não precisa entender tudo)
+3. Abra `entradas/programa_exemplo.mineires.txt` para ver código Minerês de exemplo
 
 ### Fase 2: Implementar Automato (60-90 min) 🤖
 
@@ -90,7 +90,7 @@ Mineres-Compilador/
 
 1. Abra: [docs/tutorial/04-teste.md](tutorial/04-teste.md)
 2. Execute todos os testes sugeridos
-3. Verifique que `python main.py exemplos/programa_exemplo.mineires.txt` retorna ~38 tokens
+3. Verifique que `python main.py entradas/programa_exemplo.mineires.txt` retorna ~38 tokens
 
 **Resultado**: Compilador lexical completo e validado! 🎉
 

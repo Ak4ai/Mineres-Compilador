@@ -74,7 +74,7 @@ class Lexer:
     - tokens: Lista de tokens reconhecidos
     """
     
-    def __init__(self, caminho_automato: str = "grafos/automato_simples.txt"):
+    def __init__(self, caminho_automato: str = "automatos/automato.txt"):
         """Inicializa lexer com automato."""
         self.automato = Automato()
         self.automato.carregar_do_arquivo(caminho_automato)
@@ -301,7 +301,7 @@ print("✅ Lexer funciona!")
 
 Ou teste com arquivo:
 ```python
-lexer.carregar_arquivo("exemplos/programa_exemplo.mineires.txt")
+lexer.carregar_arquivo("entradas/programa_exemplo.mineires.txt")
 tokens = lexer.analisar()
 print(f"Total de tokens: {len(tokens)}")
 for token in tokens[:5]:

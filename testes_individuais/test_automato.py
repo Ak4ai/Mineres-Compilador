@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.mineres_compilador.automato import Automato
 
 
-ARQUIVO_AUTOMATO = Path(__file__).resolve().parent.parent / "grafos" / "automato_simples.txt"
+ARQUIVO_AUTOMATO = Path(__file__).resolve().parent.parent / "automatos" / "automato.txt"
 
 
 def _novo_automato() -> Automato:

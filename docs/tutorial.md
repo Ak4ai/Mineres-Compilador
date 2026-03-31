@@ -34,7 +34,7 @@ Um **compilador lexical funcional** para Minerês em 4 fases:
 
 ### [Fase 1: Automato.py →](tutorial/01-automato.md)
 - Entender AFD (Autômato Finito Determinístico)
-- Carregar arquivo `grafos/automato_simples.txt`
+- Carregar arquivo `automatos/automato.txt`
 - Implementar reconhecimento de tokens
 - Resultado: Reconhecer entrada individual ✅
 
