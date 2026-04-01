@@ -11,8 +11,20 @@ from .tokentype import ALL_WORD_TOKENS, TokenType
 
 
 class LexicalError(Exception):
-    def __init__(self, lexeme: str, line: int, column: int) -> None:
-        super().__init__(f"Erro lexico: '{lexeme}' na linha {line}, coluna {column}")
+    def __init__(
+        self,
+        lexeme: str,
+        line: int,
+        column: int,
+        error_type: str = "ERRO_LEXICO",
+    ) -> None:
+        self.error_type = error_type
+        self.lexeme = lexeme
+        self.line = line
+        self.column = column
+        super().__init__(
+            f"Erro lexico ({error_type}): '{lexeme}' na linha {line}, coluna {column}"
+        )
 
 
 class Lexer:
@@ -98,7 +110,12 @@ class Lexer:
 
                 if fechamento == -1 or (fim_linha != -1 and fim_linha < fechamento):
                     lexeme = restante[:fim_linha] if fim_linha != -1 else restante
-                    raise LexicalError(lexeme, inicio_linha, inicio_coluna)
+                    raise LexicalError(
+                        lexeme,
+                        inicio_linha,
+                        inicio_coluna,
+                        "STRING_NAO_FECHADA",
+                    )
 
             # Valida char no formato canonico antes do automato.
             # Aceita um caractere simples ('c') ou um escape valido ('\\n', '\\t', etc.).
@@ -107,19 +124,39 @@ class Lexer:
                 fim_linha = restante.find("\n")
 
                 if fechamento == -1 or (fim_linha != -1 and fim_linha < fechamento):
-                    raise LexicalError(restante, inicio_linha, inicio_coluna)
+                    raise LexicalError(
+                        restante,
+                        inicio_linha,
+                        inicio_coluna,
+                        "CHAR_NAO_FECHADO",
+                    )
 
                 conteudo = restante[1:fechamento]
                 escapes_validos = {"n", "t", "r", "\\", "'", '"', "0", "b", "f", "v"}
 
                 if not conteudo:
-                    raise LexicalError(restante[: fechamento + 1], inicio_linha, inicio_coluna)
+                    raise LexicalError(
+                        restante[: fechamento + 1],
+                        inicio_linha,
+                        inicio_coluna,
+                        "CHAR_MAL_FORMADO",
+                    )
 
                 if conteudo.startswith("\\"):
                     if len(conteudo) != 2 or conteudo[1] not in escapes_validos:
-                        raise LexicalError(restante[: fechamento + 1], inicio_linha, inicio_coluna)
+                        raise LexicalError(
+                            restante[: fechamento + 1],
+                            inicio_linha,
+                            inicio_coluna,
+                            "CHAR_MAL_FORMADO",
+                        )
                 elif len(conteudo) != 1:
-                    raise LexicalError(restante[: fechamento + 1], inicio_linha, inicio_coluna)
+                    raise LexicalError(
+                        restante[: fechamento + 1],
+                        inicio_linha,
+                        inicio_coluna,
+                        "CHAR_MAL_FORMADO",
+                    )
 
             # Trata comentario de linha antes do automato.
             if restante.startswith("//"):
@@ -144,7 +181,12 @@ class Lexer:
                 if indice_fim == -1:
                     # Comentario de bloco nao fechado ate EOF.
                     lexeme = restante
-                    raise LexicalError(lexeme, inicio_linha, inicio_coluna)
+                    raise LexicalError(
+                        lexeme,
+                        inicio_linha,
+                        inicio_coluna,
+                        "COMENTARIO_NAO_FECHADO",
+                    )
 
                 fim_comentario = indice_fim + len(marcador_fim)
                 lexeme = restante[:fim_comentario]
@@ -159,7 +201,12 @@ class Lexer:
 
             # Em falha de reconhecimento, emite erro e avanca um caractere.
             if not ok or tamanho == 0:
-                raise LexicalError(char_atual, inicio_linha, inicio_coluna)
+                raise LexicalError(
+                    char_atual,
+                    inicio_linha,
+                    inicio_coluna,
+                    "SIMBOLO_DESCONHECIDO",
+                )
 
             lexeme = self.source[self.pos : self.pos + tamanho]
 
@@ -167,6 +214,36 @@ class Lexer:
             if lexeme in ALL_WORD_TOKENS:
                 token_type = ALL_WORD_TOKENS[lexeme]
             else:
+                tipos_numericos = {
+                    "INTEGER_LITERAL",
+                    "FLOAT_LITERAL",
+                    "HEX_LITERAL",
+                    "OCTAL_LITERAL",
+                }
+                separadores = set(" \t\r\n(){}[],;+-*/%<>=\"'")
+
+                # Se um numero eh seguido por sufixo colado (ex.: 0x10G, 12.3.4),
+                # classifica como numero mal formado em vez de simbolo desconhecido.
+                if token_type_str in tipos_numericos:
+                    proxima_pos = self.pos + tamanho
+                    if proxima_pos < len(self.source):
+                        proximo_char = self.source[proxima_pos]
+                        if proximo_char not in separadores:
+                            fim_lexema = proxima_pos
+                            while (
+                                fim_lexema < len(self.source)
+                                and self.source[fim_lexema] not in separadores
+                            ):
+                                fim_lexema += 1
+
+                            lexema_invalido = self.source[self.pos : fim_lexema]
+                            raise LexicalError(
+                                lexema_invalido,
+                                inicio_linha,
+                                inicio_coluna,
+                                "NUMERO_MAL_FORMADO",
+                            )
+
                 # Validacoes extras para numeros mal formados.
                 numero_invalido = False
 
@@ -195,11 +272,21 @@ class Lexer:
                         numero_invalido = True
 
                 if numero_invalido:
-                    raise LexicalError(lexeme, inicio_linha, inicio_coluna)
+                    raise LexicalError(
+                        lexeme,
+                        inicio_linha,
+                        inicio_coluna,
+                        "NUMERO_MAL_FORMADO",
+                    )
 
                 # Valida o token retornado pelo automato antes de converter.
                 if not token_type_str or token_type_str not in TokenType._value2member_map_:
-                    raise LexicalError(lexeme, inicio_linha, inicio_coluna)
+                    raise LexicalError(
+                        lexeme,
+                        inicio_linha,
+                        inicio_coluna,
+                        "TOKEN_DESCONHECIDO",
+                    )
                 token_type = TokenType(token_type_str)
 
             self.tokens.append(Token(token_type, lexeme, inicio_linha, inicio_coluna))

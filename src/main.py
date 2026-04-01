@@ -92,13 +92,45 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _selecionar_arquivo_entrada_interativo() -> Path | None:
+    pasta_entradas = Path("entradas")
+
+    if not pasta_entradas.exists() or not pasta_entradas.is_dir():
+        print("Pasta de entradas nao encontrada: entradas/", file=sys.stderr)
+        return None
+
+    arquivos = sorted([p for p in pasta_entradas.iterdir() if p.is_file()])
+
+    if not arquivos:
+        print("Nenhum arquivo encontrado em entradas/", file=sys.stderr)
+        return None
+
+    print("Arquivos de entrada disponiveis:")
+    for i, arquivo in enumerate(arquivos, start=1):
+        print(f"{i} - {arquivo.name}")
+
+    while True:
+        escolha = input("Digite o numero do arquivo de entrada: ").strip()
+
+        if not escolha.isdigit():
+            print("Entrada invalida. Digite apenas um numero.")
+            continue
+
+        indice = int(escolha)
+        if indice < 1 or indice > len(arquivos):
+            print(f"Opcao invalida. Escolha um numero entre 1 e {len(arquivos)}.")
+            continue
+
+        return arquivos[indice - 1]
+
+
 def run() -> int:
     parser = _build_parser()
     args = parser.parse_args()
 
-    # Garante uma unica fonte de entrada: arquivo ou string.
-    if bool(args.input) == bool(args.source):
-        parser.error("Informe exatamente uma entrada: arquivo ou --source.")
+    # Nao permite arquivo e --source ao mesmo tempo.
+    if args.input is not None and args.source is not None:
+        parser.error("Informe somente uma entrada: arquivo OU --source.")
 
     lexer = Lexer(caminho_automato=args.automato)
 
@@ -106,7 +138,14 @@ def run() -> int:
         if args.source is not None:
             lexer.carregar_string(args.source)
         else:
-            input_path = Path(args.input)
+            if args.input is not None:
+                input_path = Path(args.input)
+            else:
+                input_path = _selecionar_arquivo_entrada_interativo()
+                if input_path is None:
+                    return 2
+                print(f"Arquivo selecionado: {input_path}")
+
             if not input_path.exists():
                 print(f"Arquivo de entrada nao encontrado: {input_path}", file=sys.stderr)
                 return 2
