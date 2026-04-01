@@ -100,16 +100,25 @@ class Lexer:
                     lexeme = restante[:fim_linha] if fim_linha != -1 else restante
                     raise LexicalError(lexeme, inicio_linha, inicio_coluna)
 
-            # Valida char no formato canonico 'M' antes do automato.
-            # A validacao so verifica fechamento e cardinalidade do conteudo,
-            # e deixa o reconhecimento final para o AFD.
+            # Valida char no formato canonico antes do automato.
+            # Aceita um caractere simples ('c') ou um escape valido ('\\n', '\\t', etc.).
             if restante.startswith("'"):
                 fechamento = restante.find("'", 1)
-                if fechamento == -1:
+                fim_linha = restante.find("\n")
+
+                if fechamento == -1 or (fim_linha != -1 and fim_linha < fechamento):
                     raise LexicalError(restante, inicio_linha, inicio_coluna)
 
                 conteudo = restante[1:fechamento]
-                if len(conteudo) != 1:
+                escapes_validos = {"n", "t", "r", "\\", "'", '"', "0", "b", "f", "v"}
+
+                if not conteudo:
+                    raise LexicalError(restante[: fechamento + 1], inicio_linha, inicio_coluna)
+
+                if conteudo.startswith("\\"):
+                    if len(conteudo) != 2 or conteudo[1] not in escapes_validos:
+                        raise LexicalError(restante[: fechamento + 1], inicio_linha, inicio_coluna)
+                elif len(conteudo) != 1:
                     raise LexicalError(restante[: fechamento + 1], inicio_linha, inicio_coluna)
 
             # Trata comentario de linha antes do automato.

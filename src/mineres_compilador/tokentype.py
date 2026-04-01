@@ -86,6 +86,7 @@ class TokenType(Enum):
     LEFT_BRACE = "{"
     RIGHT_BRACE = "}"
     COMMA = ","
+    SEMICOLON = ";"
     UAI = "uai"   # equivalente a ;
     
     # COMENTÁRIOS

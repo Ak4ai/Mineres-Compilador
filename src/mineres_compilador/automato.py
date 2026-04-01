@@ -110,6 +110,10 @@ class Automato:
 
             origem, destino, char = partes
 
+            # Marcadores textuais para caracteres de controle no arquivo do AFD.
+            if char == "<SPACE>":
+                char = " "
+
             if origem not in self.estados:
                 raise ValueError(f"Estado de origem nao definido: {origem}")
             if destino not in self.estados:

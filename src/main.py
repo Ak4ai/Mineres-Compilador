@@ -6,15 +6,26 @@ from pathlib import Path
 from mineres_compilador.lexer import LexicalError, Lexer
 
 
+def _lexema_para_tabela(lexema: str) -> str:
+    # Mantem cada token em uma unica linha na tabela TXT.
+    return (
+        lexema.replace("\\", "\\\\")
+        .replace("\n", "\\n")
+        .replace("\t", "\\t")
+        .replace("\r", "\\r")
+    )
+
+
 def _linhas_tabela_tokens(tokens) -> list[str]:
     linhas = [
-        f"{'TIPO':<20} {'LEXEMA':<20} {'LINHA':<5} {'COLUNA':<6}",
+        f"{'LEXEMA':<20} {'TIPO':<20} {'LINHA':<5} {'COLUNA':<6}",
         "-" * 60,
     ]
 
     for token in tokens:
+        lexema_tabela = _lexema_para_tabela(token.lexeme)
         linhas.append(
-            f"{token.type.name:<20} {token.lexeme:<20} {token.line:<5} {token.column:<6}"
+            f"{lexema_tabela:<20} {token.type.name:<20} {token.line:<5} {token.column:<6}"
         )
 
     return linhas
@@ -34,8 +45,8 @@ def salvar_tokens_tabela(tokens, caminho_saida: Path) -> None:
 def salvar_tokens_json(tokens, caminho_saida: Path) -> None:
     dados = [
         {
-            "type": token.type.name,
             "lexeme": token.lexeme,
+            "type": token.type.name,
             "line": token.line,
             "column": token.column,
         }

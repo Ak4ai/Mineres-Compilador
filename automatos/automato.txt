@@ -22,6 +22,7 @@ q_rparen FINAL )
 q_lbrace FINAL {
 q_rbrace FINAL }
 q_comma FINAL ,
+q_semicolon FINAL ;
 q_lt FINAL <
 q_gt FINAL >
 q_le FINAL <=
@@ -30,6 +31,7 @@ q_str_open INTERMEDIARIO
 q_str_body INTERMEDIARIO
 q_str_end FINAL STRING_LITERAL
 q_char_open INTERMEDIARIO
+q_char_escape INTERMEDIARIO
 q_char_value INTERMEDIARIO
 q_char_end FINAL CHAR_LITERAL
 
@@ -221,11 +223,13 @@ q0 q_rparen )
 q0 q_lbrace {
 q0 q_rbrace }
 q0 q_comma ,
+q0 q_semicolon ;
 q0 q_lt <
 q0 q_gt >
 q_lt q_le =
 q_gt q_ge =
 q0 q_str_open "
+q_str_open q_str_body <SPACE>
 q_str_open q_str_body !
 q_str_body q_str_body !
 q_str_open q_str_body #
@@ -412,6 +416,7 @@ q_str_open q_str_body }
 q_str_body q_str_body }
 q_str_open q_str_body ~
 q_str_body q_str_body ~
+q_str_body q_str_body <SPACE>
 q_str_open q_str_end "
 q_str_body q_str_end "
 q0 q_char_open '
@@ -473,7 +478,17 @@ q_char_open q_char_value X
 q_char_open q_char_value Y
 q_char_open q_char_value Z
 q_char_open q_char_value [
-q_char_open q_char_value \
+q_char_open q_char_escape \
+q_char_escape q_char_value n
+q_char_escape q_char_value t
+q_char_escape q_char_value r
+q_char_escape q_char_value \
+q_char_escape q_char_value '
+q_char_escape q_char_value "
+q_char_escape q_char_value 0
+q_char_escape q_char_value b
+q_char_escape q_char_value f
+q_char_escape q_char_value v
 q_char_open q_char_value ]
 q_char_open q_char_value ^
 q_char_open q_char_value _

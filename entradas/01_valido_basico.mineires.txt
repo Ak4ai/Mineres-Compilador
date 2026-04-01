@@ -1,0 +1,7 @@
+bora_cumpade main()
+simbora
+    trem_discrita mensagem uai
+    fica_assim_entao "Uai, mundo!\n" uai
+    oia_proce_ve(mensagem) uai
+    ta_bao 0 uai
+cabo
