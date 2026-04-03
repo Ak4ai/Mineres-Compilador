@@ -3,8 +3,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, Optional, Set, Tuple
 
-
-# Tipos de estado aceitos no arquivo de definicao do AFD.
 # Tipos de estado aceitos no arquivo de definicao do AFD.
 class EstadoTipo(Enum):
     INICIAL = "INICIAL"

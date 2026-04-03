@@ -1,21 +1,29 @@
-# Analisador Léxico da Linguagem Mineres
+# Compilador de Minerês
 
-## 📌 Visão Geral
+<div align="justify">
+<p><strong>Disciplina:</strong> Compiladores<br>
+<strong>Instituição:</strong> Centro Federal de Educação Tecnológica de Minas Gerais (CEFET-MG) - Campus V Divinópolis<br>
+<strong>Professor:</strong> Eduardo Miranda<br>
+</div>
+
+## Analisador Léxico
+--
+### 📌 Visão Geral
 Este projeto implementa um analisador léxico para a linguagem Mineres.
 
 O papel do analisador léxico é ler o código-fonte caractere por caractere, identificar lexemas válidos e transformá-los em tokens com tipo, linha e coluna. Esses tokens são a base para as próximas fases de compilação, como análise sintática e semântica.
 
 No projeto, a análise lexical é feita com suporte de um AFD explícito carregado de arquivo (automatos/automato.txt), integrado ao lexer em Python.
 
-## 🎯 Objetivos
+### 🎯 Objetivos
 - Implementar um lexer funcional para Mineres.
 - Reconhecer palavras reservadas, identificadores, operadores, delimitadores e literais.
-- Manter rastreamento de linha e coluna para depuracao e mensagens de erro.
+- Manter rastreamento de linha e coluna para depuração e mensagens de erro.
 - Reportar erros léxicos com tipo explícito (ex.: string não fechada, número mal formado).
 - Disponibilizar execução por CLI com entrada por arquivo, string e seleção interativa.
 - Gerar saída em formato humano (tabela TXT) e estruturado (JSON).
 
-## 🏗️ Estrutura do Projeto
+### 🏗️ Estrutura do Projeto
 Principais arquivos e responsabilidades:
 
 - src/mineres_compilador/automato.py
@@ -47,23 +55,23 @@ Principais arquivos e responsabilidades:
 - saida/
   - Arquivos gerados na execução (saida_tokens.txt e saida_tokens.json).
 
-## ⚙️ Como Executar
-### 1) Ativar o ambiente virtual
+### ⚙️ Como Executar
+#### 1) Ativar o ambiente virtual
 ```bash
 source .venv/bin/activate
 ```
 
-### 2) Rodar em modo interativo (lista arquivos em entradas)
+#### 2) Rodar em modo interativo (lista arquivos em entradas)
 ```bash
 python src/main.py --print
 ```
 
-### 3) Rodar com arquivo de entrada
+#### 3) Rodar com arquivo de entrada
 ```bash
 python src/main.py entradas/01_valido_basico.mineires.txt --print
 ```
 
-### 4) Rodar com código em linha
+#### 4) Rodar com código em linha
 ```bash
 python src/main.py -s "simbora" --print
 ```
@@ -74,7 +82,7 @@ python main.py arquivo.txt
 ```
 No estado atual do repositório, o ponto de entrada está em src/main.py.
 
-## 📥 Formato de Entrada
+### 📥 Formato de Entrada
 A entrada é um arquivo texto (.txt) contendo código Mineres.
 
 Exemplo:
@@ -88,13 +96,13 @@ simbora
 cabo
 ```
 
-## 📤 Saída
+### 📤 Saída
 O programa gera dois formatos de saída:
 
 1. Tabela no terminal e em arquivo TXT (saida/saida_tokens.txt)
 2. JSON estruturado (saida/saida_tokens.json)
 
-### Exemplo de tabela
+#### Exemplo de tabela
 ```txt
 LEXEMA               TIPO                 LINHA COLUNA
 ------------------------------------------------------------
@@ -106,7 +114,7 @@ mensagem             IDENTIFIER           3     19
 ;                    SEMICOLON            3     27
 ```
 
-### Exemplo de JSON
+#### Exemplo de JSON
 ```json
 [
   {
@@ -124,7 +132,7 @@ mensagem             IDENTIFIER           3     19
 ]
 ```
 
-## 🔤 Tokens Reconhecidos
+### 🔤 Tokens Reconhecidos
 Categorias principais de tokens:
 
 - Controle: EOF
@@ -159,7 +167,7 @@ Categorias principais de tokens:
   - COMMENT_LINE
   - COMMENT_BLOCK
 
-## 🤖 Funcionamento do Lexer
+### 🤖 Funcionamento do Lexer
 Fluxo geral da análise lexical:
 
 1. Leitura da fonte
@@ -181,17 +189,17 @@ Fluxo geral da análise lexical:
 - Caso contrário, usa o tipo retornado pelo automato (literal, identificador etc.).
 - Validações adicionais detectam casos como numero mal formado.
 
-## 🔁 Representação Canônica
+### 🔁 Representação Canônica
 O projeto adota uma representação canônica de tokens para facilitar etapas futuras do compilador.
 
 Exemplo de equivalência de delimitador:
-- uai e ; coexistem como formas lexicas validas de delimitacao.
+- - "uai" e ";" coexistem como representações léxicas distintas do mesmo papel sintático de delimitador.
 - No nível de linguagem, ambos exercem papel de separador de instruções.
 
 Essa representação canônica ajuda a simplificar o parser, pois reduz ambiguidades na etapa sintática.
 
-## ⚠️ Tratamento de Erros
-Por padrao, a CLI processa todo o arquivo e lista todos os erros lexicos encontrados.
+### ⚠️ Tratamento de Erros
+Por padrao, a CLI processa todo o arquivo e lista todos os erros léxicos encontrados.
 
 Cada erro e reportado com tipo, lexema, linha e coluna.
 
@@ -211,13 +219,13 @@ Tipos de erro tratados:
 
 Exemplo de mensagem:
 ```txt
-Erros lexicos encontrados:
-1. Erro lexico (NUMERO_MAL_FORMADO): '0x10G' na linha 2, coluna 1
-2. Erro lexico (NUMERO_MAL_FORMADO): '12.3.4' na linha 3, coluna 1
+Erros léxicos encontrados:
+1. Erro léxico (NUMERO_MAL_FORMADO): '0x10G' na linha 2, coluna 1
+2. Erro léxico (NUMERO_MAL_FORMADO): '12.3.4' na linha 3, coluna 1
 ```
 
-## 🧪 Exemplo Completo
-### Entrada
+### 🧪 Exemplo Completo
+#### Entrada
 ```txt
 bora_cumpade main()
 simbora
@@ -228,7 +236,7 @@ simbora
 cabo
 ```
 
-### Saida (trecho)
+#### Saida (trecho)
 ```txt
 LEXEMA               TIPO                 LINHA COLUNA
 ------------------------------------------------------------
@@ -240,7 +248,7 @@ mensagem             IDENTIFIER           3     19
 cabo                 CABO                 7     1
 ```
 
-## 🚀 Próximos Passos
+### 🚀 Próximos Passos
 - Implementar o parser (analisador sintático).
 - Definir e validar a gramática formal da linguagem Mineres.
 - Integrar a cadeia lexer -> parser com relatórios de erro sintático.
