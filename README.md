@@ -1,83 +1,243 @@
-# Mineres-Compilador
+# Analisador Léxico da Linguagem Mineres
 
-Base organizada para evolucao de um compilador da linguagem Mineres, com foco em clareza, arquitetura limpa e padrao comercial.
+## 📌 Visão Geral
+Este projeto implementa um analisador léxico para a linguagem Mineres.
 
-## Status
+O papel do analisador léxico é ler o código-fonte caractere por caractere, identificar lexemas válidos e transformá-los em tokens com tipo, linha e coluna. Esses tokens são a base para as próximas fases de compilação, como análise sintática e semântica.
 
-- Fase atual: **Implementação de análise lexical (tutorial)**.
-- Progresso geral: 75%.
-- Último marco: Tutoriais completos para aprendizado auto-guiado e testes funcionais.
+No projeto, a análise lexical é feita com suporte de um AFD explícito carregado de arquivo (automatos/automato.txt), integrado ao lexer em Python.
 
-## 🚀 Comece aqui
+## 🎯 Objetivos
+- Implementar um lexer funcional para Mineres.
+- Reconhecer palavras reservadas, identificadores, operadores, delimitadores e literais.
+- Manter rastreamento de linha e coluna para depuracao e mensagens de erro.
+- Reportar erros léxicos com tipo explícito (ex.: string não fechada, número mal formado).
+- Disponibilizar execução por CLI com entrada por arquivo, string e seleção interativa.
+- Gerar saída em formato humano (tabela TXT) e estruturado (JSON).
 
-**Novo no projeto?** Leia: [COMECE_AQUI.md](COMECE_AQUI.md) (15 min leitura)
+## 🏗️ Estrutura do Projeto
+Principais arquivos e responsabilidades:
 
-Isso te coloca no caminho para implementar o compilador lexical passo a passo.
+- src/mineres_compilador/automato.py
+  - Carrega e valida a definição do AFD.
+  - Executa reconhecimento com estratégia maximal munch.
 
-## 📚 Documentação
+- src/mineres_compilador/lexer.py
+  - Implementa o fluxo de tokenização.
+  - Trata comentários, validações léxicas adicionais e erros tipados.
 
-### Tutoriais (para aprender implementando)
-- **[COMECE_AQUI.md](COMECE_AQUI.md)** — Roteiro de aprendizado (~4-6 horas)
-- **[Tutorial Completo](docs/tutorial.md)** — 4 fases de implementação:
-  - [Fase 1: Automato.py](docs/tutorial/01-automato.md) - AFD e reconhecimento
-  - [Fase 2: Lexer.py](docs/tutorial/02-lexer.md) - Tokenização
-  - [Fase 3: Main.py](docs/tutorial/03-main.md) - CLI funcional
-  - [Fase 4: Testes](docs/tutorial/04-teste.md) - Validação completa
+- src/mineres_compilador/tokentype.py
+  - Define TokenType e os mapas de palavras da linguagem.
+  - Centraliza o catálogo de tokens reconhecidos.
 
-### Documentação técnica
-- Home: [docs/index.md](docs/index.md)
-- Estado atual: [docs/status.md](docs/status.md)
-- Arquitetura: [docs/architecture.md](docs/architecture.md)
-- Roadmap: [docs/roadmap.md](docs/roadmap.md)
-- Decisões técnicas: [docs/decisions/ADR-0001-estrutura-inicial.md](docs/decisions/ADR-0001-estrutura-inicial.md)
+- src/mineres_compilador/mineires_token.py
+  - Modelo de token com campos de tipo, lexema e posição.
 
-Se o GitHub Pages estiver habilitado com branch main e pasta /docs, a home publica sera:
+- src/main.py
+  - CLI da aplicação.
+  - Recebe entrada por arquivo, por string ou por seleção interativa.
+  - Gera saída em TXT e JSON.
 
-- https://ak4ai.github.io/Mineres-Compilador/
+- automatos/automato.txt
+  - Definição textual do automato (estados e transições).
 
-## Estrutura do Repositorio
+- entradas/
+  - Arquivos de entrada de exemplo.
 
+- saida/
+  - Arquivos gerados na execução (saida_tokens.txt e saida_tokens.json).
+
+## ⚙️ Como Executar
+### 1) Ativar o ambiente virtual
+```bash
+source .venv/bin/activate
 ```
-Mineres-Compilador/
-	.github/workflows/          # CI/CD
-	configs/                    # configuracoes de projeto
-	docs/                       # documentacao viva (status, arquitetura, roadmap, ADR)
-	scripts/                    # automacoes locais
-	src/mineres_compilador/     # pacote principal da aplicacao
-	mineires_token.py           # contrato de token
-	tokentype.py                # enum de tokens e mapas lexicos
+
+### 2) Rodar em modo interativo (lista arquivos em entradas)
+```bash
+python src/main.py --print
 ```
 
-## O que já foi feito
+### 3) Rodar com arquivo de entrada
+```bash
+python src/main.py entradas/01_valido_basico.mineires.txt --print
+```
 
-- ✅ Estrutura base de pastas para crescimento organizado
-- ✅ Modelo de token imutável em mineires_token.py
-- ✅ Catálogo de tipos de token e mapas lexicos em tokentype.py
-- ✅ Automato lexical implementado e validado em src/mineres_compilador/automato.py
-- ✅ Arquivos de recursos: `automatos/automato.txt`, `entradas/programa_exemplo.mineires.txt`
-- ✅ Documentação técnica e tutoriais
+### 4) Rodar com código em linha
+```bash
+python src/main.py -s "simbora" --print
+```
 
-## Próximos passos (para você implementar!)
+Observação sobre o comando do enunciado:
+```bash
+python main.py arquivo.txt
+```
+No estado atual do repositório, o ponto de entrada está em src/main.py.
 
-Siga o tutorial em **[COMECE_AQUI.md](COMECE_AQUI.md)**:
+## 📥 Formato de Entrada
+A entrada é um arquivo texto (.txt) contendo código Mineres.
 
-1. **Implementar lexer.py** - Tokenizar fluxos de entrada (60-90 min)
-2. **Implementar main.py** - Interface CLI funcional (30 min)
-3. **Testar** - Validar com testes (30 min)
+Exemplo:
+```txt
+bora_cumpade main()
+simbora
+    trem_discrita mensagem ;
+    fica_assim_entao "Uai, mundo!\\n" uai
+    oia_proce_ve(mensagem) uai
+    ta_bao 0 uai
+cabo
+```
 
-**Total**: 4-6 horas dedicadas de aprendizado prático!
+## 📤 Saída
+O programa gera dois formatos de saída:
 
-## Contribuicao
+1. Tabela no terminal e em arquivo TXT (saida/saida_tokens.txt)
+2. JSON estruturado (saida/saida_tokens.json)
 
-Fluxo recomendado para contribuicoes:
+### Exemplo de tabela
+```txt
+LEXEMA               TIPO                 LINHA COLUNA
+------------------------------------------------------------
+bora_cumpade         BORA_CUMPADE         1     1
+main                 MAIN                 1     14
+(                    LEFT_PAREN           1     18
+)                    RIGHT_PAREN          1     19
+mensagem             IDENTIFIER           3     19
+;                    SEMICOLON            3     27
+```
 
-1. Atualizar codigo.
-2. Se a mudanca for pequena, registrar em docs/temporary-updates.md.
-3. Se a mudanca for final/consolidada, atualizar docs/status.md, docs/architecture.md e docs/roadmap.md.
-4. Registrar decisoes relevantes em docs/decisions.
-5. Abrir PR com descricao objetiva do impacto tecnico.
+### Exemplo de JSON
+```json
+[
+  {
+    "lexeme": "bora_cumpade",
+    "type": "BORA_CUMPADE",
+    "line": 1,
+    "column": 1
+  },
+  {
+    "lexeme": ";",
+    "type": "SEMICOLON",
+    "line": 3,
+    "column": 27
+  }
+]
+```
 
-## Licenca
+## 🔤 Tokens Reconhecidos
+Categorias principais de tokens:
 
-Definir licenca do projeto antes da primeira release publica.
+- Controle: EOF
+- Identificadores: IDENTIFIER
+- Literais:
+  - INTEGER_LITERAL
+  - FLOAT_LITERAL
+  - HEX_LITERAL
+  - OCTAL_LITERAL
+  - STRING_LITERAL
+  - CHAR_LITERAL
+- Palavras reservadas (exemplos):
+  - bora_cumpade, simbora, cabo
+  - uai_se, uai_senao
+  - dependenu, du_casu
+- Tipos (exemplos):
+  - trem_di_numeru
+  - trem_cum_virgula
+  - trem_discrita
+  - trem_discolhe
+  - trosso
+- Operadores por palavra (exemplos):
+  - fica_assim_entao
+  - mema_coisa
+  - neh_nada
+- Operadores por símbolo:
+  - +, -, /, %, <, >, <=, >=
+- Delimitadores:
+  - (, ), {, }, ,, ;
+  - uai (delimitador por palavra)
+- Comentários:
+  - COMMENT_LINE
+  - COMMENT_BLOCK
 
+## 🤖 Funcionamento do Lexer
+Fluxo geral da análise lexical:
+
+1. Leitura da fonte
+- O lexer recebe conteudo por arquivo ou string.
+
+2. Ignorar espaços em branco
+- Espaços, tabs e quebras de linha são consumidos com atualização de linha/coluna.
+
+3. Tratamento de comentários
+- // ... ate fim da linha (COMMENT_LINE)
+- causo ... fim_do_causo (COMMENT_BLOCK)
+
+4. Reconhecimento via AFD
+- O lexer envia o trecho restante ao automato.
+- O automato retorna o maior prefixo válido e o tipo candidato.
+
+5. Classificação final
+- Se o lexema estiver no mapa de palavras, ele vira token da linguagem.
+- Caso contrário, usa o tipo retornado pelo automato (literal, identificador etc.).
+- Validações adicionais detectam casos como numero mal formado.
+
+## 🔁 Representação Canônica
+O projeto adota uma representação canônica de tokens para facilitar etapas futuras do compilador.
+
+Exemplo de equivalência de delimitador:
+- uai e ; coexistem como formas lexicas validas de delimitacao.
+- No nível de linguagem, ambos exercem papel de separador de instruções.
+
+Essa representação canônica ajuda a simplificar o parser, pois reduz ambiguidades na etapa sintática.
+
+## ⚠️ Tratamento de Erros
+O lexer interrompe na primeira falha e retorna erro com tipo, lexema, linha e coluna.
+
+Tipos de erro tratados:
+- STRING_NAO_FECHADA
+- CHAR_NAO_FECHADO
+- CHAR_MAL_FORMADO
+- COMENTARIO_NAO_FECHADO
+- NUMERO_MAL_FORMADO
+- SIMBOLO_DESCONHECIDO
+- TOKEN_DESCONHECIDO
+
+Exemplo de mensagem:
+```txt
+Erro lexico (NUMERO_MAL_FORMADO): '0x10G' na linha 2, coluna 1
+```
+
+## 🧪 Exemplo Completo
+### Entrada
+```txt
+bora_cumpade main()
+simbora
+    trem_discrita mensagem ;
+    fica_assim_entao "Uai, mundo!\\n" uai
+    oia_proce_ve(mensagem) uai
+    ta_bao 0 uai
+cabo
+```
+
+### Saida (trecho)
+```txt
+LEXEMA               TIPO                 LINHA COLUNA
+------------------------------------------------------------
+bora_cumpade         BORA_CUMPADE         1     1
+main                 MAIN                 1     14
+mensagem             IDENTIFIER           3     19
+"Uai, mundo!\\n"     STRING_LITERAL       4     22
+0                    INTEGER_LITERAL      6     12
+cabo                 CABO                 7     1
+```
+
+## 🚧 Limitações
+- A validação de escapes em string ainda não é semântica completa (o lexer reconhece lexema, mas não interpreta todos os escapes como valor final).
+- A análise para no primeiro erro léxico (não há recuperação de erro para continuar listando falhas).
+- Ainda não existe parser integrado neste repositório.
+
+## 🚀 Próximos Passos
+- Implementar o parser (analisador sintático).
+- Definir e validar a gramática formal da linguagem Mineres.
+- Integrar a cadeia lexer -> parser com relatórios de erro sintático.
+- Ampliar cobertura de testes automatizados para cenários de borda.
