@@ -301,7 +301,7 @@ print("✅ Lexer funciona!")
 
 Ou teste com arquivo:
 ```python
-lexer.carregar_arquivo("entradas/programa_exemplo.mineires.txt")
+lexer.carregar_arquivo("entradas/entrada_exemplo_main.mineires.txt")
 tokens = lexer.analisar()
 print(f"Total de tokens: {len(tokens)}")
 for token in tokens[:5]:

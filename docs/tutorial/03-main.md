@@ -208,7 +208,7 @@ python main.py -s "certin"
 # Total: 1 tokens reconhecidos
 
 # Teste 2: Arquivo
-python main.py entradas/programa_exemplo.mineires.txt
+python main.py entradas/entrada_exemplo_main.mineires.txt
 
 # Saída esperada: ~38 tokens (verifique em Fase 4)
 ```

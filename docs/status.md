@@ -35,9 +35,8 @@ nav_order: 2
   - Diferenciacao de `IDENTIFIER` para palavras reservadas via `ALL_WORD_TOKENS`.
   - Rastreamento de posicao (`line`, `column`) por token.
   - Fallback de erro lexico com `TokenType.ERROR` ao falhar reconhecimento.
-- `testes_individuais/test_automato.py` e `testes_individuais/test_lexer.py`
-  - Casos de validacao para automato e lexer passando localmente.
-  - Testes com prints detalhados de debug para facilitar diagnostico.
+- Validacoes de automato e lexer foram executadas localmente durante o desenvolvimento.
+- As suites antigas de testes foram removidas do repositorio.
 
 ### Configuracao de repositorio
 
@@ -62,7 +61,7 @@ nav_order: 2
 
 - `mineires_token.py` e `tokentype.py` mantidos como fonte unica de verdade de contrato lexico.
 - `automato.py` implementado e validado com testes manuais de carga e reconhecimento.
-- `lexer.py` implementado e validado com `test_lexer.py`.
+- `lexer.py` implementado e validado por execucoes locais da CLI.
 - Testes de automato e lexer executando com sucesso localmente.
 - Documentacao minima de status estabelecida e sincronizada.
 - Roadmap de implementacao definido e versionado.

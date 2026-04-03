@@ -191,7 +191,14 @@ Exemplo de equivalência de delimitador:
 Essa representação canônica ajuda a simplificar o parser, pois reduz ambiguidades na etapa sintática.
 
 ## ⚠️ Tratamento de Erros
-O lexer interrompe na primeira falha e retorna erro com tipo, lexema, linha e coluna.
+Por padrao, a CLI processa todo o arquivo e lista todos os erros lexicos encontrados.
+
+Cada erro e reportado com tipo, lexema, linha e coluna.
+
+Se existir ao menos um erro léxico:
+- a tabela de tokens nao é impressa
+- os arquivos de saida de sucesso não são gerados
+- a execução termina com codigo de retorno 1
 
 Tipos de erro tratados:
 - STRING_NAO_FECHADA
@@ -204,7 +211,9 @@ Tipos de erro tratados:
 
 Exemplo de mensagem:
 ```txt
-Erro lexico (NUMERO_MAL_FORMADO): '0x10G' na linha 2, coluna 1
+Erros lexicos encontrados:
+1. Erro lexico (NUMERO_MAL_FORMADO): '0x10G' na linha 2, coluna 1
+2. Erro lexico (NUMERO_MAL_FORMADO): '12.3.4' na linha 3, coluna 1
 ```
 
 ## 🧪 Exemplo Completo
@@ -230,11 +239,6 @@ mensagem             IDENTIFIER           3     19
 0                    INTEGER_LITERAL      6     12
 cabo                 CABO                 7     1
 ```
-
-## 🚧 Limitações
-- A validação de escapes em string ainda não é semântica completa (o lexer reconhece lexema, mas não interpreta todos os escapes como valor final).
-- A análise para no primeiro erro léxico (não há recuperação de erro para continuar listando falhas).
-- Ainda não existe parser integrado neste repositório.
 
 ## 🚀 Próximos Passos
 - Implementar o parser (analisador sintático).

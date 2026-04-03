@@ -1,0 +1,29 @@
+bora_cumpade main()
+
+trem_di_numeru x uai
+trem_cum_virgula y uai
+
+x fica_assim_entao 10 uai
+
+// ERRO 1: string não fechada
+y fica_assim_entao "isso aqui vai dar ruim
+
+// ERRO 2: char inválido (mais de 1 caractere)
+c fica_assim_entao 'AB' uai
+
+// ERRO 3: número hexadecimal inválido
+x fica_assim_entao 0xGHI uai
+
+// ERRO 4: número octal inválido
+x fica_assim_entao 089 uai
+
+// ERRO 5: símbolo inválido
+x fica_assim_entao 10 @ uai
+
+// ERRO 6: comentário de bloco não fechado
+causo
+isso aqui nunca fecha...
+
+x fica_assim_entao 20 uai
+
+cabo

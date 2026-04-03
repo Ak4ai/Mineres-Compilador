@@ -188,7 +188,7 @@ def test_lexer_reconhece_multiplos_tokens():
 def test_lexer_arquivo():
     """Testa carregamento de arquivo"""
     lexer = Lexer()
-    lexer.carregar_arquivo("entradas/programa_exemplo.mineires.txt")
+    lexer.carregar_arquivo("entradas/entrada_exemplo_main.mineires.txt")
     tokens = lexer.analisar()
     
     # Deve reconhecer muitos tokens
@@ -250,7 +250,7 @@ Total: 3 tokens reconhecidos
 ### Teste arquivo completo
 
 ```bash
-python main.py entradas/programa_exemplo.mineires.txt
+python main.py entradas/entrada_exemplo_main.mineires.txt
 ```
 
 **Resultado esperado**: ~38 tokens
@@ -302,7 +302,7 @@ C_NAO                   c_nao           5       1
 
 ## 📊 Resultado esperado final
 
-Quando rodar `python main.py entradas/programa_exemplo.mineires.txt`, você deve ver:
+Quando rodar `python main.py entradas/entrada_exemplo_main.mineires.txt`, você deve ver:
 
 ```
 Tokens reconhecidos:

@@ -96,6 +96,7 @@ class TokenType(Enum):
     # MAIN
     MAIN = "main"
     
+# Mapa de palavras-chave reservadas.
 KEYWORD_TOKENS = {
     "bora_cumpade": TokenType.BORA_CUMPADE,
     "main": TokenType.MAIN,
@@ -119,6 +120,7 @@ KEYWORD_TOKENS = {
     "oia_proce_ve": TokenType.OIA_PROCE_VE,
 }
     
+# Mapa de palavras associadas a tipos da linguagem.
 TYPE_TOKENS = {
     "trem_di_numeru": TokenType.TREM_DI_NUMERU,
     "trem_cum_virgula": TokenType.TREM_CUM_VIRGULA,
@@ -127,11 +129,13 @@ TYPE_TOKENS = {
     "trosso": TokenType.TROSSO,
 }
     
+# Mapa de literais/operadores booleanos por palavra.
 BOOLEAN_TOKENS = {
     "eh": TokenType.EH,
     "num_eh": TokenType.NUM_EH,
 }
 
+# Mapa de operadores escritos por extenso.
 WORD_OPERATOR_TOKENS = {
     "fica_assim_entao": TokenType.FICA_ASSIM_ENTAO,
     "mema_coisa": TokenType.MEMA_COISA,
@@ -144,10 +148,12 @@ WORD_OPERATOR_TOKENS = {
     "sob": TokenType.SOB,
 }
 
+# Mapa de delimitadores escritos por palavra (ex.: uai).
 WORD_DELIMITER_TOKENS = {
     "uai": TokenType.UAI,
 }
 
+# Uniao de todos os mapas por palavra para classificacao final no lexer.
 ALL_WORD_TOKENS = {
     **KEYWORD_TOKENS,
     **TYPE_TOKENS,

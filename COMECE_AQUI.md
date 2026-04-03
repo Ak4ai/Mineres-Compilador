@@ -33,7 +33,7 @@ Mineres-Compilador/
 ├── grafos/
 │   └── automato_simples.txt        ← Definição do seu autômato
 ├── exemplos/
-│   └── programa_exemplo.mineires.txt    ← Código de teste
+│   └── entrada_exemplo_main.mineires.txt    ← Código de teste
 ├── src/
 │   └── mineres_compilador/
 │       ├── token.py                ← Modelo de token
@@ -56,7 +56,7 @@ Mineres-Compilador/
 
 1. Leia o [README.md](../README.md) para entender visão geral
 2. Abra `automatos/automato.txt` para ver o AFD (não precisa entender tudo)
-3. Abra `entradas/programa_exemplo.mineires.txt` para ver código Minerês de exemplo
+3. Abra `entradas/entrada_exemplo_main.mineires.txt` para ver código Minerês de exemplo
 
 ### Fase 2: Implementar Automato (60-90 min) 🤖
 
@@ -64,7 +64,7 @@ Mineres-Compilador/
 2. Crie arquivo: `src/mineres_compilador/automato.py`
 3. Implemente classe `Automato` seguindo tutorial
 4. Execute testes locais
-5. Quando pronto, execute: `python test_automato.py`
+5. Quando pronto, valide com um arquivo de entrada usando a CLI (`python src/main.py --print`)
 
 **Resultado**: Um programa que reconhece tokens individuais ✅
 
@@ -73,7 +73,7 @@ Mineres-Compilador/
 1. Abra: [docs/tutorial/02-lexer.md](tutorial/02-lexer.md)
 2. Crie arquivo: `src/mineres_compilador/lexer.py`
 3. Implemente classe `Lexer` seguindo tutorial
-4. Execute: `python test_lexer.py`
+4. Execute a CLI com casos de entrada validos e invalidos para validar o lexer
 
 **Resultado**: Um tokenizador que processa fluxos de entrada ✅
 
@@ -90,7 +90,7 @@ Mineres-Compilador/
 
 1. Abra: [docs/tutorial/04-teste.md](tutorial/04-teste.md)
 2. Execute todos os testes sugeridos
-3. Verifique que `python main.py entradas/programa_exemplo.mineires.txt` retorna ~38 tokens
+3. Verifique que `python main.py entradas/entrada_exemplo_main.mineires.txt` retorna ~38 tokens
 
 **Resultado**: Compilador lexical completo e validado! 🎉
 
@@ -171,4 +171,4 @@ Abra: [Fase 1: Automato](tutorial/01-automato.md) e comece!
 ---
 
 **Tempo estimado até primeira vitória**: 15 minutos
-**Próxima milestone**: Ter `test_automato.py` passando ✅
+**Próxima milestone**: Validar a etapa lexical via CLI ✅

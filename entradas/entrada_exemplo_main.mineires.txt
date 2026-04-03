@@ -3,7 +3,7 @@ simbora
 
 // comentario de linha
 causo
-bloco de comentario
+bloco de comentario dewdwdwed
 fim_do_causo
 
 trem_di_numeru a fica_assim_entao 2 uai

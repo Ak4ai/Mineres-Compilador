@@ -6,6 +6,7 @@ from pathlib import Path
 from mineres_compilador.lexer import LexicalError, Lexer
 
 
+# Normaliza caracteres de controle para manter a tabela TXT em uma linha por token.
 def _lexema_para_tabela(lexema: str) -> str:
     # Mantem cada token em uma unica linha na tabela TXT.
     return (
@@ -16,32 +17,60 @@ def _lexema_para_tabela(lexema: str) -> str:
     )
 
 
+def _truncar_texto(texto: str, largura: int) -> str:
+    # Mantem largura fixa para colunas e evita quebrar alinhamento em lexemas longos.
+    if len(texto) <= largura:
+        return texto
+    if largura <= 3:
+        return texto[:largura]
+    return texto[: largura - 3] + "..."
+
+
+# Monta a representacao tabular padrao usada no terminal e no arquivo .txt.
 def _linhas_tabela_tokens(tokens) -> list[str]:
+    largura_lexema = 36
+    largura_tipo = 22
+    largura_linha = 5
+    largura_coluna = 6
+
     linhas = [
-        f"{'LEXEMA':<20} {'TIPO':<20} {'LINHA':<5} {'COLUNA':<6}",
-        "-" * 60,
+        (
+            f"{'LEXEMA':<{largura_lexema}}"
+            f" | {'TIPO':<{largura_tipo}}"
+            f" | {'LINHA':<{largura_linha}}"
+            f" | {'COLUNA':<{largura_coluna}}"
+        ),
+        "-" * (largura_lexema + largura_tipo + largura_linha + largura_coluna + 9),
     ]
 
     for token in tokens:
-        lexema_tabela = _lexema_para_tabela(token.lexeme)
+        lexema_tabela = _truncar_texto(_lexema_para_tabela(token.lexeme), largura_lexema)
         linhas.append(
-            f"{lexema_tabela:<20} {token.type.name:<20} {token.line:<5} {token.column:<6}"
+            (
+                f"{lexema_tabela:<{largura_lexema}}"
+                f" | {token.type.name:<{largura_tipo}}"
+                f" | {token.line:<{largura_linha}}"
+                f" | {token.column:<{largura_coluna}}"
+            )
         )
 
     return linhas
 
 
+# Impressao simples no stdout para modo interativo/depuracao.
 def imprimir_tokens(tokens) -> None:
     for linha in _linhas_tabela_tokens(tokens):
         print(linha)
 
 
+# Persiste a tabela em disco para uso humano.
 def salvar_tokens_tabela(tokens, caminho_saida: Path) -> None:
     with caminho_saida.open("w", encoding="utf-8") as arquivo:
         for linha in _linhas_tabela_tokens(tokens):
             arquivo.write(linha + "\n")
 
 
+# Persiste tokens em JSON para consumo por outras ferramentas.
 def salvar_tokens_json(tokens, caminho_saida: Path) -> None:
     dados = [
         {
@@ -57,6 +86,7 @@ def salvar_tokens_json(tokens, caminho_saida: Path) -> None:
         json.dump(dados, arquivo, indent=4, ensure_ascii=False)
 
 
+# Centraliza definicao de argumentos da CLI.
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="CLI do analisador lexico da linguagem Mineres."
@@ -92,6 +122,7 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# Permite escolher arquivo por indice quando nenhum input e informado.
 def _selecionar_arquivo_entrada_interativo() -> Path | None:
     pasta_entradas = Path("entradas")
 
@@ -124,6 +155,11 @@ def _selecionar_arquivo_entrada_interativo() -> Path | None:
         return arquivos[indice - 1]
 
 
+# Fluxo principal da aplicacao:
+# 1) ler entrada,
+# 2) executar lexer,
+# 3) gerar saidas,
+# 4) retornar codigo de status.
 def run() -> int:
     parser = _build_parser()
     args = parser.parse_args()
@@ -151,7 +187,15 @@ def run() -> int:
                 return 2
             lexer.carregar_arquivo(str(input_path))
 
-        tokens = lexer.analisar()
+        # Comportamento padrao: analisar todo o arquivo e acumular erros lexicos.
+        tokens = lexer.analisar(continuar_apos_erro=True)
+
+        # Se houver erro lexico, nao imprime tabela e nao gera saida de sucesso.
+        if lexer.errors:
+            print("\nErros lexicos encontrados:", file=sys.stderr)
+            for i, erro in enumerate(lexer.errors, start=1):
+                print(f"{i}. {erro}", file=sys.stderr)
+            return 1
 
         saida_dir = Path("saida")
         saida_dir.mkdir(parents=True, exist_ok=True)

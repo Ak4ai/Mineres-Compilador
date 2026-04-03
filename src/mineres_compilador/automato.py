@@ -5,6 +5,7 @@ from typing import Dict, Optional, Set, Tuple
 
 
 # Tipos de estado aceitos no arquivo de definicao do AFD.
+# Tipos de estado aceitos no arquivo de definicao do AFD.
 class EstadoTipo(Enum):
     INICIAL = "INICIAL"
     INTERMEDIARIO = "INTERMEDIARIO"
@@ -44,6 +45,7 @@ class Automato:
         linhas_estados: list[str] = []
         linhas_transicoes: list[str] = []
 
+        # Primeiro separa o arquivo por secao; o parse detalhado acontece abaixo.
         for linha in texto.splitlines():
             linha = linha.strip()
             if not linha or linha.startswith("#"):
@@ -71,6 +73,7 @@ class Automato:
                 "Definicao do automato invalida: estado inicial nao definido."
             )
 
+    # Converte linhas de [ESTADOS] para objetos Estado e valida regras globais.
     def _processar_estados(self, linhas: list[str]) -> None:
         # Formato esperado por linha: nome tipo [token_type].
         for linha in linhas:
@@ -101,6 +104,7 @@ class Automato:
             if tipo == EstadoTipo.FINAL:
                 self.estados_finais.add(nome)
 
+    # Converte linhas de [TRANSICOES] para o mapa (origem, char) -> destino.
     def _processar_transicoes(self, linhas: list[str]) -> None:
         # Formato esperado por linha: origem destino char.
         for linha in linhas:
@@ -128,12 +132,15 @@ class Automato:
 
             self.transicoes[chave] = destino
 
+    # Busca direta de transicao; retorna None quando nao existe caminho.
     def obter_proximo_estado(self, estado_atual: str, char: str) -> Optional[str]:
         return self.transicoes.get((estado_atual, char))
 
+    # Consulta rapida para saber se um estado e final.
     def eh_estado_final(self, estado: str) -> bool:
         return estado in self.estados_finais
 
+    # Retorna o token associado a um estado final.
     def obter_token_type(self, estado: str) -> Optional[str]:
         estado_obj = self.estados.get(estado)
         return estado_obj.token_type if estado_obj else None

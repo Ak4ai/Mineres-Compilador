@@ -76,7 +76,7 @@ Documentacao oficial do projeto, com foco em organizacao comercial, clareza tecn
 - Catalogo de token types e mapas lexicos em `tokentype.py`.
 - Automato (AFD) implementado e validado em `src/mineres_compilador/automato.py`.
 - Lexer implementado com rastreamento de linha/coluna em `src/mineres_compilador/lexer.py`.
-- Testes unitarios de automato e lexer passando (`testes_individuais/`).
+- Validacoes locais de automato e lexer realizadas durante a implementacao.
 - Documentacao tecnica e tutoriais criados em docs.
 
 ### Em aberto
