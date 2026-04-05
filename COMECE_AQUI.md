@@ -35,7 +35,7 @@ Mineres-Compilador/
 ├── exemplos/
 │   └── entrada_exemplo_main.mineires.txt    ← Código de teste
 ├── src/
-│   └── mineres_compilador/
+│   └── analisador_lexico/
 │       ├── token.py                ← Modelo de token
 │       ├── tokentype.py            ← Tipos de tokens
 │       ├── automato.py             ← ❌ Você vai implementar
@@ -61,17 +61,17 @@ Mineres-Compilador/
 ### Fase 2: Implementar Automato (60-90 min) 🤖
 
 1. Abra: [docs/tutorial/01-automato.md](tutorial/01-automato.md)
-2. Crie arquivo: `src/mineres_compilador/automato.py`
+2. Crie arquivo: `src/analisador_lexico/automato.py`
 3. Implemente classe `Automato` seguindo tutorial
 4. Execute testes locais
-5. Quando pronto, valide com um arquivo de entrada usando a CLI (`python src/main.py --print`)
+5. Quando pronto, valide com um arquivo de entrada usando a CLI (`python src/analisador_lexico/main.py --print`)
 
 **Resultado**: Um programa que reconhece tokens individuais ✅
 
 ### Fase 3: Implementar Lexer (60-90 min) 🔤
 
 1. Abra: [docs/tutorial/02-lexer.md](tutorial/02-lexer.md)
-2. Crie arquivo: `src/mineres_compilador/lexer.py`
+2. Crie arquivo: `src/analisador_lexico/lexer.py`
 3. Implemente classe `Lexer` seguindo tutorial
 4. Execute a CLI com casos de entrada validos e invalidos para validar o lexer
 

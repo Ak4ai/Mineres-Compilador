@@ -26,22 +26,22 @@ No projeto, a análise lexical é feita com suporte de um AFD explícito carrega
 ### 🏗️ Estrutura do Projeto
 Principais arquivos e responsabilidades:
 
-- src/mineres_compilador/automato.py
+- src/analisador_lexico/automato.py
   - Carrega e valida a definição do AFD.
   - Executa reconhecimento com estratégia maximal munch.
 
-- src/mineres_compilador/lexer.py
+- src/analisador_lexico/lexer.py
   - Implementa o fluxo de tokenização.
   - Trata comentários, validações léxicas adicionais e erros tipados.
 
-- src/mineres_compilador/tokentype.py
+- src/analisador_lexico/tokentype.py
   - Define TokenType e os mapas de palavras da linguagem.
   - Centraliza o catálogo de tokens reconhecidos.
 
-- src/mineres_compilador/mineires_token.py
+- src/analisador_lexico/mineires_token.py
   - Modelo de token com campos de tipo, lexema e posição.
 
-- src/main.py
+- src/analisador_lexico/main.py
   - CLI da aplicação.
   - Recebe entrada por arquivo, por string ou por seleção interativa.
   - Gera saída em TXT e JSON.
@@ -63,24 +63,24 @@ source .venv/bin/activate
 
 #### 2) Rodar em modo interativo (lista arquivos em entradas)
 ```bash
-python src/main.py --print
+python src/analisador_lexico/main.py --print
 ```
 
 #### 3) Rodar com arquivo de entrada
 ```bash
-python src/main.py entradas/01_valido_basico.mineires.txt --print
+python src/analisador_lexico/main.py entradas/01_valido_basico.mineires.txt --print
 ```
 
 #### 4) Rodar com código em linha
 ```bash
-python src/main.py -s "simbora" --print
+python src/analisador_lexico/main.py -s "simbora" --print
 ```
 
 Observação sobre o comando do enunciado:
 ```bash
 python main.py arquivo.txt
 ```
-No estado atual do repositório, o ponto de entrada está em src/main.py.
+No estado atual do repositório, o ponto de entrada está em src/analisador_lexico/main.py.
 
 ### 📥 Formato de Entrada
 A entrada é um arquivo texto (.txt) contendo código Mineres.

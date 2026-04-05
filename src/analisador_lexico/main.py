@@ -3,7 +3,13 @@ import json
 import sys
 from pathlib import Path
 
-from mineres_compilador.lexer import LexicalError, Lexer
+try:
+    # Execucao como modulo (ex.: python -m analisador_lexico.main)
+    from .lexer import LexicalError, Lexer
+except ImportError:
+    # Execucao direta por caminho (ex.: python src/analisador_lexico/main.py)
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from analisador_lexico.lexer import LexicalError, Lexer
 
 
 # Normaliza caracteres de controle para manter a tabela TXT em uma linha por token.
