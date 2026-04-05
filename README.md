@@ -7,9 +7,9 @@
 </div>
 
 ## Analisador Léxico
---
+
 ### 📌 Visão Geral
-Este projeto implementa um analisador léxico para a linguagem Mineres.
+A primeira parte deste projeto implementa um analisador léxico para a linguagem Mineres.
 
 O papel do analisador léxico é ler o código-fonte caractere por caractere, identificar lexemas válidos e transformá-los em tokens com tipo, linha e coluna. Esses tokens são a base para as próximas fases de compilação, como análise sintática e semântica.
 
@@ -247,9 +247,3 @@ mensagem             IDENTIFIER           3     19
 0                    INTEGER_LITERAL      6     12
 cabo                 CABO                 7     1
 ```
-
-### 🚀 Próximos Passos
-- Implementar o parser (analisador sintático).
-- Definir e validar a gramática formal da linguagem Mineres.
-- Integrar a cadeia lexer -> parser com relatórios de erro sintático.
-- Ampliar cobertura de testes automatizados para cenários de borda.
