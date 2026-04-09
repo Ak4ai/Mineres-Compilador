@@ -258,7 +258,7 @@ class Lexer:
                         "HEX_LITERAL",
                         "OCTAL_LITERAL",
                     }
-                    separadores = set(" \t\r\n(){}[],;+-*/%<>=\"'")
+                    separadores = set(" \t\r\n(){}[],:;+-*/%<>=\"'")
 
                     # Se um numero eh seguido por sufixo colado (ex.: 0x10G, 12.3.4),
                     # classifica como numero mal formado em vez de simbolo desconhecido.

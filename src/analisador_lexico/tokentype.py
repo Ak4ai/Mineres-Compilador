@@ -37,6 +37,7 @@ class TokenType(Enum):
 
     DEPENDENU = "dependenu"
     DU_CASU = "du_casu"
+    DEFAULT = "default"
 
     TA_BAO = "ta_bao"
     PARA_O_TREM = "para_o_trem"
@@ -86,6 +87,7 @@ class TokenType(Enum):
     LEFT_BRACE = "{"
     RIGHT_BRACE = "}"
     COMMA = ","
+    COLON = ":"
     SEMICOLON = ";"
     UAI = "uai"   # equivalente a ;
     
@@ -111,6 +113,7 @@ KEYWORD_TOKENS = {
 
     "dependenu": TokenType.DEPENDENU,
     "du_casu": TokenType.DU_CASU,
+    "default": TokenType.DEFAULT,
 
     "ta_bao": TokenType.TA_BAO,
     "para_o_trem": TokenType.PARA_O_TREM,

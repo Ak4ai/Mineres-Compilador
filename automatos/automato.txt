@@ -22,6 +22,7 @@ q_rparen FINAL )
 q_lbrace FINAL {
 q_rbrace FINAL }
 q_comma FINAL ,
+q_colon FINAL :
 q_semicolon FINAL ;
 q_lt FINAL <
 q_gt FINAL >
@@ -223,6 +224,7 @@ q0 q_rparen )
 q0 q_lbrace {
 q0 q_rbrace }
 q0 q_comma ,
+q0 q_colon :
 q0 q_semicolon ;
 q0 q_lt <
 q0 q_gt >
