@@ -1,0 +1,4 @@
+bora_cumpade main()
+simbora
+    ta_bao 0 uai
+cabo

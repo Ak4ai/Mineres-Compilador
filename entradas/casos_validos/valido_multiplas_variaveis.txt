@@ -1,0 +1,4 @@
+bora_cumpade main()
+simbora
+    trem_di_numeru a, b, c uai
+cabo

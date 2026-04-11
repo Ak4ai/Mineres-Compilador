@@ -1,0 +1,4 @@
+bora_cumpade main()
+simbora
+    x fica_assim_entao 1 + uai
+cabo

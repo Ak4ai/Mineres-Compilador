@@ -68,7 +68,7 @@ python src/analisador_lexico/main.py --print
 
 #### 3) Rodar com arquivo de entrada
 ```bash
-python src/analisador_lexico/main.py entradas/01_valido_basico.mineires.txt --print
+python src/analisador_lexico/main.py entradas/casos_validos/valido_basico.txt --print
 ```
 
 #### 4) Rodar com código em linha

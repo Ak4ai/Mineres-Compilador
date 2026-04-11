@@ -11,6 +11,12 @@ except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from analisador_lexico.lexer import LexicalError, Lexer
 
+try:
+    from analisador_sintatico.analisador_sintatico import Parser, ParserError
+except ImportError:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from analisador_sintatico.analisador_sintatico import Parser, ParserError
+
 
 # Normaliza caracteres de controle para manter a tabela TXT em uma linha por token.
 def _lexema_para_tabela(lexema: str) -> str:
@@ -124,6 +130,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "--automato",
         help="Caminho opcional para o arquivo de definicao do automato.",
     )
+    parser.add_argument(
+        "--sintatico",
+        action="store_true",
+        help="Executa tambem a analise sintatica apos a analise lexica.",
+    )
 
     return parser
 
@@ -136,15 +147,48 @@ def _selecionar_arquivo_entrada_interativo() -> Path | None:
         print("Pasta de entradas nao encontrada: entradas/", file=sys.stderr)
         return None
 
-    arquivos = sorted([p for p in pasta_entradas.iterdir() if p.is_file()])
+    arquivos = sorted([p for p in pasta_entradas.rglob("*") if p.is_file()])
 
     if not arquivos:
         print("Nenhum arquivo encontrado em entradas/", file=sys.stderr)
         return None
 
+    grupos_ordenados = ["casos_validos", "erros_lexicos", "erros_sintaticos"]
+    titulos_grupo = {
+        "casos_validos": "CASOS_VALIDOS",
+        "erros_lexicos": "ERROS LEXICOS",
+        "erros_sintaticos": "ERROS SINTATICOS",
+    }
+
+    arquivos_por_grupo: dict[str, list[Path]] = {}
+    for arquivo in arquivos:
+        rel = arquivo.relative_to(pasta_entradas)
+        grupo = rel.parts[0] if len(rel.parts) > 1 else "outros"
+        arquivos_por_grupo.setdefault(grupo, []).append(arquivo)
+
+    ordem_grupos = [g for g in grupos_ordenados if g in arquivos_por_grupo]
+    grupos_restantes = sorted(g for g in arquivos_por_grupo if g not in grupos_ordenados)
+    ordem_grupos.extend(grupos_restantes)
+
     print("Arquivos de entrada disponiveis:")
-    for i, arquivo in enumerate(arquivos, start=1):
-        print(f"{i} - {arquivo.name}")
+    arquivos_indexados: list[Path] = []
+
+    for grupo in ordem_grupos:
+        titulo = titulos_grupo.get(grupo, grupo.upper())
+        print(f"\n----- {titulo} -----")
+
+        for arquivo in arquivos_por_grupo[grupo]:
+            arquivos_indexados.append(arquivo)
+            indice = len(arquivos_indexados)
+            rel = arquivo.relative_to(pasta_entradas)
+
+            # Para grupos conhecidos, mostra o caminho sem o prefixo do grupo.
+            if rel.parts and rel.parts[0] in titulos_grupo:
+                exibicao = Path(*rel.parts[1:]) if len(rel.parts) > 1 else rel
+            else:
+                exibicao = rel
+
+            print(f"{indice} - {exibicao}")
 
     while True:
         escolha = input("Digite o numero do arquivo de entrada: ").strip()
@@ -154,11 +198,13 @@ def _selecionar_arquivo_entrada_interativo() -> Path | None:
             continue
 
         indice = int(escolha)
-        if indice < 1 or indice > len(arquivos):
-            print(f"Opcao invalida. Escolha um numero entre 1 e {len(arquivos)}.")
+        if indice < 1 or indice > len(arquivos_indexados):
+            print(
+                f"Opcao invalida. Escolha um numero entre 1 e {len(arquivos_indexados)}."
+            )
             continue
 
-        return arquivos[indice - 1]
+        return arquivos_indexados[indice - 1]
 
 
 # Fluxo principal da aplicacao:
@@ -203,6 +249,14 @@ def run() -> int:
                 print(f"{i}. {erro}", file=sys.stderr)
             return 1
 
+        # Opcional: valida sintaxe com o parser recursivo descendente.
+        if args.sintatico:
+            try:
+                Parser(tokens).parse()
+            except ParserError as error:
+                print(str(error), file=sys.stderr)
+                return 1
+
         saida_dir = Path("saida")
         saida_dir.mkdir(parents=True, exist_ok=True)
 
@@ -214,6 +268,9 @@ def run() -> int:
 
         if args.print_tokens:
             imprimir_tokens(tokens)
+
+        if args.sintatico:
+            print("Analise sintatica concluida com sucesso.")
 
         print(f"Analise concluida com sucesso. Tokens salvos em: {output_path}")
         print(f"Arquivo JSON gerado em: {json_path}")
