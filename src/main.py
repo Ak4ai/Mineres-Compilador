@@ -7,6 +7,51 @@ from analisador_lexico.lexer import LexicalError, Lexer
 from analisador_sintatico.analisador_sintatico import Parser, ParserError
 
 
+def _descricao_fases(executar_saida_lexica: bool, executar_sintatico: bool) -> str:
+    if executar_saida_lexica and executar_sintatico:
+        return "lexica + sintatica"
+    if executar_saida_lexica:
+        return "lexica"
+    return "sintatica"
+
+
+def _imprimir_resultado(
+    *,
+    status: str,
+    executar_saida_lexica: bool,
+    executar_sintatico: bool,
+    total_tokens: int | None = None,
+    detalhe: str | None = None,
+    detalhes: list[str] | None = None,
+    output_path: Path | None = None,
+    json_path: Path | None = None,
+    stream=sys.stdout,
+) -> None:
+    print("\nResultado", file=stream)
+    print("---------", file=stream)
+    print(f"Status: {status}", file=stream)
+    print(
+        f"Fases executadas: {_descricao_fases(executar_saida_lexica, executar_sintatico)}",
+        file=stream,
+    )
+
+    if total_tokens is not None:
+        print(f"Total de tokens: {total_tokens}", file=stream)
+
+    if detalhe:
+        print(f"Detalhe: {detalhe}", file=stream)
+
+    if detalhes:
+        print("Detalhes:", file=stream)
+        for i, item in enumerate(detalhes, start=1):
+            print(f"{i}. {item}", file=stream)
+
+    if output_path is not None:
+        print(f"Saida TXT: {output_path}", file=stream)
+    if json_path is not None:
+        print(f"Saida JSON: {json_path}", file=stream)
+
+
 # Normaliza caracteres de controle para manter a tabela TXT em uma linha por token.
 def _lexema_para_tabela(lexema: str) -> str:
     # Mantem cada token em uma unica linha na tabela TXT.
@@ -244,9 +289,15 @@ def run() -> int:
 
         # Se houver erro lexico, nao imprime tabela e nao gera saida de sucesso.
         if lexer.errors:
-            print("\nErros lexicos encontrados:", file=sys.stderr)
-            for i, erro in enumerate(lexer.errors, start=1):
-                print(f"{i}. {erro}", file=sys.stderr)
+            _imprimir_resultado(
+                status="erro",
+                executar_saida_lexica=executar_saida_lexica,
+                executar_sintatico=executar_sintatico,
+                total_tokens=len(tokens),
+                detalhe=f"Foram encontrados {len(lexer.errors)} erro(s) lexicos.",
+                detalhes=[str(erro) for erro in lexer.errors],
+                stream=sys.stderr,
+            )
             return 1
 
         # Opcional: valida sintaxe com o parser recursivo descendente.
@@ -254,12 +305,24 @@ def run() -> int:
             try:
                 Parser(tokens).parse()
             except ParserError as error:
-                print(str(error), file=sys.stderr)
+                _imprimir_resultado(
+                    status="erro",
+                    executar_saida_lexica=executar_saida_lexica,
+                    executar_sintatico=executar_sintatico,
+                    total_tokens=len(tokens),
+                    detalhe=str(error),
+                    stream=sys.stderr,
+                )
                 return 1
 
         # Modo dedicado para validar apenas sintaxe, sem artefatos lexicos.
         if not executar_saida_lexica:
-            print("Analise sintatica concluida com sucesso.")
+            _imprimir_resultado(
+                status="sucesso",
+                executar_saida_lexica=executar_saida_lexica,
+                executar_sintatico=executar_sintatico,
+                total_tokens=len(tokens),
+            )
             return 0
 
         saida_dir = Path("saida")
@@ -274,15 +337,24 @@ def run() -> int:
         if args.print_tokens:
             imprimir_tokens(tokens)
 
-        if executar_sintatico:
-            print("Analise sintatica concluida com sucesso.")
-
-        print(f"Analise concluida com sucesso. Tokens salvos em: {output_path}")
-        print(f"Arquivo JSON gerado em: {json_path}")
+        _imprimir_resultado(
+            status="sucesso",
+            executar_saida_lexica=executar_saida_lexica,
+            executar_sintatico=executar_sintatico,
+            total_tokens=len(tokens),
+            output_path=output_path,
+            json_path=json_path,
+        )
         return 0
 
     except LexicalError as error:
-        print(str(error), file=sys.stderr)
+        _imprimir_resultado(
+            status="erro",
+            executar_saida_lexica=executar_saida_lexica,
+            executar_sintatico=executar_sintatico,
+            detalhe=str(error),
+            stream=sys.stderr,
+        )
         return 1
 
 
