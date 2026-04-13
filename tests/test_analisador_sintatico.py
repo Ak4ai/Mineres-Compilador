@@ -153,7 +153,7 @@ class TestAnalisadorSintatico(unittest.TestCase):
 
     def test_case_dois_default(self):
         arquivo = ENTRADAS_DIR / "erros_sintaticos" / "erro_dois_default.txt"
-        self.assertParserErrorContains(arquivo, "default")
+        self.assertParserErrorContains(arquivo, "uai_so")
         
     # =========================
 # HELPERS AVANÇADOS

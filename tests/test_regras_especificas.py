@@ -157,7 +157,7 @@ simbora
     dependenu(x) simbora
         du_casu 1: para_o_trem uai
         du_casu 2: toca_o_trem uai
-        default: para_o_trem uai
+        uai_so: para_o_trem uai
     cabo
 cabo
 """)
@@ -170,7 +170,7 @@ simbora
         du_casu 1:
             dependenu(y) simbora
                 du_casu 2: para_o_trem uai
-                default: toca_o_trem uai
+                uai_so: toca_o_trem uai
             cabo
     cabo
 cabo
@@ -250,7 +250,7 @@ simbora
 
     dependenu(a) simbora
         du_casu 1: para_o_trem uai
-        default: toca_o_trem uai
+        uai_so: toca_o_trem uai
     cabo
 cabo
 """)

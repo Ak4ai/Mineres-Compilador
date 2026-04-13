@@ -2,6 +2,6 @@ bora_cumpade main()
 simbora
     dependenu(x) simbora
         du_casu 1: para_o_trem uai
-        default para_o_trem uai
+        uai_so para_o_trem uai
     cabo
 cabo

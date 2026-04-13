@@ -256,14 +256,14 @@ class Parser:
         self.stmt()
 
     def resto_dos_casos(self) -> None:
-        # <restoDosCasos> -> <doCaso><restoDosCasos> | default ':' <stmt> | &
+        # <restoDosCasos> -> <doCaso><restoDosCasos> | uai_so ':' <stmt> | &
         if self._matches(TokenType.DU_CASU):
             self.do_caso()
             self.resto_dos_casos()
             return
 
-        if self._matches(TokenType.DEFAULT):
-            self.consume(TokenType.DEFAULT)
+        if self._matches(TokenType.UAI_SO):
+            self.consume(TokenType.UAI_SO)
             self.consume(TokenType.COLON)
             self.stmt()
 
