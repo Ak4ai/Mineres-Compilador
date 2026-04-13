@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from analisador_lexico.mineires_token import Token
-from analisador_lexico.tokentype import TokenType
+from mineires_token import Token
+from tokentype import TokenType
 
 
 class ParserError(Exception):

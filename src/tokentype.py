@@ -1,4 +1,4 @@
-"""Definicoes de tokens para o lexer de Mineres.
+"""Definicoes de tokens para a linguagem Mineres.
 
 Este modulo centraliza todos os tipos de token aceitos pela
 especificacao da linguagem Mineres.
@@ -8,7 +8,7 @@ from enum import Enum
 
 
 class TokenType(Enum):
-    
+
     # CONTROLE
     EOF = "EOF"
     ERROR = "ERROR"
@@ -46,7 +46,7 @@ class TokenType(Enum):
     XOVE = "xove"
     OIA_PROCE_VE = "oia_proce_ve"
 
-    # TIPOS    
+    # TIPOS
     TREM_DI_NUMERU = "trem_di_numeru"
     TREM_CUM_VIRGULA = "trem_cum_virgula"
     TREM_DISCRITA = "trem_discrita"
@@ -57,7 +57,7 @@ class TokenType(Enum):
     EH = "eh"
     NUM_EH = "num_eh"
 
-    # OPERADORES (PALAVRA)    
+    # OPERADORES (PALAVRA)
     FICA_ASSIM_ENTAO = "fica_assim_entao"
     MEMA_COISA = "mema_coisa"
     NEH_NADA = "neh_nada"
@@ -70,18 +70,18 @@ class TokenType(Enum):
     VEIZ = "veiz"
     SOB = "sob"
 
-    # OPERADORES (SÍMBOLO)
+    # OPERADORES (SIMBOLO)
     PLUS = "+"
     MINUS = "-"
-    INT_DIV = "/"     # divisão inteira
-    MOD = "%"         # módulo
+    INT_DIV = "/"     # divisao inteira
+    MOD = "%"         # modulo
 
     LT = "<"
     GT = ">"
     LE = "<="
     GE = ">="
-    
-    # DELIMITADORES    
+
+    # DELIMITADORES
     LEFT_PAREN = "("
     RIGHT_PAREN = ")"
     LEFT_BRACE = "{"
@@ -90,14 +90,15 @@ class TokenType(Enum):
     COLON = ":"
     SEMICOLON = ";"
     UAI = "uai"   # equivalente a ;
-    
-    # COMENTÁRIOS
+
+    # COMENTARIOS
     COMMENT_LINE = "COMMENT_LINE"
     COMMENT_BLOCK = "COMMENT_BLOCK"
-    
+
     # MAIN
     MAIN = "main"
-    
+
+
 # Mapa de palavras-chave reservadas.
 KEYWORD_TOKENS = {
     "bora_cumpade": TokenType.BORA_CUMPADE,
@@ -122,7 +123,7 @@ KEYWORD_TOKENS = {
     "xove": TokenType.XOVE,
     "oia_proce_ve": TokenType.OIA_PROCE_VE,
 }
-    
+
 # Mapa de palavras associadas a tipos da linguagem.
 TYPE_TOKENS = {
     "trem_di_numeru": TokenType.TREM_DI_NUMERU,
@@ -131,7 +132,7 @@ TYPE_TOKENS = {
     "trem_discolhe": TokenType.TREM_DISCOLHE,
     "trosso": TokenType.TROSSO,
 }
-    
+
 # Mapa de literais/operadores booleanos por palavra.
 BOOLEAN_TOKENS = {
     "eh": TokenType.EH,

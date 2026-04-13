@@ -34,14 +34,14 @@ Principais arquivos e responsabilidades:
   - Implementa o fluxo de tokenização.
   - Trata comentários, validações léxicas adicionais e erros tipados.
 
-- src/analisador_lexico/tokentype.py
+- src/tokentype.py
   - Define TokenType e os mapas de palavras da linguagem.
   - Centraliza o catálogo de tokens reconhecidos.
 
-- src/analisador_lexico/mineires_token.py
+- src/mineires_token.py
   - Modelo de token com campos de tipo, lexema e posição.
 
-- src/analisador_lexico/main.py
+- src/main.py
   - CLI da aplicação.
   - Recebe entrada por arquivo, por string ou por seleção interativa.
   - Gera saída em TXT e JSON.
@@ -63,24 +63,35 @@ source .venv/bin/activate
 
 #### 2) Rodar em modo interativo (lista arquivos em entradas)
 ```bash
-python src/analisador_lexico/main.py --print
+python src/main.py --print
 ```
+Padrao: executa analise lexica e sintatica.
 
 #### 3) Rodar com arquivo de entrada
 ```bash
-python src/analisador_lexico/main.py entradas/casos_validos/valido_basico.txt --print
+python src/main.py entradas/casos_validos/valido_basico.txt --print
 ```
 
 #### 4) Rodar com código em linha
 ```bash
-python src/analisador_lexico/main.py -s "simbora" --print
+python src/main.py -s "simbora" --print
+```
+
+#### 5) Rodar apenas a análise léxica
+```bash
+python src/main.py entradas/casos_validos/valido_basico.txt --print --lexico
+```
+
+#### 6) Rodar apenas a análise sintática (sem gerar .txt/.json léxicos)
+```bash
+python src/main.py entradas/casos_validos/valido_basico.txt --print --sintatico
 ```
 
 Observação sobre o comando do enunciado:
 ```bash
 python main.py arquivo.txt
 ```
-No estado atual do repositório, o ponto de entrada está em src/analisador_lexico/main.py.
+No estado atual do repositório, o ponto de entrada está em src/main.py.
 
 ### 📥 Formato de Entrada
 A entrada é um arquivo texto (.txt) contendo código Mineres.

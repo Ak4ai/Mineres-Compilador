@@ -3,19 +3,8 @@ import json
 import sys
 from pathlib import Path
 
-try:
-    # Execucao como modulo (ex.: python -m analisador_lexico.main)
-    from .lexer import LexicalError, Lexer
-except ImportError:
-    # Execucao direta por caminho (ex.: python src/analisador_lexico/main.py)
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from analisador_lexico.lexer import LexicalError, Lexer
-
-try:
-    from analisador_sintatico.analisador_sintatico import Parser, ParserError
-except ImportError:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from analisador_sintatico.analisador_sintatico import Parser, ParserError
+from analisador_lexico.lexer import LexicalError, Lexer
+from analisador_sintatico.analisador_sintatico import Parser, ParserError
 
 
 # Normaliza caracteres de controle para manter a tabela TXT em uma linha por token.
@@ -101,7 +90,7 @@ def salvar_tokens_json(tokens, caminho_saida: Path) -> None:
 # Centraliza definicao de argumentos da CLI.
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="CLI do analisador lexico da linguagem Mineres."
+        description="CLI principal do compilador Mineres (lexico e sintatico)."
     )
 
     parser.add_argument(
@@ -130,10 +119,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "--automato",
         help="Caminho opcional para o arquivo de definicao do automato.",
     )
-    parser.add_argument(
+    modo_execucao = parser.add_mutually_exclusive_group()
+    modo_execucao.add_argument(
+        "--lexico",
+        action="store_true",
+        help="Executa apenas a analise lexica.",
+    )
+    modo_execucao.add_argument(
         "--sintatico",
         action="store_true",
-        help="Executa tambem a analise sintatica apos a analise lexica.",
+        help="Executa apenas a analise sintatica (sem gerar .txt/.json lexico).",
     )
 
     return parser
@@ -210,11 +205,16 @@ def _selecionar_arquivo_entrada_interativo() -> Path | None:
 # Fluxo principal da aplicacao:
 # 1) ler entrada,
 # 2) executar lexer,
-# 3) gerar saidas,
-# 4) retornar codigo de status.
+# 3) executar sintatico (opcional),
+# 4) gerar saidas,
+# 5) retornar codigo de status.
 def run() -> int:
     parser = _build_parser()
     args = parser.parse_args()
+
+    # Modo padrao: executa lexico + sintatico.
+    executar_saida_lexica = not args.sintatico
+    executar_sintatico = not args.lexico
 
     # Nao permite arquivo e --source ao mesmo tempo.
     if args.input is not None and args.source is not None:
@@ -250,12 +250,17 @@ def run() -> int:
             return 1
 
         # Opcional: valida sintaxe com o parser recursivo descendente.
-        if args.sintatico:
+        if executar_sintatico:
             try:
                 Parser(tokens).parse()
             except ParserError as error:
                 print(str(error), file=sys.stderr)
                 return 1
+
+        # Modo dedicado para validar apenas sintaxe, sem artefatos lexicos.
+        if not executar_saida_lexica:
+            print("Analise sintatica concluida com sucesso.")
+            return 0
 
         saida_dir = Path("saida")
         saida_dir.mkdir(parents=True, exist_ok=True)
@@ -269,7 +274,7 @@ def run() -> int:
         if args.print_tokens:
             imprimir_tokens(tokens)
 
-        if args.sintatico:
+        if executar_sintatico:
             print("Analise sintatica concluida com sucesso.")
 
         print(f"Analise concluida com sucesso. Tokens salvos em: {output_path}")

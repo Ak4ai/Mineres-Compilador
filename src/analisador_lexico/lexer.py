@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Optional
 
 from .automato import Automato
-from .mineires_token import Token
-from .tokentype import ALL_WORD_TOKENS, TokenType
+from mineires_token import Token
+from tokentype import ALL_WORD_TOKENS, TokenType
 
 
 class LexicalError(Exception):

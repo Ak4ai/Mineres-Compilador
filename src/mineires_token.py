@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from .tokentype import TokenType
+from tokentype import TokenType
 
 
 # Token imutavel: depois de criado, nao deve ser alterado.
