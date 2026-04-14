@@ -1,3 +1,10 @@
+'''
+Suite principal de testes do analisador sintatico.
+
+Este arquivo valida o fluxo completo lexer -> parser usando os
+arquivos de entrada do projeto (casos validos e erros esperados).
+'''
+
 import re
 import sys
 import unittest
@@ -154,104 +161,87 @@ class TestAnalisadorSintatico(unittest.TestCase):
     def test_case_dois_default(self):
         arquivo = ENTRADAS_DIR / "erros_sintaticos" / "erro_dois_default.txt"
         self.assertParserErrorContains(arquivo, "uai_so")
-        
-    # =========================
-# HELPERS AVANÇADOS
-# =========================
 
-def _parse_string(self, fonte: str):
-    lexer = Lexer()
-    lexer.carregar_string(fonte)
-    tokens = lexer.analisar(continuar_apos_erro=True)
-    return tokens, lexer.errors
+    # Helpers de apoio para montar cenarios de teste em memoria.
 
+    def _parse_string(self, fonte: str):
+        lexer = Lexer()
+        lexer.carregar_string(fonte)
+        tokens = lexer.analisar(continuar_apos_erro=True)
+        return tokens, lexer.errors
 
-def _assert_valido(self, fonte: str):
-    tokens, erros = self._parse_string(fonte)
-    self.assertEqual(erros, [], "Não deveria haver erro léxico")
-    resultado = Parser(tokens).parse()
-    self.assertTrue(resultado)
+    def _assert_valido(self, fonte: str):
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Não deveria haver erro léxico")
+        resultado = Parser(tokens).parse()
+        self.assertTrue(resultado)
 
+    def _assert_erro_sintatico(self, fonte: str, expected_msg_part: str = None):
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro léxico inesperado")
 
-def _assert_erro_sintatico(self, fonte: str, expected_msg_part: str = None):
-    tokens, erros = self._parse_string(fonte)
-    self.assertEqual(erros, [], "Erro léxico inesperado")
+        with self.assertRaises(ParserError) as ctx:
+            Parser(tokens).parse()
 
-    with self.assertRaises(ParserError) as ctx:
-        Parser(tokens).parse()
+        if expected_msg_part:
+            self.assertIn(expected_msg_part, str(ctx.exception))
 
-    if expected_msg_part:
-        self.assertIn(expected_msg_part, str(ctx.exception))
+    # Casos focados em expressoes e precedencia.
 
-
-# =========================
-# TESTES DE EXPRESSÕES
-# =========================
-
-def test_precedencia_operadores(self):
-    self._assert_valido("""
+    def test_precedencia_operadores(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     a fica_assim_entao 1 + 2 veiz 3 uai
 cabo
 """)
 
-
-def test_associatividade(self):
-    self._assert_valido("""
+    def test_associatividade(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     a fica_assim_entao 1 - 2 - 3 uai
 cabo
 """)
 
-
-def test_parenteses_aninhados(self):
-    self._assert_valido("""
+    def test_parenteses_aninhados(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     a fica_assim_entao (((((1))))) uai
 cabo
 """)
 
-
-def test_unarios_encadeados(self):
-    self._assert_valido("""
+    def test_unarios_encadeados(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     a fica_assim_entao - - + 5 uai
 cabo
 """)
 
+    # Casos de operadores logicos.
 
-# =========================
-# OPERADORES LÓGICOS
-# =========================
-
-def test_operadores_logicos(self):
-    self._assert_valido("""
+    def test_operadores_logicos(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     a fica_assim_entao eh quarque_um num_eh tamem eh uai
 cabo
 """)
 
-
-def test_not_encadeado(self):
-    self._assert_valido("""
+    def test_not_encadeado(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     a fica_assim_entao vam_marca vam_marca eh uai
 cabo
 """)
 
+    # Casos de comandos de controle.
 
-# =========================
-# TESTES DE CONTROLE
-# =========================
-
-def test_if_else_aninhado(self):
-    self._assert_valido("""
+    def test_if_else_aninhado(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     uai_se(eh)
@@ -262,9 +252,8 @@ simbora
 cabo
 """)
 
-
-def test_while_com_bloco(self):
-    self._assert_valido("""
+    def test_while_com_bloco(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     enquanto_tiver_trem(eh)
@@ -274,9 +263,8 @@ simbora
 cabo
 """)
 
-
-def test_for_completo_complexo(self):
-    self._assert_valido("""
+    def test_for_completo_complexo(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
@@ -286,85 +274,72 @@ simbora
 cabo
 """)
 
+    # Casos da estrutura dependenu/du_casu/uai_so.
 
-# =========================
-# TESTES DE CASE
-# =========================
-
-def test_case_completo(self):
-    self._assert_valido("""
+    def test_case_completo(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     dependenu(x) simbora
         du_casu 1: para_o_trem uai
         du_casu 2: toca_o_trem uai
-        default: para_o_trem uai
+        uai_so: para_o_trem uai
     cabo
 cabo
 """)
 
-
-def test_case_aninhado(self):
-    self._assert_valido("""
+    def test_case_aninhado(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     dependenu(x) simbora
         du_casu 1:
             dependenu(y) simbora
                 du_casu 2: para_o_trem uai
-                default: toca_o_trem uai
+                uai_so: toca_o_trem uai
             cabo
     cabo
 cabo
 """)
 
+    # Casos de erro sintatico mais sutis.
 
-# =========================
-# TESTES DE ERROS SUTIS
-# =========================
-
-def test_falta_delimitador(self):
-    self._assert_erro_sintatico("""
+    def test_falta_delimitador(self):
+        self._assert_erro_sintatico("""
 bora_cumpade main()
 simbora
     trem_di_numeru x
 cabo
 """, "uai")
 
-
-def test_parenteses_vazio_expr(self):
-    self._assert_erro_sintatico("""
+    def test_parenteses_vazio_expr(self):
+        self._assert_erro_sintatico("""
 bora_cumpade main()
 simbora
     a fica_assim_entao () uai
 cabo
 """, "fator")
 
-
-def test_operador_sem_operando(self):
-    self._assert_erro_sintatico("""
+    def test_operador_sem_operando(self):
+        self._assert_erro_sintatico("""
 bora_cumpade main()
 simbora
     a fica_assim_entao 1 + uai
 cabo
 """, "fator")
 
-
-def test_excesso_parenteses(self):
-    self._assert_erro_sintatico("""
+    def test_excesso_parenteses(self):
+        self._assert_erro_sintatico("""
 bora_cumpade main()
 simbora
     a fica_assim_entao (1 uai
 cabo
 """, "RIGHT_PAREN")
 
+    # Casos de robustez com programas maiores.
 
-# =========================
-# ROBUSTEZ
-# =========================
-
-def test_programa_grande(self):
-    self._assert_valido("""
+    def test_programa_grande(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     trem_di_numeru a, b, c uai
@@ -378,37 +353,31 @@ simbora
 
     dependenu(c) simbora
         du_casu 1: para_o_trem uai
-        default: toca_o_trem uai
+        uai_so: toca_o_trem uai
     cabo
 cabo
 """)
 
-
-def test_muitos_niveis_recursao(self):
-    self._assert_valido("""
+    def test_muitos_niveis_recursao(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     a fica_assim_entao (((((((((((1))))))))))) uai
 cabo
 """)
 
+    # Casos de borda.
 
-# =========================
-# EDGE CASES
-# =========================
+    def test_programa_vazio_invalido(self):
+        self._assert_erro_sintatico("", "BORA_CUMPADE")
 
-def test_programa_vazio_invalido(self):
-    self._assert_erro_sintatico("", "BORA_CUMPADE")
-
-
-def test_main_sem_bloco(self):
-    self._assert_erro_sintatico("""
+    def test_main_sem_bloco(self):
+        self._assert_erro_sintatico("""
 bora_cumpade main()
 """, "SIMBORA")
 
-
-def test_lixo_antes_programa(self):
-    self._assert_erro_sintatico("""
+    def test_lixo_antes_programa(self):
+        self._assert_erro_sintatico("""
 lixo
 bora_cumpade main()
 simbora

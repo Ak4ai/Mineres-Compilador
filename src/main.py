@@ -164,6 +164,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--automato",
         help="Caminho opcional para o arquivo de definicao do automato.",
     )
+    # Os modos sao exclusivos para evitar combinacoes ambiguas (ex.: --lexico e --sintatico juntos).
     modo_execucao = parser.add_mutually_exclusive_group()
     modo_execucao.add_argument(
         "--lexico",
@@ -289,6 +290,7 @@ def run() -> int:
 
         # Se houver erro lexico, nao imprime tabela e nao gera saida de sucesso.
         if lexer.errors:
+            # Em erro lexico, o sintatico nao deve ser reportado como executado.
             _imprimir_resultado(
                 status="erro",
                 executar_saida_lexica=executar_saida_lexica,
@@ -326,6 +328,7 @@ def run() -> int:
         saida_dir = Path("saida")
         saida_dir.mkdir(parents=True, exist_ok=True)
 
+        # Usa apenas o nome do arquivo para impedir escrita fora de `saida/`.
         output_path = saida_dir / Path(args.output).name
         salvar_tokens_tabela(tokens, output_path)
 

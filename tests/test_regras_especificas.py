@@ -1,3 +1,10 @@
+'''
+Suite complementar de regras especificas do parser.
+
+Este arquivo cobre cenarios pontuais de expressoes, controle,
+case e erros sintaticos usando fontes em memoria.
+'''
+
 import sys
 import unittest
 from pathlib import Path
@@ -13,11 +20,7 @@ from analisador_sintatico.analisador_sintatico import Parser, ParserError
 
 
 class TestRegrasEspecificas(unittest.TestCase):
-
-    # =========================
-    # HELPERS
-    # =========================
-
+    # Helpers de apoio para montar cenarios de teste em memoria.
     def _parse_string(self, fonte: str):
         lexer = Lexer()
         lexer.carregar_string(fonte)
@@ -39,10 +42,7 @@ class TestRegrasEspecificas(unittest.TestCase):
         if trecho_msg:
             self.assertIn(trecho_msg, str(ctx.exception))
 
-    # =========================
-    # EXPRESSÕES
-    # =========================
-
+    # Casos focados em expressoes e precedencia.
     def test_precedencia(self):
         self._assert_valido("""
 bora_cumpade main()
@@ -83,10 +83,7 @@ simbora
 cabo
 """)
 
-    # =========================
-    # LÓGICOS
-    # =========================
-
+    # Casos de operadores logicos.
     def test_logicos(self):
         self._assert_valido("""
 bora_cumpade main()
@@ -103,10 +100,7 @@ simbora
 cabo
 """)
 
-    # =========================
-    # CONTROLE
-    # =========================
-
+    # Casos de comandos de controle.
     def test_if_else(self):
         self._assert_valido("""
 bora_cumpade main()
@@ -146,10 +140,7 @@ simbora
 cabo
 """)
 
-    # =========================
-    # CASE
-    # =========================
-
+    # Casos da estrutura dependenu/du_casu/uai_so.
     def test_case_completo(self):
         self._assert_valido("""
 bora_cumpade main()
@@ -186,10 +177,7 @@ simbora
 cabo
 """)
 
-    # =========================
-    # ERROS SINTÁTICOS
-    # =========================
-
+    # Casos de erro sintatico.
     def test_falta_delimitador(self):
         self._assert_erro("""
 bora_cumpade main()
@@ -232,10 +220,7 @@ simbora
 cabo
 """)
 
-    # =========================
-    # ROBUSTEZ
-    # =========================
-
+    # Casos de robustez com programas maiores.
     def test_programa_grande(self):
         self._assert_valido("""
 bora_cumpade main()
@@ -263,10 +248,7 @@ simbora
 cabo
 """)
 
-    # =========================
-    # EDGE CASES
-    # =========================
-
+    # Casos de borda.
     def test_vazio(self):
         self._assert_erro("", "BORA_CUMPADE")
 
