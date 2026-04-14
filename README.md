@@ -17,7 +17,7 @@
 <a id="visao-geral-do-projeto"></a>
 
 ## 📌 Visão Geral do Projeto
-Este repositório se trata um projeto da disciplina de Compiladores, sendo a implementação de um compilador para a linguagem **Minerês** [[1]](#ref-1), dividido por fases.
+Este repositório se trata de um projeto da disciplina de Compiladores, sendo a implementação de um compilador para a linguagem **Minerês** [[1]](#ref-1), dividido por fases.
 
 No estado atual, o foco do projeto está em:
 - **Análise léxica:** converte o código-fonte em uma sequência de tokens (tipo, lexema, linha e coluna).
@@ -54,7 +54,7 @@ O papel do analisador léxico é ler o código-fonte caractere por caractere, id
 No projeto, a análise lexical é feita com suporte de um AFD explícito carregado de arquivo (automatos/automato.txt), integrado ao lexer em Python.
 
 ### 🎯 Objetivos
-- Implementar um lexer funcional para Mineres.
+- Implementar um lexer funcional para Minerês.
 - Reconhecer palavras reservadas, identificadores, operadores, delimitadores e literais.
 - Manter rastreamento de linha e coluna para depuração e mensagens de erro.
 - Reportar erros léxicos com tipo explícito (ex.: string não fechada, número mal formado).
@@ -76,7 +76,7 @@ Principais arquivos desta fase:
   - Definição textual do AFD (estados e transições) carregada pelo lexer.
 
 ### 📥 Formato de Entrada
-A entrada é um arquivo texto (.txt) contendo código Mineres.
+A entrada é um arquivo texto (.txt) contendo código Minerês.
 
 Exemplo:
 ```txt
@@ -163,23 +163,23 @@ Categorias principais de tokens:
 Fluxo geral da análise lexical:
 
 1. Leitura da fonte
-- O lexer recebe conteudo por arquivo ou string.
+- O lexer recebe conteúdo por arquivo ou string.
 
 2. Ignorar espaços em branco
 - Espaços, tabs e quebras de linha são consumidos com atualização de linha/coluna.
 
 3. Tratamento de comentários
-- // ... ate fim da linha (COMMENT_LINE)
+- // ... até fim da linha (COMMENT_LINE)
 - causo ... fim_do_causo (COMMENT_BLOCK)
 
 4. Reconhecimento via AFD
-- O lexer envia o trecho restante ao automato.
-- O automato retorna o maior prefixo válido e o tipo candidato.
+- O lexer envia o trecho restante ao autômato.
+- O autômato retorna o maior prefixo válido e o tipo candidato.
 
 5. Classificação final
 - Se o lexema estiver no mapa de palavras, ele vira token da linguagem.
-- Caso contrário, usa o tipo retornado pelo automato (literal, identificador etc.).
-- Validações adicionais detectam casos como numero mal formado.
+- Caso contrário, usa o tipo retornado pelo autômato (literal, identificador etc.).
+- Validações adicionais detectam casos como número mal formado.
 
 ### 🔁 Representação Canônica
 O projeto adota uma representação canônica de tokens para facilitar etapas futuras do compilador.
@@ -191,14 +191,14 @@ Exemplo de equivalência de delimitador:
 Essa representação canônica ajuda a simplificar o parser, pois reduz ambiguidades na etapa sintática.
 
 ### ⚠️ Tratamento de Erros
-Por padrao, a CLI processa todo o arquivo e lista todos os erros léxicos encontrados.
+Por padrão, a CLI processa todo o arquivo e lista todos os erros léxicos encontrados.
 
-Cada erro e reportado com tipo, lexema, linha e coluna.
+Cada erro é reportado com tipo, lexema, linha e coluna.
 
 Se existir ao menos um erro léxico:
-- a tabela de tokens nao é impressa
-- os arquivos de saida de sucesso não são gerados
-- a execução termina com codigo de retorno 1
+- a tabela de tokens não é impressa
+- os arquivos de saída de sucesso não são gerados
+- a execução termina com código de retorno 1
 
 Tipos de erro tratados:
 - STRING_NAO_FECHADA
@@ -227,7 +227,7 @@ simbora
 cabo
 ```
 
-#### Saida (trecho)
+#### Saída (trecho)
 ```txt
 LEXEMA               TIPO                 LINHA COLUNA
 ------------------------------------------------------------
@@ -243,14 +243,14 @@ cabo                 CABO                 5     1
 ## Analisador Sintático
 
 ### 📌 Visão Geral
-A segunda parte do projeto implementa um analisador sintático para a linguagem Mineres.
+A segunda parte do projeto implementa um analisador sintático para a linguagem Minerês.
 
 O papel do analisador sintático é receber a sequência de tokens do lexer e validar se ela forma um programa válido de acordo com a gramática da linguagem. Nesta etapa, o objetivo é validar a estrutura (programa, blocos, comandos e expressões) e reportar erros de forma precisa.
 
 No projeto, a análise sintática é feita por um parser descendente recursivo (recursive descent), baseado na gramática de referência em `src/analisador_sintatico/mineres.gmr`. A implementação não constrói AST: ela apenas valida e para no primeiro erro encontrado.
 
 ### 🎯 Objetivos
-- Implementar um parser recursivo para Mineres.
+- Implementar um parser recursivo para Minerês.
 - Validar a estrutura do programa (main, bloco e lista de comandos).
 - Validar comandos de controle (if/else, while, for, case) e IO.
 - Validar expressões com precedência e associatividade definidas na gramática.
@@ -272,7 +272,7 @@ Principais arquivos desta fase:
   - Aceita `uai` e `;` como delimitadores equivalentes de comando.
 
 ### 📥 Formato de Entrada
-A entrada do sintático é o mesmo código-fonte Mineres usado no léxico (arquivo .txt ou `-s` via CLI). O parser opera sobre os tokens produzidos pelo lexer.
+A entrada do sintático é o mesmo código-fonte Minerês usado no léxico (arquivo .txt ou `-s` via CLI). O parser opera sobre os tokens produzidos pelo lexer.
 
 Exemplo válido (compatível com o parser atual):
 ```txt
@@ -360,7 +360,7 @@ Erro sintático: esperado <X>, mas recebeu <Y> na linha <L>, coluna <C>
 python src/main.py entradas/erros_sintaticos/sint_default_sem_colon.txt --sintatico
 ```
 
-#### Saida (trecho)
+#### Saída (trecho)
 ```txt
 Resultado
 ---------
