@@ -1,6 +1,0 @@
-bora_cumpade main()
-simbora
-    trem_discrita mensagem;
-    mensagem fica_assim_entao "Uai, mundo!\n" uai
-    oia_proce_ve(mensagem) uai
-cabo

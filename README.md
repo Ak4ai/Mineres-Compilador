@@ -100,10 +100,9 @@ Exemplo:
 ```txt
 bora_cumpade main()
 simbora
-    trem_discrita mensagem ;
-    fica_assim_entao "Uai, mundo!\\n" uai
-    oia_proce_ve(mensagem) uai
-    ta_bao 0 uai
+  trem_discrita mensagem;
+  mensagem fica_assim_entao "Uai, mundo!\\n" uai
+  oia_proce_ve(mensagem) uai
 cabo
 ```
 
@@ -240,10 +239,9 @@ Erros léxicos encontrados:
 ```txt
 bora_cumpade main()
 simbora
-    trem_discrita mensagem ;
-    fica_assim_entao "Uai, mundo!\\n" uai
-    oia_proce_ve(mensagem) uai
-    ta_bao 0 uai
+  trem_discrita mensagem;
+  mensagem fica_assim_entao "Uai, mundo!\\n" uai
+  oia_proce_ve(mensagem) uai
 cabo
 ```
 
@@ -255,6 +253,159 @@ bora_cumpade         BORA_CUMPADE         1     1
 main                 MAIN                 1     14
 mensagem             IDENTIFIER           3     19
 "Uai, mundo!\\n"     STRING_LITERAL       4     22
-0                    INTEGER_LITERAL      6     12
-cabo                 CABO                 7     1
+cabo                 CABO                 5     1
+```
+
+## Analisador Sintático
+
+### 📌 Visão Geral
+A segunda parte do projeto implementa um analisador sintático para a linguagem Mineres.
+
+O papel do analisador sintático é receber a sequência de tokens do lexer e validar se ela forma um programa válido de acordo com a gramática da linguagem. Nesta etapa, o objetivo é validar a estrutura (programa, blocos, comandos e expressões) e reportar erros de forma precisa.
+
+No projeto, a análise sintática é feita por um parser descendente recursivo (recursive descent), baseado na gramática de referência em `src/analisador_sintatico/mineres.gmr`. A implementação não constrói AST: ela apenas valida e para no primeiro erro encontrado.
+
+### 🎯 Objetivos
+- Implementar um parser recursivo para Mineres.
+- Validar a estrutura do programa (main, bloco e lista de comandos).
+- Validar comandos de controle (if/else, while, for, case) e IO.
+- Validar expressões com precedência e associatividade definidas na gramática.
+- Ignorar comentários na análise sintática (não participam da gramática).
+- Reportar erros sintáticos com token esperado/recebido e posição (linha/coluna).
+- Integrar a execução ao fluxo da CLI (junto do léxico ou em modo apenas sintático).
+
+### 🏗️ Estrutura do Projeto
+Principais arquivos e responsabilidades:
+
+- src/analisador_sintatico/mineres.gmr
+  - Gramática da linguagem usada como referência.
+  - Define não-terminais como `<function*>`, `<bloco>`, `<stmt>`, `<expr>` e a precedência de operadores.
+
+- src/analisador_sintatico/analisador_sintatico.py
+  - Implementa a classe `Parser` e a exceção `ParserError`.
+  - Filtra tokens de comentário (`COMMENT_LINE` e `COMMENT_BLOCK`) antes do parse.
+  - Implementa métodos por regra (ex.: `function()`, `bloco()`, `stmt()`, `expr()`).
+  - Aceita `uai` e `;` como delimitadores equivalentes de comando.
+
+- src/main.py
+  - Orquestra o pipeline: lexer → (opcional) parser.
+  - Em erro sintático, imprime o bloco "Resultado" com o detalhe do `ParserError` e retorna código 1.
+
+### ⚙️ Como Executar
+O sintático pode ser executado junto do léxico (padrão) ou isoladamente.
+
+#### 1) Fluxo padrão (léxico + sintático)
+```bash
+python src/main.py entradas/casos_validos/valido_basico.txt
+```
+
+#### 2) Rodar apenas a análise sintática (sem gerar .txt/.json léxicos)
+```bash
+python src/main.py entradas/casos_validos/valido_basico.txt --sintatico
+```
+
+Observação:
+- O argumento `--print` é usado para imprimir tokens (saída léxica). No modo `--sintatico`, a CLI imprime apenas o bloco "Resultado".
+
+Também funciona em modo interativo (seleção de arquivo em `entradas/`):
+```bash
+python src/main.py --sintatico
+```
+
+### 📥 Formato de Entrada
+A entrada do sintático é o mesmo código-fonte Mineres usado no léxico (arquivo .txt ou `-s` via CLI). O parser opera sobre os tokens produzidos pelo lexer.
+
+Exemplo válido (compatível com o parser atual):
+```txt
+bora_cumpade main()
+simbora
+    trem_discrita mensagem;
+    mensagem fica_assim_entao "Uai, mundo!\\n" uai
+    oia_proce_ve(mensagem) uai
+cabo
+```
+
+Observação:
+- O parser aceita `uai` ou `;` como delimitador de comando.
+
+### 📤 Saída
+O sintático não gera um arquivo próprio de "resultado sintático"; a validação é reportada no terminal pelo bloco "Resultado" da CLI.
+
+#### Exemplo de sucesso (modo apenas sintático)
+```txt
+Resultado
+---------
+Status: sucesso
+Fases executadas: sintatica
+Total de tokens: 19
+```
+
+#### Exemplo de erro sintático (modo apenas sintático)
+```txt
+Resultado
+---------
+Status: erro
+Fases executadas: sintatica
+Detalhe: Erro sintático: esperado COLON, mas recebeu para_o_trem na linha 5, coluna 16
+```
+
+No fluxo padrão (léxico + sintático), em caso de sucesso, a CLI também lista os caminhos de saída TXT/JSON (gerados pelo léxico).
+
+### 🧩 Regras Sintáticas Suportadas
+De forma resumida, o parser valida:
+
+- Programa no formato: `bora_cumpade main() <bloco>`
+- Blocos: `simbora ... cabo`
+- Declarações: `<type> <identList> (uai ou ;)`
+- Atribuições e expressões (com operadores aritméticos, relacionais e lógicos)
+- Comandos:
+  - `roda_esse_trem (...) <stmt>`
+  - `enquanto_tiver_trem (<expr>) <stmt>`
+  - `uai_se (<expr>) <stmt> [uai_senao <stmt>]`
+  - `dependenu (IDENT) simbora ... cabo` com casos `du_casu <fatorZin> : <stmt>` e opcional `uai_so : <stmt>`
+  - IO: `xove(type, IDENT)` e `oia_proce_ve(...)`
+  - Controle: `para_o_trem` e `toca_o_trem`
+  - Comando vazio: `uai` ou `;`
+
+### 🤖 Funcionamento do Parser
+Fluxo geral da análise sintática:
+
+1. Receber tokens do lexer
+- O parser recebe a lista de tokens já com linha/coluna.
+
+2. Remover comentários
+- Tokens `COMMENT_LINE` e `COMMENT_BLOCK` são descartados antes da validação.
+
+3. Aplicar regras recursivas
+- A entrada é validada a partir de `<function*>`.
+- Cada regra consome tokens esperados com `consume(...)`.
+- Ao final, o parser exige consumo de `EOF`.
+
+4. Delimitadores canônicos
+- Para comandos, `consume_delimiter()` aceita tanto `uai` quanto `;`.
+
+### ⚠️ Tratamento de Erros
+O parser para no primeiro erro sintático encontrado e levanta `ParserError`.
+
+Formato da mensagem:
+```txt
+Erro sintático: esperado <X>, mas recebeu <Y> na linha <L>, coluna <C>
+```
+
+- Se houver erro léxico, o sintático não é executado.
+- O token/comando `ta_bao` não faz parte da gramática do parser no estado atual (main não retorna). Se ele aparecer no código, será reportado como erro sintático.
+
+### 🧪 Exemplo Completo
+#### Comando
+```bash
+python src/main.py entradas/erros_sintaticos/sint_default_sem_colon.txt --sintatico
+```
+
+#### Saida (trecho)
+```txt
+Resultado
+---------
+Status: erro
+Fases executadas: sintatica
+Detalhe: Erro sintático: esperado COLON, mas recebeu para_o_trem na linha 5, coluna 16
 ```

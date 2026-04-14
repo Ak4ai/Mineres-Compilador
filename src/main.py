@@ -292,8 +292,7 @@ def run() -> int:
             _imprimir_resultado(
                 status="erro",
                 executar_saida_lexica=executar_saida_lexica,
-                executar_sintatico=executar_sintatico,
-                total_tokens=len(tokens),
+                executar_sintatico=False,
                 detalhe=f"Foram encontrados {len(lexer.errors)} erro(s) lexicos.",
                 detalhes=[str(erro) for erro in lexer.errors],
                 stream=sys.stderr,
@@ -309,7 +308,6 @@ def run() -> int:
                     status="erro",
                     executar_saida_lexica=executar_saida_lexica,
                     executar_sintatico=executar_sintatico,
-                    total_tokens=len(tokens),
                     detalhe=str(error),
                     stream=sys.stderr,
                 )
@@ -351,7 +349,7 @@ def run() -> int:
         _imprimir_resultado(
             status="erro",
             executar_saida_lexica=executar_saida_lexica,
-            executar_sintatico=executar_sintatico,
+            executar_sintatico=False,
             detalhe=str(error),
             stream=sys.stderr,
         )
