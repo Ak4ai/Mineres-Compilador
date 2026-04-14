@@ -6,10 +6,48 @@
 <strong>Professor:</strong> Eduardo Miranda<br>
 </div>
 
+## Sumário
+- [Visão Geral do Projeto](#visao-geral-do-projeto)
+- [Estrutura Geral do Projeto](#estrutura-geral-do-projeto)
+- [Analisador Léxico](#analisador-lexico)
+- [Analisador Sintático](#analisador-sintatico)
+- [Como Executar](#como-executar)
+- [Referências](#referencias)
+
+<a id="visao-geral-do-projeto"></a>
+
+## 📌 Visão Geral do Projeto
+Este repositório se trata um projeto da disciplina de Compiladores, sendo a implementação de um compilador para a linguagem **Minerês** [[1]](#ref-1), dividido por fases.
+
+No estado atual, o foco do projeto está em:
+- **Análise léxica:** converte o código-fonte em uma sequência de tokens (tipo, lexema, linha e coluna).
+- **Análise sintática:** valida se a sequência de tokens forma um programa válido conforme a gramática.
+
+<a id="estrutura-geral-do-projeto"></a>
+
+## 🗂️ Estrutura Geral do Projeto
+Visão geral do repositório e do que é compartilhado entre as fases:
+
+```txt
+.
+├── src/
+│   ├── main.py                      # CLI e orquestração (léxico → sintático)
+│   ├── tokentype.py                 # TokenType + mapa de palavras da linguagem
+│   ├── mineires_token.py            # Modelo de Token (lexema, tipo, linha, coluna)
+│   ├── analisador_lexico/           # Implementação do analisador léxico
+│   └── analisador_sintatico/        # Implementação do analisador sintático
+├── automatos/                       # Definição do AFD usado no léxico
+├── entradas/                        # Casos de teste (válidos, erros léxicos, erros sintáticos)
+├── saida/                           # Artefatos gerados (TXT/JSON) quando aplicável
+└── tests/                           # Testes unitários
+```
+
+<a id="analisador-lexico"></a>
+
 ## Analisador Léxico
 
 ### 📌 Visão Geral
-A primeira parte deste projeto implementa um analisador léxico para a linguagem Mineres.
+A primeira parte deste projeto implementa um analisador léxico para a linguagem Minerês.
 
 O papel do analisador léxico é ler o código-fonte caractere por caractere, identificar lexemas válidos e transformá-los em tokens com tipo, linha e coluna. Esses tokens são a base para as próximas fases de compilação, como análise sintática e semântica.
 
@@ -23,8 +61,8 @@ No projeto, a análise lexical é feita com suporte de um AFD explícito carrega
 - Disponibilizar execução por CLI com entrada por arquivo, string e seleção interativa.
 - Gerar saída em formato humano (tabela TXT) e estruturado (JSON).
 
-### 🏗️ Estrutura do Projeto
-Principais arquivos e responsabilidades:
+### 🏗️ Estrutura da Fase
+Principais arquivos desta fase:
 
 - src/analisador_lexico/automato.py
   - Carrega e valida a definição do AFD.
@@ -34,64 +72,8 @@ Principais arquivos e responsabilidades:
   - Implementa o fluxo de tokenização.
   - Trata comentários, validações léxicas adicionais e erros tipados.
 
-- src/tokentype.py
-  - Define TokenType e os mapas de palavras da linguagem.
-  - Centraliza o catálogo de tokens reconhecidos.
-
-- src/mineires_token.py
-  - Modelo de token com campos de tipo, lexema e posição.
-
-- src/main.py
-  - CLI da aplicação.
-  - Recebe entrada por arquivo, por string ou por seleção interativa.
-  - Gera saída em TXT e JSON.
-
 - automatos/automato.txt
-  - Definição textual do automato (estados e transições).
-
-- entradas/
-  - Arquivos de entrada de exemplo.
-
-- saida/
-  - Arquivos gerados na execução (saida_tokens.txt e saida_tokens.json).
-
-### ⚙️ Como Executar
-#### 1) Ativar o ambiente virtual
-```bash
-source .venv/bin/activate
-```
-
-#### 2) Rodar em modo interativo (lista arquivos em entradas)
-```bash
-python src/main.py --print
-```
-Padrao: executa analise lexica e sintatica.
-
-#### 3) Rodar com arquivo de entrada
-```bash
-python src/main.py entradas/casos_validos/valido_basico.txt --print
-```
-
-#### 4) Rodar com código em linha
-```bash
-python src/main.py -s "simbora" --print
-```
-
-#### 5) Rodar apenas a análise léxica
-```bash
-python src/main.py entradas/casos_validos/valido_basico.txt --print --lexico
-```
-
-#### 6) Rodar apenas a análise sintática (sem gerar .txt/.json léxicos)
-```bash
-python src/main.py entradas/casos_validos/valido_basico.txt --print --sintatico
-```
-
-Observação sobre o comando do enunciado:
-```bash
-python main.py arquivo.txt
-```
-No estado atual do repositório, o ponto de entrada está em src/main.py.
+  - Definição textual do AFD (estados e transições) carregada pelo lexer.
 
 ### 📥 Formato de Entrada
 A entrada é um arquivo texto (.txt) contendo código Mineres.
@@ -256,6 +238,8 @@ mensagem             IDENTIFIER           3     19
 cabo                 CABO                 5     1
 ```
 
+<a id="analisador-sintatico"></a>
+
 ## Analisador Sintático
 
 ### 📌 Visão Geral
@@ -274,8 +258,8 @@ No projeto, a análise sintática é feita por um parser descendente recursivo (
 - Reportar erros sintáticos com token esperado/recebido e posição (linha/coluna).
 - Integrar a execução ao fluxo da CLI (junto do léxico ou em modo apenas sintático).
 
-### 🏗️ Estrutura do Projeto
-Principais arquivos e responsabilidades:
+### 🏗️ Estrutura da Fase
+Principais arquivos desta fase:
 
 - src/analisador_sintatico/mineres.gmr
   - Gramática da linguagem usada como referência.
@@ -286,31 +270,6 @@ Principais arquivos e responsabilidades:
   - Filtra tokens de comentário (`COMMENT_LINE` e `COMMENT_BLOCK`) antes do parse.
   - Implementa métodos por regra (ex.: `function()`, `bloco()`, `stmt()`, `expr()`).
   - Aceita `uai` e `;` como delimitadores equivalentes de comando.
-
-- src/main.py
-  - Orquestra o pipeline: lexer → (opcional) parser.
-  - Em erro sintático, imprime o bloco "Resultado" com o detalhe do `ParserError` e retorna código 1.
-
-### ⚙️ Como Executar
-O sintático pode ser executado junto do léxico (padrão) ou isoladamente.
-
-#### 1) Fluxo padrão (léxico + sintático)
-```bash
-python src/main.py entradas/casos_validos/valido_basico.txt
-```
-
-#### 2) Rodar apenas a análise sintática (sem gerar .txt/.json léxicos)
-```bash
-python src/main.py entradas/casos_validos/valido_basico.txt --sintatico
-```
-
-Observação:
-- O argumento `--print` é usado para imprimir tokens (saída léxica). No modo `--sintatico`, a CLI imprime apenas o bloco "Resultado".
-
-Também funciona em modo interativo (seleção de arquivo em `entradas/`):
-```bash
-python src/main.py --sintatico
-```
 
 ### 📥 Formato de Entrada
 A entrada do sintático é o mesmo código-fonte Mineres usado no léxico (arquivo .txt ou `-s` via CLI). O parser opera sobre os tokens produzidos pelo lexer.
@@ -409,3 +368,53 @@ Status: erro
 Fases executadas: sintatica
 Detalhe: Erro sintático: esperado COLON, mas recebeu para_o_trem na linha 5, coluna 16
 ```
+
+<a id="como-executar"></a>
+
+## ⚙️ Como Executar
+Este tópico é geral (vale para o fluxo completo e para cada fase isolada).
+
+### 1) Ativar o ambiente virtual
+```bash
+source .venv/bin/activate
+```
+
+### 2) Rodar em modo interativo (lista arquivos em entradas/)
+```bash
+python src/main.py --print
+```
+Padrão: executa análise léxica + sintática.
+
+### 3) Rodar com arquivo de entrada
+```bash
+python src/main.py entradas/casos_validos/valido_basico.txt --print
+```
+
+### 4) Rodar com código em linha
+```bash
+python src/main.py -s "simbora" --print
+```
+
+### 5) Rodar apenas a análise léxica
+```bash
+python src/main.py --print --lexico
+```
+
+### 6) Rodar apenas a análise sintática (sem gerar .txt/.json léxicos)
+```bash
+python src/main.py --sintatico
+```
+Observação:
+- O argumento `--print` é usado para imprimir tokens (saída léxica). No modo `--sintatico`, a CLI imprime apenas o bloco "Resultado".
+
+### Observação sobre o comando do enunciado
+```bash
+python main.py arquivo.txt
+```
+No estado atual do repositório, o ponto de entrada está em `src/main.py`.
+
+<a id="referencias"></a>
+
+## Referências
+<a id="ref-1"></a>
+1. Referência da linguagem Minerês: https://mineres-language.github.io
