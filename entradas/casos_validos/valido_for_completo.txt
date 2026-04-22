@@ -1,0 +1,5 @@
+bora_cumpade main()
+simbora
+    roda_esse_trem(x fica_assim_entao 0; x < 10; x fica_assim_entao x + 1)
+        para_o_trem uai
+cabo

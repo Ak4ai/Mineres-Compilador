@@ -1,0 +1,4 @@
+bora_cumpade main()
+simbora
+    oia_proce_ve("a", "b", "c") uai
+cabo

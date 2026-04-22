@@ -1,0 +1,7 @@
+bora_cumpade main()
+simbora
+    dependenu(x) simbora
+        uai_so: para_o_trem uai
+        uai_so: toca_o_trem uai
+    cabo
+cabo
