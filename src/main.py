@@ -109,6 +109,17 @@ def imprimir_tokens(tokens) -> None:
         print(linha)
 
 
+def _linhas_codigo_intermediario(codigo) -> list[str]:
+    return [f"({op}, {result}, {arg1}, {arg2})" for op, result, arg1, arg2 in codigo]
+
+
+def imprimir_codigo_intermediario(codigo, stream=sys.stdout) -> None:
+    print("\nCodigo intermediario", file=stream)
+    print("--------------------", file=stream)
+    for linha in _linhas_codigo_intermediario(codigo):
+        print(linha, file=stream)
+
+
 # Persiste a tabela em disco para uso humano.
 def salvar_tokens_tabela(tokens, caminho_saida: Path) -> None:
     with caminho_saida.open("w", encoding="utf-8") as arquivo:
@@ -159,6 +170,12 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         dest="print_tokens",
         help="Imprime os tokens no terminal.",
+    )
+    parser.add_argument(
+        "--print-codigo",
+        action="store_true",
+        dest="print_codigo",
+        help="Imprime o codigo intermediario gerado durante a analise sintatica.",
     )
     parser.add_argument(
         "--automato",
@@ -262,6 +279,9 @@ def run() -> int:
     executar_saida_lexica = not args.sintatico
     executar_sintatico = not args.lexico
 
+    if args.print_codigo and not executar_sintatico:
+        parser.error("A opcao --print-codigo exige execucao da analise sintatica.")
+
     # Nao permite arquivo e --source ao mesmo tempo.
     if args.input is not None and args.source is not None:
         parser.error("Informe somente uma entrada: arquivo OU --source.")
@@ -302,9 +322,11 @@ def run() -> int:
             return 1
 
         # Opcional: valida sintaxe com o parser recursivo descendente.
+        parser_sintatico = None
         if executar_sintatico:
             try:
-                Parser(tokens).parse()
+                parser_sintatico = Parser(tokens)
+                parser_sintatico.parse()
             except ParserError as error:
                 _imprimir_resultado(
                     status="erro",
@@ -317,6 +339,8 @@ def run() -> int:
 
         # Modo dedicado para validar apenas sintaxe, sem artefatos lexicos.
         if not executar_saida_lexica:
+            if args.print_codigo and parser_sintatico is not None:
+                imprimir_codigo_intermediario(parser_sintatico.codigo)
             _imprimir_resultado(
                 status="sucesso",
                 executar_saida_lexica=executar_saida_lexica,
@@ -324,6 +348,9 @@ def run() -> int:
                 total_tokens=len(tokens),
             )
             return 0
+
+        if args.print_codigo and parser_sintatico is not None:
+            imprimir_codigo_intermediario(parser_sintatico.codigo)
 
         saida_dir = Path("saida")
         saida_dir.mkdir(parents=True, exist_ok=True)

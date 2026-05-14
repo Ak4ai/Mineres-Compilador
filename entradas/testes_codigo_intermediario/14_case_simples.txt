@@ -1,0 +1,8 @@
+bora_cumpade main()
+simbora
+    dependenu(x) simbora
+        du_casu 1: y fica_assim_entao 10 uai
+        du_casu 2: y fica_assim_entao 20 uai
+        uai_so: y fica_assim_entao 0 uai
+    cabo
+cabo

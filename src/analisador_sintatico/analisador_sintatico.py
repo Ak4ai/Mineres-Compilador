@@ -51,6 +51,51 @@ class Parser:
         for op, result, arg1, arg2 in self.codigo:
             print(f"({op}, {result}, {arg1}, {arg2})")
 
+    def _capture_stmt_code(self) -> list[tuple[str, str, str, str]]:
+        # Permite montar codigo de controle de fluxo sem mudar a gramatica.
+        codigo_anterior = self.codigo
+        self.codigo = []
+        self.stmt()
+        codigo_capturado = self.codigo
+        self.codigo = codigo_anterior
+        return codigo_capturado
+
+    def _capture_expr_code(self) -> tuple[list[tuple[str, str, str, str]], str]:
+        # Captura codigo de expressoes usadas fora do fluxo linear padrao.
+        codigo_anterior = self.codigo
+        self.codigo = []
+        result = self.atrib()
+        codigo_capturado = self.codigo
+        self.codigo = codigo_anterior
+        return codigo_capturado, result
+
+    def _is_temp_name(self, value: str) -> bool:
+        return value.startswith("temp") and value[4:].isdigit()
+
+    def _refresh_temp_names(
+        self, codigo: list[tuple[str, str, str, str]]
+    ) -> list[tuple[str, str, str, str]]:
+        # Recria nomes temporarios na ordem de emissao efetiva.
+        mapping: dict[str, str] = {}
+        codigo_atualizado = []
+
+        for op, result, arg1, arg2 in codigo:
+            new_result = result
+            if self._is_temp_name(result):
+                new_result = mapping.setdefault(result, self.new_temp())
+
+            new_arg1 = arg1
+            if self._is_temp_name(arg1) and arg1 in mapping:
+                new_arg1 = mapping[arg1]
+
+            new_arg2 = arg2
+            if self._is_temp_name(arg2) and arg2 in mapping:
+                new_arg2 = mapping[arg2]
+
+            codigo_atualizado.append((op, new_result, new_arg1, new_arg2))
+
+        return codigo_atualizado
+
     # Parte 1: navegacao na lista de tokens
     def current(self) -> Token:
         if self.pos < len(self.tokens):
@@ -201,13 +246,36 @@ class Parser:
         # For: roda_esse_trem(expr; expr; expr) + comando/bloco.
         self.consume(TokenType.RODA_ESSE_TREM)
         self.consume(TokenType.LEFT_PAREN)
-        self.opt_expr()
+        codigo_init = []
+        if self._is_expr_start(self.current()):
+            codigo_init, _ = self._capture_expr_code()
         self.consume(TokenType.SEMICOLON)
-        self.opt_expr()
+        codigo_cond = []
+        cond = "eh"
+        if self._is_expr_start(self.current()):
+            codigo_cond, cond = self._capture_expr_code()
         self.consume(TokenType.SEMICOLON)
-        self.opt_expr()
+        codigo_inc = []
+        if self._is_expr_start(self.current()):
+            temp_count_before_inc = self.temp_count
+            codigo_inc, _ = self._capture_expr_code()
+            self.temp_count = temp_count_before_inc
         self.consume(TokenType.RIGHT_PAREN)
-        self.stmt()
+        codigo_body = self._capture_stmt_code()
+
+        label_start = self.new_label()
+        label_body = self.new_label()
+        label_end = self.new_label()
+
+        self.codigo.extend(codigo_init)
+        self.emit("label", label_start)
+        self.codigo.extend(codigo_cond)
+        self.emit("if", cond, label_body, label_end)
+        self.emit("label", label_body)
+        self.codigo.extend(codigo_body)
+        self.codigo.extend(self._refresh_temp_names(codigo_inc))
+        self.emit("jump", label_start)
+        self.emit("label", label_end)
 
     def opt_expr(self) -> None:
         # Expressao opcional (pode ficar vazia no for).
@@ -253,20 +321,54 @@ class Parser:
 
     def while_stmt(self) -> None:
         # While: enquanto tiver trem (expr) + comando/bloco.
+        label_start = self.new_label()
+        label_body = self.new_label()
+        label_end = self.new_label()
+
         self.consume(TokenType.ENQUANTO_TIVER_TREM)
         self.consume(TokenType.LEFT_PAREN)
-        self.expr()
+        self.emit("label", label_start)
+        cond = self.expr()
         self.consume(TokenType.RIGHT_PAREN)
+        self.emit("if", cond, label_body, label_end)
+        self.emit("label", label_body)
         self.stmt()
+        self.emit("jump", label_start)
+        self.emit("label", label_end)
 
     def if_stmt(self) -> None:
         # If com else opcional.
         self.consume(TokenType.UAI_SE)
         self.consume(TokenType.LEFT_PAREN)
-        self.expr()
+        cond = self.expr()
         self.consume(TokenType.RIGHT_PAREN)
-        self.stmt()
-        self.else_part()
+
+        codigo_if = self._capture_stmt_code()
+
+        if self._matches(TokenType.UAI_SENAO):
+            label_true = self.new_label()
+            label_false = self.new_label()
+            label_end = self.new_label()
+
+            self.emit("if", cond, label_true, label_false)
+            self.emit("label", label_true)
+            self.codigo.extend(codigo_if)
+            self.emit("jump", label_end)
+
+            self.consume(TokenType.UAI_SENAO)
+            codigo_else = self._capture_stmt_code()
+
+            self.emit("label", label_false)
+            self.codigo.extend(codigo_else)
+            self.emit("label", label_end)
+            return
+
+        label_true = self.new_label()
+        label_end = self.new_label()
+        self.emit("if", cond, label_true, label_end)
+        self.emit("label", label_true)
+        self.codigo.extend(codigo_if)
+        self.emit("label", label_end)
 
     def else_part(self) -> None:
         # Parte opcional do senao.
@@ -278,35 +380,49 @@ class Parser:
         # Estrutura dependenu/du_casu/uai_so.
         self.consume(TokenType.DEPENDENU)
         self.consume(TokenType.LEFT_PAREN)
-        self.consume(TokenType.IDENTIFIER)
+        ident = self.consume(TokenType.IDENTIFIER).lexeme
         self.consume(TokenType.RIGHT_PAREN)
         self.consume(TokenType.SIMBORA)
-        self.dos_casos()
+        label_end = self.new_label()
+        self.dos_casos(ident, label_end)
+        self.emit("label", label_end)
         self.consume(TokenType.CABO)
 
-    def dos_casos(self) -> None:
+    def dos_casos(self, ident: str, label_end: str) -> None:
         # Primeiro caso obrigatorio.
-        self.do_caso()
-        self.resto_dos_casos()
+        self.do_caso(ident, label_end)
+        self.resto_dos_casos(ident, label_end)
 
-    def do_caso(self) -> None:
+    def do_caso(self, ident: str, label_end: str) -> None:
         # Um bloco du_casu.
         self.consume(TokenType.DU_CASU)
-        self.fator_zin()
+        valor = self.fator_zin()
         self.consume(TokenType.COLON)
-        self.stmt()
+        codigo_case = self._capture_stmt_code()
 
-    def resto_dos_casos(self) -> None:
+        temp = self.new_temp()
+        label_case = self.new_label()
+        label_next = self.new_label()
+
+        self.emit("eq", temp, ident, valor)
+        self.emit("if", temp, label_case, label_next)
+        self.emit("label", label_case)
+        self.codigo.extend(codigo_case)
+        self.emit("jump", label_end)
+        self.emit("label", label_next)
+
+    def resto_dos_casos(self, ident: str, label_end: str) -> None:
         # Casos seguintes e opcional uai_so.
         if self._matches(TokenType.DU_CASU):
-            self.do_caso()
-            self.resto_dos_casos()
+            self.do_caso(ident, label_end)
+            self.resto_dos_casos(ident, label_end)
             return
 
         if self._matches(TokenType.UAI_SO):
             self.consume(TokenType.UAI_SO)
             self.consume(TokenType.COLON)
-            self.stmt()
+            codigo_default = self._capture_stmt_code()
+            self.codigo.extend(codigo_default)
 
     # Parte 5: expressoes (com precedencia)
     def expr(self) -> str:

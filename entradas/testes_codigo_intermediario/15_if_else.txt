@@ -1,0 +1,7 @@
+bora_cumpade main()
+simbora
+    uai_se(x < 10)
+        y fica_assim_entao 1 uai
+    uai_senao
+        y fica_assim_entao 2 uai
+cabo

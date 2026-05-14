@@ -72,6 +72,213 @@ cabo
             ],
         )
 
+    def test_codigo_intermediario_if_sem_else(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    uai_se(x < 10)
+        oia_proce_ve(x) uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("les", "temp1", "x", "10"),
+                ("if", "temp1", "label1", "label2"),
+                ("label", "label1", "null", "null"),
+                ("call", "print", "x", "null"),
+                ("label", "label2", "null", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_if_com_else(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    uai_se(eh)
+        oia_proce_ve(x) uai
+    uai_senao
+        oia_proce_ve(y) uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("if", "eh", "label1", "label2"),
+                ("label", "label1", "null", "null"),
+                ("call", "print", "x", "null"),
+                ("jump", "label3", "null", "null"),
+                ("label", "label2", "null", "null"),
+                ("call", "print", "y", "null"),
+                ("label", "label3", "null", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_while(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    enquanto_tiver_trem(x < 3)
+        x fica_assim_entao x + 1 uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("label", "label1", "null", "null"),
+                ("les", "temp1", "x", "3"),
+                ("if", "temp1", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("add", "temp2", "x", "1"),
+                ("att", "x", "temp2", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_for_completo(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
+        oia_proce_ve(i) uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("att", "i", "0", "null"),
+                ("label", "label1", "null", "null"),
+                ("les", "temp1", "i", "10"),
+                ("if", "temp1", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("call", "print", "i", "null"),
+                ("add", "temp2", "i", "1"),
+                ("att", "i", "temp2", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_for_sem_condicao(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    roda_esse_trem(i fica_assim_entao 0; ; i fica_assim_entao i + 1)
+        oia_proce_ve(i) uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("att", "i", "0", "null"),
+                ("label", "label1", "null", "null"),
+                ("if", "eh", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("call", "print", "i", "null"),
+                ("add", "temp1", "i", "1"),
+                ("att", "i", "temp1", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_for_temporarios_em_ordem_visual(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
+        simbora
+            x fica_assim_entao x + 1 uai
+            y fica_assim_entao y + x uai
+        cabo
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("att", "i", "0", "null"),
+                ("label", "label1", "null", "null"),
+                ("les", "temp1", "i", "10"),
+                ("if", "temp1", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("add", "temp2", "x", "1"),
+                ("att", "x", "temp2", "null"),
+                ("add", "temp3", "y", "x"),
+                ("att", "y", "temp3", "null"),
+                ("add", "temp4", "i", "1"),
+                ("att", "i", "temp4", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_case_com_default(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    dependenu(x) simbora
+        du_casu 1: y fica_assim_entao 10 uai
+        du_casu 2: y fica_assim_entao 20 uai
+        uai_so: y fica_assim_entao 30 uai
+    cabo
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("eq", "temp1", "x", "1"),
+                ("if", "temp1", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("att", "y", "10", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+                ("eq", "temp2", "x", "2"),
+                ("if", "temp2", "label4", "label5"),
+                ("label", "label4", "null", "null"),
+                ("att", "y", "20", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label5", "null", "null"),
+                ("att", "y", "30", "null"),
+                ("label", "label1", "null", "null"),
+            ],
+        )
+
     def test_precedencia_parenteses(self):
         self._assert_valido("""
 bora_cumpade main()

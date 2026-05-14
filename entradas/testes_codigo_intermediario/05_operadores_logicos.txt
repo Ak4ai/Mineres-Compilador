@@ -1,0 +1,4 @@
+bora_cumpade main()
+simbora
+    resultado fica_assim_entao eh tamem num_eh uai
+cabo
