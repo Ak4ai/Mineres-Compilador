@@ -9,6 +9,19 @@ from .automato import Automato
 from mineires_token import Token
 from tokentype import ALL_WORD_TOKENS, TokenType
 
+ESCAPES_LITERAIS = {
+    "n": "\n",
+    "t": "\t",
+    "r": "\r",
+    "\\": "\\",
+    "'": "'",
+    '"': '"',
+    "0": "\0",
+    "b": "\b",
+    "f": "\f",
+    "v": "\v",
+}
+
 
 class LexicalError(Exception):
     # Excecao com contexto completo para erro lexico.
@@ -124,6 +137,30 @@ class Lexer:
 
         self._advance_position(trecho)
         self.pos += len(trecho)
+
+    def _decodificar_escapes_literal(self, lexema: str) -> str:
+        # Converte escapes conhecidos para o caractere real sem remover delimitadores.
+        if len(lexema) < 2 or lexema[0] != lexema[-1] or lexema[0] not in {'"', "'"}:
+            return lexema
+
+        delimitador = lexema[0]
+        conteudo = lexema[1:-1]
+        conteudo_decodificado: list[str] = []
+        i = 0
+
+        while i < len(conteudo):
+            char = conteudo[i]
+            if char == "\\" and i + 1 < len(conteudo):
+                escape = conteudo[i + 1]
+                if escape in ESCAPES_LITERAIS:
+                    conteudo_decodificado.append(ESCAPES_LITERAIS[escape])
+                    i += 2
+                    continue
+
+            conteudo_decodificado.append(char)
+            i += 1
+
+        return f"{delimitador}{''.join(conteudo_decodificado)}{delimitador}"
 
     def tokenize(self, continuar_apos_erro: bool = False) -> list[Token]:
         # Executa o loop principal de analise lexica.
@@ -333,6 +370,8 @@ class Lexer:
                         lexema_canonico = f"0{lexema_canonico}"
                     if lexema_canonico.endswith("."):
                         lexema_canonico = f"{lexema_canonico}0"
+                elif token_type in {TokenType.STRING_LITERAL, TokenType.CHAR_LITERAL}:
+                    lexema_canonico = self._decodificar_escapes_literal(lexema_canonico)
 
                 self.tokens.append(Token(token_type, lexema_canonico, inicio_linha, inicio_coluna))
                 self._advance_position(lexema_bruto)

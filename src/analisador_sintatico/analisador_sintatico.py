@@ -3,6 +3,72 @@ from __future__ import annotations
 from mineires_token import Token
 from tokentype import TokenType
 
+COMMENT_TOKEN_TYPES = frozenset({TokenType.COMMENT_LINE, TokenType.COMMENT_BLOCK})
+
+TYPE_START_TOKEN_TYPES = frozenset(
+    {
+        TokenType.TREM_DI_NUMERU,
+        TokenType.TREM_CUM_VIRGULA,
+        TokenType.TREM_DISCRITA,
+        TokenType.TREM_DISCOLHE,
+        TokenType.TROSSO,
+    }
+)
+
+NUMINT_TOKEN_TYPES = frozenset(
+    {
+        TokenType.INTEGER_LITERAL,
+        TokenType.HEX_LITERAL,
+        TokenType.OCTAL_LITERAL,
+    }
+)
+
+BOOLEAN_LITERAL_TOKEN_TYPES = frozenset({TokenType.EH, TokenType.NUM_EH})
+
+EXPR_START_TOKEN_TYPES = frozenset(
+    {
+        TokenType.IDENTIFIER,
+        TokenType.STRING_LITERAL,
+        TokenType.INTEGER_LITERAL,
+        TokenType.FLOAT_LITERAL,
+        TokenType.HEX_LITERAL,
+        TokenType.OCTAL_LITERAL,
+        TokenType.CHAR_LITERAL,
+        *BOOLEAN_LITERAL_TOKEN_TYPES,
+        TokenType.LEFT_PAREN,
+        TokenType.PLUS,
+        TokenType.MINUS,
+        TokenType.VAM_MARCA,
+    }
+)
+
+STMT_START_TOKEN_TYPES = frozenset(
+    {
+        TokenType.RODA_ESSE_TREM,
+        TokenType.XOVE,
+        TokenType.OIA_PROCE_VE,
+        TokenType.ENQUANTO_TIVER_TREM,
+        TokenType.UAI_SE,
+        TokenType.DEPENDENU,
+        TokenType.SIMBORA,
+        TokenType.PARA_O_TREM,
+        TokenType.TOCA_O_TREM,
+        TokenType.UAI,
+    }
+)
+
+IO_STMT_TOKEN_TYPES = frozenset({TokenType.XOVE, TokenType.OIA_PROCE_VE})
+
+GRAMMAR_TOKEN_ALIASES: dict[str, frozenset[TokenType]] = {
+    "IDENT": frozenset({TokenType.IDENTIFIER}),
+    "NUMint": NUMINT_TOKEN_TYPES,
+    "NUMfloat": frozenset({TokenType.FLOAT_LITERAL}),
+    "STR": frozenset({TokenType.STRING_LITERAL}),
+    "valorBooleano": BOOLEAN_LITERAL_TOKEN_TYPES,
+    "valorChar": frozenset({TokenType.CHAR_LITERAL}),
+    "uai": frozenset({TokenType.UAI}),
+}
+
 
 class ParserError(Exception):
     # Erro sintatico: para no primeiro ponto invalido.
@@ -21,7 +87,7 @@ class Parser:
         self.tokens = [
             t
             for t in tokens
-            if t.type not in {TokenType.COMMENT_LINE, TokenType.COMMENT_BLOCK}
+            if t.type not in COMMENT_TOKEN_TYPES
         ]
         self.pos = 0
         self.codigo = []
@@ -136,13 +202,7 @@ class Parser:
     def type_rule(self) -> None:
         # Aceita um dos tipos primitivos da linguagem.
         tok = self.current()
-        if tok.type in {
-            TokenType.TREM_DI_NUMERU,
-            TokenType.TREM_CUM_VIRGULA,
-            TokenType.TREM_DISCRITA,
-            TokenType.TREM_DISCOLHE,
-            TokenType.TROSSO,
-        }:
+        if tok.type in TYPE_START_TOKEN_TYPES:
             self.consume(tok.type)
             return
         raise ParserError("<type>", self._received_label(tok), tok.line, tok.column)
@@ -170,7 +230,7 @@ class Parser:
             return
 
         # IO (entrada/saida)
-        if tok.type in {TokenType.XOVE, TokenType.OIA_PROCE_VE}:
+        if tok.type in IO_STMT_TOKEN_TYPES:
             self.io_stmt()
             return
 
@@ -658,48 +718,16 @@ class Parser:
 
     def _is_type_start(self, tok: Token) -> bool:
         # Diz se o token pode iniciar declaracao de tipo.
-        return tok.type in {
-            TokenType.TREM_DI_NUMERU,
-            TokenType.TREM_CUM_VIRGULA,
-            TokenType.TREM_DISCRITA,
-            TokenType.TREM_DISCOLHE,
-            TokenType.TROSSO,
-        }
+        return tok.type in TYPE_START_TOKEN_TYPES
 
     def _is_expr_start(self, tok: Token) -> bool:
         # Diz se o token pode iniciar uma expressao.
-        return tok.type in {
-            TokenType.IDENTIFIER,
-            TokenType.STRING_LITERAL,
-            TokenType.INTEGER_LITERAL,
-            TokenType.FLOAT_LITERAL,
-            TokenType.HEX_LITERAL,
-            TokenType.OCTAL_LITERAL,
-            TokenType.CHAR_LITERAL,
-            TokenType.EH,
-            TokenType.NUM_EH,
-            TokenType.LEFT_PAREN,
-            TokenType.PLUS,
-            TokenType.MINUS,
-            TokenType.VAM_MARCA,
-        }
+        return tok.type in EXPR_START_TOKEN_TYPES
 
     def _is_stmt_start(self, tok: Token) -> bool:
         # FIRST(stmt): ajuda stmt_list a saber quando parar.
         return (
-            tok.type
-            in {
-                TokenType.RODA_ESSE_TREM,
-                TokenType.XOVE,
-                TokenType.OIA_PROCE_VE,
-                TokenType.ENQUANTO_TIVER_TREM,
-                TokenType.UAI_SE,
-                TokenType.DEPENDENU,
-                TokenType.SIMBORA,
-                TokenType.PARA_O_TREM,
-                TokenType.TOCA_O_TREM,
-                TokenType.UAI,
-            }
+            tok.type in STMT_START_TOKEN_TYPES
             or self._is_type_start(tok)
             or self._is_expr_start(tok)
         )
@@ -712,27 +740,9 @@ class Parser:
             return tok.type == expected
 
         if isinstance(expected, str):
-            # Atalhos de notacao da gramatica.
-            if expected == "IDENT":
-                return tok.type == TokenType.IDENTIFIER
-            if expected == "NUMint":
-                return tok.type in {
-                    TokenType.INTEGER_LITERAL,
-                    TokenType.HEX_LITERAL,
-                    TokenType.OCTAL_LITERAL,
-                }
-            if expected == "NUMfloat":
-                return tok.type == TokenType.FLOAT_LITERAL
-            if expected == "STR":
-                return tok.type == TokenType.STRING_LITERAL
-            if expected == "valorBooleano":
-                return tok.type in {TokenType.EH, TokenType.NUM_EH}
-            if expected == "valorChar":
-                return tok.type == TokenType.CHAR_LITERAL
-
-            # Delimitador de comando fora do for.
-            if expected == "uai":
-                return tok.type == TokenType.UAI
+            # Atalhos de notacao da gramatica ficam centralizados em um unico mapa.
+            if expected in GRAMMAR_TOKEN_ALIASES:
+                return tok.type in GRAMMAR_TOKEN_ALIASES[expected]
 
             # Compatibilidade com terminais por nome, valor ou lexema literal.
             return (

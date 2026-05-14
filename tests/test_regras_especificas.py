@@ -17,6 +17,8 @@ if str(SRC_DIR) not in sys.path:
 
 from analisador_lexico.lexer import Lexer
 from analisador_sintatico.analisador_sintatico import Parser, ParserError
+from main import _linhas_codigo_intermediario
+from tokentype import TokenType
 
 
 class TestRegrasEspecificas(unittest.TestCase):
@@ -206,6 +208,42 @@ cabo
                 ("jump", "label1", "null", "null"),
                 ("label", "label3", "null", "null"),
             ],
+        )
+
+    def test_string_literal_com_escape_newline_vira_quebra_real_no_token(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    oia_proce_ve("a\\nb") uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        string_token = next(
+            token for token in tokens if token.type == TokenType.STRING_LITERAL
+        )
+        self.assertEqual(string_token.lexeme, '"a\nb"')
+
+    def test_codigo_intermediario_escapa_newline_ao_exibir_string(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    oia_proce_ve("a\\nb") uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [("call", "print", '"a\nb"', "null")],
+        )
+        self.assertEqual(
+            _linhas_codigo_intermediario(parser.codigo),
+            ['(call, print, "a\\nb", null)'],
         )
 
     def test_codigo_intermediario_for_temporarios_em_ordem_visual(self):

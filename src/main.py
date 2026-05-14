@@ -110,7 +110,13 @@ def imprimir_tokens(tokens) -> None:
 
 
 def _linhas_codigo_intermediario(codigo) -> list[str]:
-    return [f"({op}, {result}, {arg1}, {arg2})" for op, result, arg1, arg2 in codigo]
+    return [
+        (
+            f"({_lexema_para_tabela(str(op))}, {_lexema_para_tabela(str(result))}, "
+            f"{_lexema_para_tabela(str(arg1))}, {_lexema_para_tabela(str(arg2))})"
+        )
+        for op, result, arg1, arg2 in codigo
+    ]
 
 
 def imprimir_codigo_intermediario(codigo, stream=sys.stdout) -> None:
