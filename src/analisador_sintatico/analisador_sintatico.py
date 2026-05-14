@@ -24,6 +24,32 @@ class Parser:
             if t.type not in {TokenType.COMMENT_LINE, TokenType.COMMENT_BLOCK}
         ]
         self.pos = 0
+        self.codigo = []
+        self.temp_count = 0
+        self.label_count = 0
+
+    def new_temp(self) -> str:
+        self.temp_count += 1
+        return f"temp{self.temp_count}"
+
+    def new_label(self) -> str:
+        self.label_count += 1
+        return f"label{self.label_count}"
+
+    def emit(self, op, result=None, arg1=None, arg2=None) -> None:
+        # Padroniza campos ausentes como "null" para manter a saida estavel.
+        self.codigo.append(
+            (
+                op,
+                "null" if result is None else result,
+                "null" if arg1 is None else arg1,
+                "null" if arg2 is None else arg2,
+            )
+        )
+
+    def print_codigo(self) -> None:
+        for op, result, arg1, arg2 in self.codigo:
+            print(f"({op}, {result}, {arg1}, {arg2})")
 
     # Parte 1: navegacao na lista de tokens
     def current(self) -> Token:
@@ -195,9 +221,10 @@ class Parser:
             self.consume(TokenType.LEFT_PAREN)
             self.type_rule()
             self.consume(TokenType.COMMA)
-            self.consume(TokenType.IDENTIFIER)
+            ident = self.consume(TokenType.IDENTIFIER)
             self.consume(TokenType.RIGHT_PAREN)
             self.consume_delimiter()
+            self.emit("call", "read", ident.lexeme)
             return
 
         self.consume(TokenType.OIA_PROCE_VE)
@@ -211,9 +238,11 @@ class Parser:
         self.out()
         self.resto_out_list()
 
-    def out(self) -> None:
+    def out(self) -> str:
         # Um item de saida.
-        self.fator_zin()
+        value = self.fator_zin()
+        self.emit("call", "print", value)
+        return value
 
     def resto_out_list(self) -> None:
         # Itens extras da lista de saida.
@@ -280,191 +309,220 @@ class Parser:
             self.stmt()
 
     # Parte 5: expressoes (com precedencia)
-    def expr(self) -> None:
+    def expr(self) -> str:
         # Entrada da expressao.
-        self.atrib()
+        return self.atrib()
 
-    def atrib(self) -> None:
+    def atrib(self) -> str:
         # Nivel de atribuicao.
-        self.or_rule()
-        self.resto_atrib()
+        left = self.or_rule()
+        return self.resto_atrib(left)
 
-    def resto_atrib(self) -> None:
+    def resto_atrib(self, left: str) -> str:
         # Continua atribuicao (associativa a direita).
         if self._matches(TokenType.FICA_ASSIM_ENTAO):
             self.consume(TokenType.FICA_ASSIM_ENTAO)
-            self.atrib()
+            right = self.atrib()
+            self.emit("att", left, right)
+            return left
+        return left
 
-    def or_rule(self) -> None:
+    def or_rule(self) -> str:
         # Operador logico OR.
-        self.xor_rule()
-        self.resto_or()
+        left = self.xor_rule()
+        return self.resto_or(left)
 
-    def resto_or(self) -> None:
+    def resto_or(self, left: str) -> str:
         # Encadeamento de OR.
         if self._matches(TokenType.QUARQUE_UM):
             self.consume(TokenType.QUARQUE_UM)
-            self.xor_rule()
-            self.resto_or()
+            right = self.xor_rule()
+            temp = self.new_temp()
+            self.emit("or", temp, left, right)
+            return self.resto_or(temp)
+        return left
 
-    def xor_rule(self) -> None:
+    def xor_rule(self) -> str:
         # Operador logico XOR.
-        self.and_rule()
-        self.resto_xor()
+        left = self.and_rule()
+        return self.resto_xor(left)
 
-    def resto_xor(self) -> None:
+    def resto_xor(self, left: str) -> str:
         # Encadeamento de XOR.
         if self._matches(TokenType.UM_O_OTO):
             self.consume(TokenType.UM_O_OTO)
-            self.and_rule()
-            self.resto_xor()
+            right = self.and_rule()
+            temp = self.new_temp()
+            self.emit("xor", temp, left, right)
+            return self.resto_xor(temp)
+        return left
 
-    def and_rule(self) -> None:
+    def and_rule(self) -> str:
         # Operador logico AND.
-        self.not_rule()
-        self.resto_and()
+        left = self.not_rule()
+        return self.resto_and(left)
 
-    def resto_and(self) -> None:
+    def resto_and(self, left: str) -> str:
         # Encadeamento de AND.
         if self._matches(TokenType.TAMEM):
             self.consume(TokenType.TAMEM)
-            self.not_rule()
-            self.resto_and()
+            right = self.not_rule()
+            temp = self.new_temp()
+            self.emit("and", temp, left, right)
+            return self.resto_and(temp)
+        return left
 
-    def not_rule(self) -> None:
+    def not_rule(self) -> str:
         # Operador logico NOT unario.
         if self._matches(TokenType.VAM_MARCA):
             self.consume(TokenType.VAM_MARCA)
-            self.not_rule()
-            return
-        self.rel()
+            value = self.not_rule()
+            temp = self.new_temp()
+            self.emit("not", temp, value)
+            return temp
+        return self.rel()
 
-    def rel(self) -> None:
+    def rel(self) -> str:
         # Comparacoes relacionais.
-        self.add()
-        self.resto_rel()
+        left = self.add()
+        return self.resto_rel(left)
 
-    def resto_rel(self) -> None:
+    def resto_rel(self, left: str) -> str:
         # Operadores ==, !=, <, <=, >, >=.
         if self._matches(TokenType.MEMA_COISA):
             self.consume(TokenType.MEMA_COISA)
-            self.add()
-            return
+            right = self.add()
+            temp = self.new_temp()
+            self.emit("eq", temp, left, right)
+            return temp
         if self._matches(TokenType.NEH_NADA):
             self.consume(TokenType.NEH_NADA)
-            self.add()
-            return
+            right = self.add()
+            temp = self.new_temp()
+            self.emit("dif", temp, left, right)
+            return temp
         if self._matches(TokenType.LT):
             self.consume(TokenType.LT)
-            self.add()
-            return
+            right = self.add()
+            temp = self.new_temp()
+            self.emit("les", temp, left, right)
+            return temp
         if self._matches(TokenType.LE):
             self.consume(TokenType.LE)
-            self.add()
-            return
+            right = self.add()
+            temp = self.new_temp()
+            self.emit("leq", temp, left, right)
+            return temp
         if self._matches(TokenType.GT):
             self.consume(TokenType.GT)
-            self.add()
-            return
+            right = self.add()
+            temp = self.new_temp()
+            self.emit("grt", temp, left, right)
+            return temp
         if self._matches(TokenType.GE):
             self.consume(TokenType.GE)
-            self.add()
+            right = self.add()
+            temp = self.new_temp()
+            self.emit("geq", temp, left, right)
+            return temp
+        return left
 
-    def add(self) -> None:
+    def add(self) -> str:
         # Soma e subtracao.
-        self.mult()
-        self.resto_add()
+        left = self.mult()
+        return self.resto_add(left)
 
-    def resto_add(self) -> None:
+    def resto_add(self, left: str) -> str:
         # Encadeamento de + e -.
         if self._matches(TokenType.PLUS):
             self.consume(TokenType.PLUS)
-            self.mult()
-            self.resto_add()
-            return
+            right = self.mult()
+            temp = self.new_temp()
+            self.emit("add", temp, left, right)
+            return self.resto_add(temp)
         if self._matches(TokenType.MINUS):
             self.consume(TokenType.MINUS)
-            self.mult()
-            self.resto_add()
+            right = self.mult()
+            temp = self.new_temp()
+            self.emit("sub", temp, left, right)
+            return self.resto_add(temp)
+        return left
 
-    def mult(self) -> None:
+    def mult(self) -> str:
         # Multiplicacao e divisoes.
-        self.uno()
-        self.resto_mult()
+        left = self.uno()
+        return self.resto_mult(left)
 
-    def resto_mult(self) -> None:
+    def resto_mult(self, left: str) -> str:
         # Encadeamento de veiz/sob///%.
         if self._matches(TokenType.VEIZ):
             self.consume(TokenType.VEIZ)
-            self.uno()
-            self.resto_mult()
-            return
+            right = self.uno()
+            temp = self.new_temp()
+            self.emit("mult", temp, left, right)
+            return self.resto_mult(temp)
         if self._matches(TokenType.SOB):
             self.consume(TokenType.SOB)
-            self.uno()
-            self.resto_mult()
-            return
+            right = self.uno()
+            temp = self.new_temp()
+            self.emit("div", temp, left, right)
+            return self.resto_mult(temp)
         if self._matches(TokenType.INT_DIV):
             self.consume(TokenType.INT_DIV)
-            self.uno()
-            self.resto_mult()
-            return
+            right = self.uno()
+            temp = self.new_temp()
+            self.emit("divI", temp, left, right)
+            return self.resto_mult(temp)
         if self._matches(TokenType.MOD):
             self.consume(TokenType.MOD)
-            self.uno()
-            self.resto_mult()
+            right = self.uno()
+            temp = self.new_temp()
+            self.emit("divI", temp, left, right)
+            return self.resto_mult(temp)
+        return left
 
-    def uno(self) -> None:
+    def uno(self) -> str:
         # Unarios + e -.
         if self._matches(TokenType.PLUS):
             self.consume(TokenType.PLUS)
-            self.uno()
-            return
+            return self.uno()
         if self._matches(TokenType.MINUS):
             self.consume(TokenType.MINUS)
-            self.uno()
-            return
-        self.fator_zao()
+            value = self.uno()
+            temp = self.new_temp()
+            self.emit("sub", temp, "0", value)
+            return temp
+        return self.fator_zao()
 
-    def fator_zao(self) -> None:
+    def fator_zao(self) -> str:
         # Fator com ou sem parenteses.
         if self._matches(TokenType.LEFT_PAREN):
             self.consume(TokenType.LEFT_PAREN)
-            self.atrib()
+            value = self.atrib()
             self.consume(TokenType.RIGHT_PAREN)
-            return
-        self.fator_zin()
+            return value
+        return self.fator_zin()
 
-    def fator_zin(self) -> None:
+    def fator_zin(self) -> str:
         # Menor unidade de expressao: literal ou identificador.
         if self._matches(TokenType.STRING_LITERAL):
-            #print(self.current().lexeme)
-            self.consume(TokenType.STRING_LITERAL)
-            return
+            return self.consume(TokenType.STRING_LITERAL).lexeme
         if self._matches(TokenType.IDENTIFIER):
-            self.consume(TokenType.IDENTIFIER)
-            return
+            return self.consume(TokenType.IDENTIFIER).lexeme
         if self._matches(TokenType.INTEGER_LITERAL):
-            self.consume(TokenType.INTEGER_LITERAL)
-            return
+            return self.consume(TokenType.INTEGER_LITERAL).lexeme
         if self._matches(TokenType.HEX_LITERAL):
-            self.consume(TokenType.HEX_LITERAL)
-            return
+            return self.consume(TokenType.HEX_LITERAL).lexeme
         if self._matches(TokenType.OCTAL_LITERAL):
-            self.consume(TokenType.OCTAL_LITERAL)
-            return
+            return self.consume(TokenType.OCTAL_LITERAL).lexeme
         if self._matches(TokenType.FLOAT_LITERAL):
-            self.consume(TokenType.FLOAT_LITERAL)
-            return
+            return self.consume(TokenType.FLOAT_LITERAL).lexeme
         if self._matches(TokenType.EH):
-            self.consume(TokenType.EH)
-            return
+            return self.consume(TokenType.EH).lexeme
         if self._matches(TokenType.NUM_EH):
-            self.consume(TokenType.NUM_EH)
-            return
+            return self.consume(TokenType.NUM_EH).lexeme
         if self._matches(TokenType.CHAR_LITERAL):
-            self.consume(TokenType.CHAR_LITERAL)
-            return
+            return self.consume(TokenType.CHAR_LITERAL).lexeme
 
         tok = self.current()
         raise ParserError(

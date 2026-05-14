@@ -29,7 +29,7 @@ class TestRegrasEspecificas(unittest.TestCase):
 
     def _assert_valido(self, fonte: str):
         tokens, erros = self._parse_string(fonte)
-        self.assertEqual(erros, [], "Erro léxico inesperado")
+        self.assertEqual(erros, [], "Erro lexico inesperado")
         self.assertTrue(Parser(tokens).parse())
 
     def _assert_erro(self, fonte: str, trecho_msg: str = None):
@@ -50,6 +50,27 @@ simbora
     a fica_assim_entao 1 + 2 veiz 3 uai
 cabo
 """)
+
+    def test_codigo_intermediario_simples(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    x fica_assim_entao 1 + 2 veiz 3 uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro léxico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("mult", "temp1", "2", "3"),
+                ("add", "temp2", "1", "temp1"),
+                ("att", "x", "temp2", "null"),
+            ],
+        )
 
     def test_precedencia_parenteses(self):
         self._assert_valido("""
