@@ -5,7 +5,7 @@ from tokentype import TokenType
 
 
 class ParserError(Exception):
-    # Erro sintatico fatal: o parser para no primeiro erro encontrado.
+    # Erro sintatico: para no primeiro ponto invalido.
     def __init__(self, expected: str, received: str, line: int, column: int) -> None:
         super().__init__(
             f"Erro sintático: esperado {expected}, mas recebeu {received} "
@@ -14,10 +14,10 @@ class ParserError(Exception):
 
 
 class Parser:
-    # Parser recursivo para validar sintaxe da linguagem Mineres.
+    # Parser recursivo: valida a estrutura do programa.
 
     def __init__(self, tokens: list[Token]):
-        # Comentarios nao participam da sintaxe da gramatica.
+        # Ignora comentarios: eles nao entram na analise sintatica.
         self.tokens = [
             t
             for t in tokens
@@ -25,11 +25,11 @@ class Parser:
         ]
         self.pos = 0
 
-    # Metodos basicos
+    # Parte 1: navegacao na lista de tokens
     def current(self) -> Token:
         if self.pos < len(self.tokens):
             return self.tokens[self.pos]
-        # Seguranca para listas sem EOF (na pratica o lexer gera EOF).
+        # Fallback de seguranca (normalmente sempre existe EOF).
         return self.tokens[-1]
 
     def advance(self) -> None:
@@ -37,6 +37,7 @@ class Parser:
             self.pos += 1
 
     def consume(self, expected_type) -> Token:
+        # Consome token esperado; se nao casar, dispara erro com linha/coluna.
         tok = self.current()
         if self._matches(expected_type):
             self.advance()
@@ -45,15 +46,16 @@ class Parser:
         expected_label = self._expected_label(expected_type)
         raise ParserError(expected_label, self._received_label(tok), tok.line, tok.column)
 
-    # API principal
+    # Parte 2: porta de entrada do parser
     def parse(self) -> bool:
+        # Regra inicial + EOF: garante que todo o arquivo foi consumido.
         self.function()
         self.consume(TokenType.EOF)
         return True
 
-    # Regras da gramatica
+    # Parte 3: estrutura geral do programa
     def function(self) -> None:
-        # <function*> -> 'bora_cumpade' 'main' '(' ')' <bloco>
+        # Programa obrigatorio: bora_cumpade main() seguido de bloco.
         self.consume(TokenType.BORA_CUMPADE)
         self.consume(TokenType.MAIN)
         self.consume(TokenType.LEFT_PAREN)
@@ -61,7 +63,7 @@ class Parser:
         self.bloco()
 
     def type_rule(self) -> None:
-        # <type> -> trem_di_numeru | trem_cum_virgula | trem_discrita | trem_discolhe | trosso
+        # Aceita um dos tipos primitivos da linguagem.
         tok = self.current()
         if tok.type in {
             TokenType.TREM_DI_NUMERU,
@@ -75,65 +77,75 @@ class Parser:
         raise ParserError("<type>", self._received_label(tok), tok.line, tok.column)
 
     def bloco(self) -> None:
-        # <bloco> -> 'simbora' <stmtList> 'cabo'
+        # Bloco: abre com simbora e fecha com cabo.
         self.consume(TokenType.SIMBORA)
         self.stmt_list()
         self.consume(TokenType.CABO)
 
     def stmt_list(self) -> None:
-        # <stmtList> -> <stmt> <stmtList> | &
+        # Lista de comandos: repete enquanto houver inicio de stmt.
         if self._is_stmt_start(self.current()):
             self.stmt()
             self.stmt_list()
 
+    # Parte 4: comandos
     def stmt(self) -> None:
-        # <stmt> -> varias alternativas
+        # Escolhe qual comando parsear olhando o token atual.
         tok = self.current()
 
+        # FOR
         if tok.type == TokenType.RODA_ESSE_TREM:
             self.for_stmt()
             return
 
+        # IO (entrada/saida)
         if tok.type in {TokenType.XOVE, TokenType.OIA_PROCE_VE}:
             self.io_stmt()
             return
 
+        # WHILE
         if tok.type == TokenType.ENQUANTO_TIVER_TREM:
             self.while_stmt()
             return
 
+        # IF
         if tok.type == TokenType.UAI_SE:
             self.if_stmt()
             return
 
+        # CASE
         if tok.type == TokenType.DEPENDENU:
             self.case_stmt()
             return
 
+        # BLOCO
         if tok.type == TokenType.SIMBORA:
             self.bloco()
             return
 
+        # PARA_O_TREM
         if tok.type == TokenType.PARA_O_TREM:
             self.consume(TokenType.PARA_O_TREM)
             self.consume_delimiter()
             return
 
+        # TOCA_O_TREM
         if tok.type == TokenType.TOCA_O_TREM:
             self.consume(TokenType.TOCA_O_TREM)
             self.consume_delimiter()
             return
 
+        # DECLARACAO
         if self._is_type_start(tok):
             self.declaration()
             return
 
-        if tok.type in {TokenType.UAI, TokenType.SEMICOLON}:
-            # Comando vazio.
+        if tok.type == TokenType.UAI:
+            # Comando vazio (apenas delimitador).
             self.consume_delimiter()
             return
 
-        # Se nao caiu em nenhuma alternativa, tenta <atrib> 'uai'.
+        # Se comecar com expressao, trata como atribuicao/comando de expressao.
         if self._is_expr_start(tok):
             self.atrib()
             self.consume_delimiter()
@@ -142,25 +154,25 @@ class Parser:
         raise ParserError("<stmt>", self._received_label(tok), tok.line, tok.column)
 
     def declaration(self) -> None:
-        # <declaration> -> <type> <identList> 'uai'
+        # Declaracao: tipo + lista de nomes + uai.
         self.type_rule()
         self.ident_list()
         self.consume_delimiter()
 
     def ident_list(self) -> None:
-        # <identList> -> IDENT <restoIdentList>
+        # Primeiro identificador da declaracao.
         self.consume(TokenType.IDENTIFIER)
         self.resto_ident_list()
 
     def resto_ident_list(self) -> None:
-        # <restoIdentList> -> ',' IDENT <restoIdentList> | &
+        # Continua lista de identificadores separados por virgula.
         if self._matches(TokenType.COMMA):
             self.consume(TokenType.COMMA)
             self.consume(TokenType.IDENTIFIER)
             self.resto_ident_list()
 
     def for_stmt(self) -> None:
-        # <forStmt> -> roda_esse_trem '(' <optExpr> ';' <optExpr> ';' <optExpr> ')' <stmt>
+        # For: roda_esse_trem(expr; expr; expr) + comando/bloco.
         self.consume(TokenType.RODA_ESSE_TREM)
         self.consume(TokenType.LEFT_PAREN)
         self.opt_expr()
@@ -172,12 +184,12 @@ class Parser:
         self.stmt()
 
     def opt_expr(self) -> None:
-        # <optExpr> -> <atrib> | &
+        # Expressao opcional (pode ficar vazia no for).
         if self._is_expr_start(self.current()):
             self.atrib()
 
     def io_stmt(self) -> None:
-        # <ioStmt> -> xove(...) uai | oia_proce_ve(...) uai
+        # Comandos de entrada/saida.
         if self._matches(TokenType.XOVE):
             self.consume(TokenType.XOVE)
             self.consume(TokenType.LEFT_PAREN)
@@ -195,23 +207,23 @@ class Parser:
         self.consume_delimiter()
 
     def out_list(self) -> None:
-        # <outList> -> <out> <restoOutList>
+        # Lista de itens para saida.
         self.out()
         self.resto_out_list()
 
     def out(self) -> None:
-        # <out> -> <fatorZin>
+        # Um item de saida.
         self.fator_zin()
 
     def resto_out_list(self) -> None:
-        # <restoOutList> -> ',' <out> <restoOutList> | &
+        # Itens extras da lista de saida.
         if self._matches(TokenType.COMMA):
             self.consume(TokenType.COMMA)
             self.out()
             self.resto_out_list()
 
     def while_stmt(self) -> None:
-        # <whileStmt> -> enquanto_tiver_trem '(' <expr> ')' <stmt>
+        # While: enquanto tiver trem (expr) + comando/bloco.
         self.consume(TokenType.ENQUANTO_TIVER_TREM)
         self.consume(TokenType.LEFT_PAREN)
         self.expr()
@@ -219,7 +231,7 @@ class Parser:
         self.stmt()
 
     def if_stmt(self) -> None:
-        # <ifStmt> -> uai_se '(' <expr> ')' <stmt> <elsePart>
+        # If com else opcional.
         self.consume(TokenType.UAI_SE)
         self.consume(TokenType.LEFT_PAREN)
         self.expr()
@@ -228,13 +240,13 @@ class Parser:
         self.else_part()
 
     def else_part(self) -> None:
-        # <elsePart> -> uai_senao <stmt> | &
+        # Parte opcional do senao.
         if self._matches(TokenType.UAI_SENAO):
             self.consume(TokenType.UAI_SENAO)
             self.stmt()
 
     def case_stmt(self) -> None:
-        # <caseStmt> -> dependenu '(' IDENT ')' simbora <dosCasos> cabo
+        # Estrutura dependenu/du_casu/uai_so.
         self.consume(TokenType.DEPENDENU)
         self.consume(TokenType.LEFT_PAREN)
         self.consume(TokenType.IDENTIFIER)
@@ -244,19 +256,19 @@ class Parser:
         self.consume(TokenType.CABO)
 
     def dos_casos(self) -> None:
-        # <dosCasos> -> <doCaso> <restoDosCasos>
+        # Primeiro caso obrigatorio.
         self.do_caso()
         self.resto_dos_casos()
 
     def do_caso(self) -> None:
-        # <doCaso> -> du_casu <fatorZin> ':' <stmt>
+        # Um bloco du_casu.
         self.consume(TokenType.DU_CASU)
         self.fator_zin()
         self.consume(TokenType.COLON)
         self.stmt()
 
     def resto_dos_casos(self) -> None:
-        # <restoDosCasos> -> <doCaso><restoDosCasos> | uai_so ':' <stmt> | &
+        # Casos seguintes e opcional uai_so.
         if self._matches(TokenType.DU_CASU):
             self.do_caso()
             self.resto_dos_casos()
@@ -267,59 +279,60 @@ class Parser:
             self.consume(TokenType.COLON)
             self.stmt()
 
+    # Parte 5: expressoes (com precedencia)
     def expr(self) -> None:
-        # <expr> -> <atrib>
+        # Entrada da expressao.
         self.atrib()
 
     def atrib(self) -> None:
-        # <atrib> -> <or> <restoAtrib>
+        # Nivel de atribuicao.
         self.or_rule()
         self.resto_atrib()
 
     def resto_atrib(self) -> None:
-        # <restoAtrib> -> fica_assim_entao <atrib> | &
+        # Continua atribuicao (associativa a direita).
         if self._matches(TokenType.FICA_ASSIM_ENTAO):
             self.consume(TokenType.FICA_ASSIM_ENTAO)
             self.atrib()
 
     def or_rule(self) -> None:
-        # <or> -> <xor> <restoOr>
+        # Operador logico OR.
         self.xor_rule()
         self.resto_or()
 
     def resto_or(self) -> None:
-        # <restoOr> -> quarque_um <xor> <restoOr> | &
+        # Encadeamento de OR.
         if self._matches(TokenType.QUARQUE_UM):
             self.consume(TokenType.QUARQUE_UM)
             self.xor_rule()
             self.resto_or()
 
     def xor_rule(self) -> None:
-        # <xor> -> <and> <restoXor>
+        # Operador logico XOR.
         self.and_rule()
         self.resto_xor()
 
     def resto_xor(self) -> None:
-        # <restoXor> -> um_o_oto <and> <restoXor> | &
+        # Encadeamento de XOR.
         if self._matches(TokenType.UM_O_OTO):
             self.consume(TokenType.UM_O_OTO)
             self.and_rule()
             self.resto_xor()
 
     def and_rule(self) -> None:
-        # <and> -> <not> <restoAnd>
+        # Operador logico AND.
         self.not_rule()
         self.resto_and()
 
     def resto_and(self) -> None:
-        # <restoAnd> -> tamem <not> <restoAnd> | &
+        # Encadeamento de AND.
         if self._matches(TokenType.TAMEM):
             self.consume(TokenType.TAMEM)
             self.not_rule()
             self.resto_and()
 
     def not_rule(self) -> None:
-        # <not> -> vam_marca <not> | <rel>
+        # Operador logico NOT unario.
         if self._matches(TokenType.VAM_MARCA):
             self.consume(TokenType.VAM_MARCA)
             self.not_rule()
@@ -327,13 +340,12 @@ class Parser:
         self.rel()
 
     def rel(self) -> None:
-        # <rel> -> <add> <restoRel>
+        # Comparacoes relacionais.
         self.add()
         self.resto_rel()
 
     def resto_rel(self) -> None:
-        # <restoRel> -> mema_coisa <add> | neh_nada <add>
-        #            | '<' <add> | '<=' <add> | '>' <add> | '>=' <add> | &
+        # Operadores ==, !=, <, <=, >, >=.
         if self._matches(TokenType.MEMA_COISA):
             self.consume(TokenType.MEMA_COISA)
             self.add()
@@ -359,12 +371,12 @@ class Parser:
             self.add()
 
     def add(self) -> None:
-        # <add> -> <mult> <restoAdd>
+        # Soma e subtracao.
         self.mult()
         self.resto_add()
 
     def resto_add(self) -> None:
-        # <restoAdd> -> '+' <mult> <restoAdd> | '-' <mult> <restoAdd> | &
+        # Encadeamento de + e -.
         if self._matches(TokenType.PLUS):
             self.consume(TokenType.PLUS)
             self.mult()
@@ -376,16 +388,12 @@ class Parser:
             self.resto_add()
 
     def mult(self) -> None:
-        # <mult> -> <uno> <restoMult>
+        # Multiplicacao e divisoes.
         self.uno()
         self.resto_mult()
 
     def resto_mult(self) -> None:
-        # <restoMult> -> veiz <uno> <restoMult>
-        #             | sob <uno> <restoMult>
-        #             | '/' <uno> <restoMult>
-        #             | '%' <uno> <restoMult>
-        #             | &
+        # Encadeamento de veiz/sob///%.
         if self._matches(TokenType.VEIZ):
             self.consume(TokenType.VEIZ)
             self.uno()
@@ -407,7 +415,7 @@ class Parser:
             self.resto_mult()
 
     def uno(self) -> None:
-        # <uno> -> '+' <uno> | '-' <uno> | <fatorZao>
+        # Unarios + e -.
         if self._matches(TokenType.PLUS):
             self.consume(TokenType.PLUS)
             self.uno()
@@ -419,7 +427,7 @@ class Parser:
         self.fator_zao()
 
     def fator_zao(self) -> None:
-        # <fatorZao> -> <fatorZin> | '(' <atrib> ')'
+        # Fator com ou sem parenteses.
         if self._matches(TokenType.LEFT_PAREN):
             self.consume(TokenType.LEFT_PAREN)
             self.atrib()
@@ -428,8 +436,9 @@ class Parser:
         self.fator_zin()
 
     def fator_zin(self) -> None:
-        # <fatorZin> -> STR | IDENT | NUMint | NUMfloat | valorBooleano | valorChar
+        # Menor unidade de expressao: literal ou identificador.
         if self._matches(TokenType.STRING_LITERAL):
+            #print(self.current().lexeme)
             self.consume(TokenType.STRING_LITERAL)
             return
         if self._matches(TokenType.IDENTIFIER):
@@ -465,19 +474,16 @@ class Parser:
             tok.column,
         )
 
-    # -----------------------------
-    # Helpers de validacao
-    # -----------------------------
+    # Bloco 6: helpers de validacao
     def consume_delimiter(self) -> Token:
-        # Regra pragmatica: aceita tanto 'uai' quanto ';' como delimitador de stmt.
+        # Delimitador de comando fora do for.
         tok = self.current()
         if self._matches(TokenType.UAI):
             return self.consume(TokenType.UAI)
-        if self._matches(TokenType.SEMICOLON):
-            return self.consume(TokenType.SEMICOLON)
-        raise ParserError("uai ou ;", self._received_label(tok), tok.line, tok.column)
+        raise ParserError("uai", self._received_label(tok), tok.line, tok.column)
 
     def _is_type_start(self, tok: Token) -> bool:
+        # Diz se o token pode iniciar declaracao de tipo.
         return tok.type in {
             TokenType.TREM_DI_NUMERU,
             TokenType.TREM_CUM_VIRGULA,
@@ -487,6 +493,7 @@ class Parser:
         }
 
     def _is_expr_start(self, tok: Token) -> bool:
+        # Diz se o token pode iniciar uma expressao.
         return tok.type in {
             TokenType.IDENTIFIER,
             TokenType.STRING_LITERAL,
@@ -504,6 +511,7 @@ class Parser:
         }
 
     def _is_stmt_start(self, tok: Token) -> bool:
+        # FIRST(stmt): ajuda stmt_list a saber quando parar.
         return (
             tok.type
             in {
@@ -517,13 +525,13 @@ class Parser:
                 TokenType.PARA_O_TREM,
                 TokenType.TOCA_O_TREM,
                 TokenType.UAI,
-                TokenType.SEMICOLON,
             }
             or self._is_type_start(tok)
             or self._is_expr_start(tok)
         )
 
     def _matches(self, expected) -> bool:
+        # Compara token atual com TokenType ou com atalhos textuais.
         tok = self.current()
 
         if isinstance(expected, TokenType):
@@ -548,9 +556,9 @@ class Parser:
             if expected == "valorChar":
                 return tok.type == TokenType.CHAR_LITERAL
 
-            # Delimitador flexivel: aceita palavra e simbolo.
-            if expected in {"uai", ";"}:
-                return tok.type in {TokenType.UAI, TokenType.SEMICOLON}
+            # Delimitador de comando fora do for.
+            if expected == "uai":
+                return tok.type == TokenType.UAI
 
             # Compatibilidade com terminais por nome, valor ou lexema literal.
             return (
@@ -562,10 +570,11 @@ class Parser:
         return False
 
     def _expected_label(self, expected) -> str:
+        # Texto amigavel do "esperado" para mensagem de erro.
         if isinstance(expected, TokenType):
             return expected.name
         return str(expected)
 
     def _received_label(self, tok: Token) -> str:
-        # Prioriza lexema para mensagem mais intuitiva; em EOF usa o nome do tipo.
+        # Texto do token recebido: lexema quando possivel.
         return tok.lexeme if tok.lexeme else tok.type.name

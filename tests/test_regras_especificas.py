@@ -186,6 +186,14 @@ simbora
 cabo
 """, "uai")
 
+    def test_ponto_virgula_fora_do_for_invalido(self):
+        self._assert_erro("""
+bora_cumpade main()
+simbora
+    trem_di_numeru x;
+cabo
+""", "uai")
+
     def test_expr_invalida(self):
         self._assert_erro("""
 bora_cumpade main()

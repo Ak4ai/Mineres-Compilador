@@ -245,11 +245,12 @@ class Lexer:
                         "SIMBOLO_DESCONHECIDO",
                     )
 
-                lexeme = self.source[self.pos : self.pos + tamanho]
+                lexema_bruto = self.source[self.pos : self.pos + tamanho]
+                lexema_canonico = lexema_bruto
 
                 # Classificacao final: palavras conhecidas vencem IDENTIFIER.
-                if lexeme in ALL_WORD_TOKENS:
-                    token_type = ALL_WORD_TOKENS[lexeme]
+                if lexema_bruto in ALL_WORD_TOKENS:
+                    token_type = ALL_WORD_TOKENS[lexema_bruto]
                 else:
                     # Tipos numericos para validacoes adicionais de sufixo invalido.
                     tipos_numericos = {
@@ -285,33 +286,33 @@ class Lexer:
                     # Validacoes extras para numeros mal formados.
                     numero_invalido = False
 
-                    if lexeme.lower().startswith("0x"):
+                    if lexema_bruto.lower().startswith("0x"):
                         try:
-                            int(lexeme, 16)
+                            int(lexema_bruto, 16)
                         except ValueError:
                             numero_invalido = True
 
                     if (
                         not numero_invalido
-                        and lexeme.startswith("0")
-                        and lexeme.isdigit()
-                        and lexeme != "0"
+                        and lexema_bruto.startswith("0")
+                        and lexema_bruto.isdigit()
+                        and lexema_bruto != "0"
                     ):
                         try:
-                            int(lexeme, 8)
+                            int(lexema_bruto, 8)
                         except ValueError:
                             numero_invalido = True
 
                     # Valida float apenas quando o AFD classificar como FLOAT_LITERAL.
                     if not numero_invalido and token_type_str == "FLOAT_LITERAL":
                         try:
-                            float(lexeme)
+                            float(lexema_bruto)
                         except ValueError:
                             numero_invalido = True
 
                     if numero_invalido:
                         raise LexicalError(
-                            lexeme,
+                            lexema_bruto,
                             inicio_linha,
                             inicio_coluna,
                             "NUMERO_MAL_FORMADO",
@@ -320,16 +321,22 @@ class Lexer:
                     # Valida o token retornado pelo automato antes de converter.
                     if not token_type_str or token_type_str not in TokenType._value2member_map_:
                         raise LexicalError(
-                            lexeme,
+                            lexema_bruto,
                             inicio_linha,
                             inicio_coluna,
                             "TOKEN_DESCONHECIDO",
                         )
                     token_type = TokenType(token_type_str)
 
-                self.tokens.append(Token(token_type, lexeme, inicio_linha, inicio_coluna))
-                self._advance_position(lexeme)
-                self.pos += len(lexeme)
+                if token_type == TokenType.FLOAT_LITERAL:
+                    if lexema_canonico.startswith("."):
+                        lexema_canonico = f"0{lexema_canonico}"
+                    if lexema_canonico.endswith("."):
+                        lexema_canonico = f"{lexema_canonico}0"
+
+                self.tokens.append(Token(token_type, lexema_canonico, inicio_linha, inicio_coluna))
+                self._advance_position(lexema_bruto)
+                self.pos += len(lexema_bruto)
             except LexicalError as erro:
                 # Comportamento padrao: falha rapida no primeiro erro.
                 if not continuar_apos_erro:

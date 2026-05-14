@@ -1,22 +1,16 @@
-"""Definicoes de tokens para a linguagem Mineres.
-
-Este modulo centraliza todos os tipos de token aceitos pela
-especificacao da linguagem Mineres.
-"""
-
 from enum import Enum
 
-
+# Lista de tipos de token da linguagem.
 class TokenType(Enum):
 
-    # CONTROLE
+    # Tokens internos do fluxo do compilador.
     EOF = "EOF"
     ERROR = "ERROR"
 
-    # IDENTIFICADORES
+    # Identificadores
     IDENTIFIER = "IDENTIFIER"
 
-    # LITERAIS
+    # Literais
     INTEGER_LITERAL = "INTEGER_LITERAL"
     FLOAT_LITERAL = "FLOAT_LITERAL"
     HEX_LITERAL = "HEX_LITERAL"
@@ -24,25 +18,30 @@ class TokenType(Enum):
     STRING_LITERAL = "STRING_LITERAL"
     CHAR_LITERAL = "CHAR_LITERAL"
 
-    # PALAVRAS RESERVADAS
+    # Estrutura principal do programa
     BORA_CUMPADE = "bora_cumpade"
     SIMBORA = "simbora"
     CABO = "cabo"
 
+    # Controle condicional
     UAI_SE = "uai_se"
     UAI_SENAO = "uai_senao"
 
+    # Controle de repeticao
     ENQUANTO_TIVER_TREM = "enquanto_tiver_trem"
     RODA_ESSE_TREM = "roda_esse_trem"
 
+    # Estrutura de selecao por casos
     DEPENDENU = "dependenu"
     DU_CASU = "du_casu"
     UAI_SO = "uai_so"
 
+    # Comandos de fluxo simples
     TA_BAO = "ta_bao"
     PARA_O_TREM = "para_o_trem"
     TOCA_O_TREM = "toca_o_trem"
 
+    # Entrada e saida
     XOVE = "xove"
     OIA_PROCE_VE = "oia_proce_ve"
 
@@ -53,7 +52,7 @@ class TokenType(Enum):
     TREM_DISCOLHE = "trem_discolhe"
     TROSSO = "trosso"
 
-    # BOOLEANOS
+    # Booleanos
     EH = "eh"
     NUM_EH = "num_eh"
 
@@ -98,7 +97,7 @@ class TokenType(Enum):
     # MAIN
     MAIN = "main"
 
-
+# Mapas usados pelo lexer para converter lexema textual em TokenType.
 # Mapa de palavras-chave reservadas.
 KEYWORD_TOKENS = {
     "bora_cumpade": TokenType.BORA_CUMPADE,
@@ -158,6 +157,7 @@ WORD_DELIMITER_TOKENS = {
 }
 
 # Uniao de todos os mapas por palavra para classificacao final no lexer.
+# Se uma palavra existir aqui, o lexer classifica direto pelo mapa.
 ALL_WORD_TOKENS = {
     **KEYWORD_TOKENS,
     **TYPE_TOKENS,

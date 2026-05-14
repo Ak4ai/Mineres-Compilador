@@ -7,7 +7,7 @@ q0 INICIAL
 q_id FINAL IDENTIFIER
 q_int FINAL INTEGER_LITERAL
 q_zero FINAL INTEGER_LITERAL
-q_float_dot_only INTERMEDIARIO
+q_float_dot_only FINAL FLOAT_LITERAL
 q_float_frac FINAL FLOAT_LITERAL
 q_hex_prefix INTERMEDIARIO
 q_hex FINAL HEX_LITERAL
@@ -155,6 +155,7 @@ q_dot_start q_float_frac 8
 q_dot_start q_float_frac 9
 q_zero q_hex_prefix x
 q_zero q_hex_prefix X
+q_zero q_float_dot_only .
 q_hex_prefix q_hex 0
 q_hex q_hex 0
 q_hex_prefix q_hex 1
