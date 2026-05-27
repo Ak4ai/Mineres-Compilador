@@ -102,14 +102,39 @@ class Parser:
         self.label_count += 1
         return f"label{self.label_count}"
 
+    def make_var(self, nome: str) -> str:
+        return f"var:{nome}"
+
+    def make_lit(self, valor: str) -> str:
+        return f"lit:{valor}"
+
+    def is_temp(self, valor: str) -> bool:
+        return valor.startswith("temp") and valor[4:].isdigit()
+
+    def is_label(self, valor: str) -> bool:
+        return valor.startswith("label") and valor[5:].isdigit()
+
+    def normalize_operand(self, valor):
+        if valor is None:
+            return "null"
+        if not isinstance(valor, str):
+            return valor
+        if valor == "null":
+            return valor
+        if valor.startswith(("var:", "lit:")):
+            return valor
+        if self.is_temp(valor) or self.is_label(valor):
+            return valor
+        return valor
+
     def emit(self, op, result=None, arg1=None, arg2=None) -> None:
         # Padroniza campos ausentes como "null" para manter a saida estavel.
         self.codigo.append(
             (
                 op,
-                "null" if result is None else result,
-                "null" if arg1 is None else arg1,
-                "null" if arg2 is None else arg2,
+                self.normalize_operand(result),
+                self.normalize_operand(arg1),
+                self.normalize_operand(arg2),
             )
         )
 
@@ -136,7 +161,7 @@ class Parser:
         return codigo_capturado, result
 
     def _is_temp_name(self, value: str) -> bool:
-        return value.startswith("temp") and value[4:].isdigit()
+        return self.is_temp(value)
 
     def _refresh_temp_names(
         self, codigo: list[tuple[str, str, str, str]]
@@ -311,7 +336,7 @@ class Parser:
             codigo_init, _ = self._capture_expr_code()
         self.consume(TokenType.SEMICOLON)
         codigo_cond = []
-        cond = "eh"
+        cond = self.make_lit("eh")
         if self._is_expr_start(self.current()):
             codigo_cond, cond = self._capture_expr_code()
         self.consume(TokenType.SEMICOLON)
@@ -352,7 +377,7 @@ class Parser:
             ident = self.consume(TokenType.IDENTIFIER)
             self.consume(TokenType.RIGHT_PAREN)
             self.consume_delimiter()
-            self.emit("call", "read", ident.lexeme)
+            self.emit("call", "read", self.make_var(ident.lexeme))
             return
 
         self.consume(TokenType.OIA_PROCE_VE)
@@ -440,7 +465,7 @@ class Parser:
         # Estrutura dependenu/du_casu/uai_so.
         self.consume(TokenType.DEPENDENU)
         self.consume(TokenType.LEFT_PAREN)
-        ident = self.consume(TokenType.IDENTIFIER).lexeme
+        ident = self.make_var(self.consume(TokenType.IDENTIFIER).lexeme)
         self.consume(TokenType.RIGHT_PAREN)
         self.consume(TokenType.SIMBORA)
         label_end = self.new_label()
@@ -666,7 +691,7 @@ class Parser:
             self.consume(TokenType.MINUS)
             value = self.uno()
             temp = self.new_temp()
-            self.emit("sub", temp, "0", value)
+            self.emit("sub", temp, self.make_lit("0"), value)
             return temp
         return self.fator_zao()
 
@@ -682,23 +707,23 @@ class Parser:
     def fator_zin(self) -> str:
         # Menor unidade de expressao: literal ou identificador.
         if self._matches(TokenType.STRING_LITERAL):
-            return self.consume(TokenType.STRING_LITERAL).lexeme
+            return self.make_lit(self.consume(TokenType.STRING_LITERAL).lexeme)
         if self._matches(TokenType.IDENTIFIER):
-            return self.consume(TokenType.IDENTIFIER).lexeme
+            return self.make_var(self.consume(TokenType.IDENTIFIER).lexeme)
         if self._matches(TokenType.INTEGER_LITERAL):
-            return self.consume(TokenType.INTEGER_LITERAL).lexeme
+            return self.make_lit(self.consume(TokenType.INTEGER_LITERAL).lexeme)
         if self._matches(TokenType.HEX_LITERAL):
-            return self.consume(TokenType.HEX_LITERAL).lexeme
+            return self.make_lit(self.consume(TokenType.HEX_LITERAL).lexeme)
         if self._matches(TokenType.OCTAL_LITERAL):
-            return self.consume(TokenType.OCTAL_LITERAL).lexeme
+            return self.make_lit(self.consume(TokenType.OCTAL_LITERAL).lexeme)
         if self._matches(TokenType.FLOAT_LITERAL):
-            return self.consume(TokenType.FLOAT_LITERAL).lexeme
+            return self.make_lit(self.consume(TokenType.FLOAT_LITERAL).lexeme)
         if self._matches(TokenType.EH):
-            return self.consume(TokenType.EH).lexeme
+            return self.make_lit(self.consume(TokenType.EH).lexeme)
         if self._matches(TokenType.NUM_EH):
-            return self.consume(TokenType.NUM_EH).lexeme
+            return self.make_lit(self.consume(TokenType.NUM_EH).lexeme)
         if self._matches(TokenType.CHAR_LITERAL):
-            return self.consume(TokenType.CHAR_LITERAL).lexeme
+            return self.make_lit(self.consume(TokenType.CHAR_LITERAL).lexeme)
 
         tok = self.current()
         raise ParserError(

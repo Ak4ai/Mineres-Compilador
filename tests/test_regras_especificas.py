@@ -68,9 +68,35 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
-                ("mult", "temp1", "2", "3"),
-                ("add", "temp2", "1", "temp1"),
-                ("att", "x", "temp2", "null"),
+                ("mult", "temp1", "lit:2", "lit:3"),
+                ("add", "temp2", "lit:1", "temp1"),
+                ("att", "var:x", "temp2", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_diferencia_variavel_de_literal(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    trem_discrita a, b uai
+    a fica_assim_entao "teste" uai
+    b fica_assim_entao a + a uai
+    b fica_assim_entao a + "a" uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("att", "var:a", 'lit:"teste"', "null"),
+                ("add", "temp1", "var:a", "var:a"),
+                ("att", "var:b", "temp1", "null"),
+                ("add", "temp2", "var:a", 'lit:"a"'),
+                ("att", "var:b", "temp2", "null"),
             ],
         )
 
@@ -90,10 +116,10 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
-                ("les", "temp1", "x", "10"),
+                ("les", "temp1", "var:x", "lit:10"),
                 ("if", "temp1", "label1", "label2"),
                 ("label", "label1", "null", "null"),
-                ("call", "print", "x", "null"),
+                ("call", "print", "var:x", "null"),
                 ("label", "label2", "null", "null"),
             ],
         )
@@ -116,12 +142,12 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
-                ("if", "eh", "label1", "label2"),
+                ("if", "lit:eh", "label1", "label2"),
                 ("label", "label1", "null", "null"),
-                ("call", "print", "x", "null"),
+                ("call", "print", "var:x", "null"),
                 ("jump", "label3", "null", "null"),
                 ("label", "label2", "null", "null"),
-                ("call", "print", "y", "null"),
+                ("call", "print", "var:y", "null"),
                 ("label", "label3", "null", "null"),
             ],
         )
@@ -143,11 +169,11 @@ cabo
             parser.codigo,
             [
                 ("label", "label1", "null", "null"),
-                ("les", "temp1", "x", "3"),
+                ("les", "temp1", "var:x", "lit:3"),
                 ("if", "temp1", "label2", "label3"),
                 ("label", "label2", "null", "null"),
-                ("add", "temp2", "x", "1"),
-                ("att", "x", "temp2", "null"),
+                ("add", "temp2", "var:x", "lit:1"),
+                ("att", "var:x", "temp2", "null"),
                 ("jump", "label1", "null", "null"),
                 ("label", "label3", "null", "null"),
             ],
@@ -169,14 +195,14 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
-                ("att", "i", "0", "null"),
+                ("att", "var:i", "lit:0", "null"),
                 ("label", "label1", "null", "null"),
-                ("les", "temp1", "i", "10"),
+                ("les", "temp1", "var:i", "lit:10"),
                 ("if", "temp1", "label2", "label3"),
                 ("label", "label2", "null", "null"),
-                ("call", "print", "i", "null"),
-                ("add", "temp2", "i", "1"),
-                ("att", "i", "temp2", "null"),
+                ("call", "print", "var:i", "null"),
+                ("add", "temp2", "var:i", "lit:1"),
+                ("att", "var:i", "temp2", "null"),
                 ("jump", "label1", "null", "null"),
                 ("label", "label3", "null", "null"),
             ],
@@ -198,13 +224,13 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
-                ("att", "i", "0", "null"),
+                ("att", "var:i", "lit:0", "null"),
                 ("label", "label1", "null", "null"),
-                ("if", "eh", "label2", "label3"),
+                ("if", "lit:eh", "label2", "label3"),
                 ("label", "label2", "null", "null"),
-                ("call", "print", "i", "null"),
-                ("add", "temp1", "i", "1"),
-                ("att", "i", "temp1", "null"),
+                ("call", "print", "var:i", "null"),
+                ("add", "temp1", "var:i", "lit:1"),
+                ("att", "var:i", "temp1", "null"),
                 ("jump", "label1", "null", "null"),
                 ("label", "label3", "null", "null"),
             ],
@@ -239,11 +265,11 @@ cabo
         self.assertTrue(parser.parse())
         self.assertEqual(
             parser.codigo,
-            [("call", "print", '"a\nb"', "null")],
+            [("call", "print", 'lit:"a\nb"', "null")],
         )
         self.assertEqual(
             _linhas_codigo_intermediario(parser.codigo),
-            ['(call, print, "a\\nb", null)'],
+            ['(call, print, lit:"a\\nb", null)'],
         )
 
     def test_codigo_intermediario_for_temporarios_em_ordem_visual(self):
@@ -265,17 +291,17 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
-                ("att", "i", "0", "null"),
+                ("att", "var:i", "lit:0", "null"),
                 ("label", "label1", "null", "null"),
-                ("les", "temp1", "i", "10"),
+                ("les", "temp1", "var:i", "lit:10"),
                 ("if", "temp1", "label2", "label3"),
                 ("label", "label2", "null", "null"),
-                ("add", "temp2", "x", "1"),
-                ("att", "x", "temp2", "null"),
-                ("add", "temp3", "y", "x"),
-                ("att", "y", "temp3", "null"),
-                ("add", "temp4", "i", "1"),
-                ("att", "i", "temp4", "null"),
+                ("add", "temp2", "var:x", "lit:1"),
+                ("att", "var:x", "temp2", "null"),
+                ("add", "temp3", "var:y", "var:x"),
+                ("att", "var:y", "temp3", "null"),
+                ("add", "temp4", "var:i", "lit:1"),
+                ("att", "var:i", "temp4", "null"),
                 ("jump", "label1", "null", "null"),
                 ("label", "label3", "null", "null"),
             ],
@@ -300,19 +326,19 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
-                ("eq", "temp1", "x", "1"),
+                ("eq", "temp1", "var:x", "lit:1"),
                 ("if", "temp1", "label2", "label3"),
                 ("label", "label2", "null", "null"),
-                ("att", "y", "10", "null"),
+                ("att", "var:y", "lit:10", "null"),
                 ("jump", "label1", "null", "null"),
                 ("label", "label3", "null", "null"),
-                ("eq", "temp2", "x", "2"),
+                ("eq", "temp2", "var:x", "lit:2"),
                 ("if", "temp2", "label4", "label5"),
                 ("label", "label4", "null", "null"),
-                ("att", "y", "20", "null"),
+                ("att", "var:y", "lit:20", "null"),
                 ("jump", "label1", "null", "null"),
                 ("label", "label5", "null", "null"),
-                ("att", "y", "30", "null"),
+                ("att", "var:y", "lit:30", "null"),
                 ("label", "label1", "null", "null"),
             ],
         )
