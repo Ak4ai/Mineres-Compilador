@@ -17,6 +17,8 @@ q_plus FINAL +
 q_minus FINAL -
 q_div FINAL /
 q_mod FINAL %
+q_mult FINAL *
+q_assign FINAL =
 q_lparen FINAL (
 q_rparen FINAL )
 q_lbrace FINAL {
@@ -30,6 +32,7 @@ q_le FINAL <=
 q_ge FINAL >=
 q_str_open INTERMEDIARIO
 q_str_body INTERMEDIARIO
+q_str_escape INTERMEDIARIO
 q_str_end FINAL STRING_LITERAL
 q_char_open INTERMEDIARIO
 q_char_escape INTERMEDIARIO
@@ -220,6 +223,8 @@ q0 q_plus +
 q0 q_minus -
 q0 q_div /
 q0 q_mod %
+q0 q_mult *
+q0 q_assign =
 q0 q_lparen (
 q0 q_rparen )
 q0 q_lbrace {
@@ -349,8 +354,7 @@ q_str_open q_str_body Z
 q_str_body q_str_body Z
 q_str_open q_str_body [
 q_str_body q_str_body [
-q_str_open q_str_body \
-q_str_body q_str_body \
+q_str_open q_str_escape \
 q_str_open q_str_body ]
 q_str_body q_str_body ]
 q_str_open q_str_body ^
@@ -422,6 +426,18 @@ q_str_body q_str_body ~
 q_str_body q_str_body <SPACE>
 q_str_open q_str_end "
 q_str_body q_str_end "
+q_str_body q_str_escape \
+# From escape state accept common escapes and return to body
+q_str_escape q_str_body n
+q_str_escape q_str_body t
+q_str_escape q_str_body r
+q_str_escape q_str_body \
+q_str_escape q_str_body '
+q_str_escape q_str_body "
+q_str_escape q_str_body 0
+q_str_escape q_str_body b
+q_str_escape q_str_body f
+q_str_escape q_str_body v
 q0 q_char_open '
 q_char_open q_char_value !
 q_char_open q_char_value "

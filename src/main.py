@@ -5,6 +5,7 @@ from pathlib import Path
 
 from analisador_lexico.lexer import LexicalError, Lexer
 from analisador_sintatico.analisador_sintatico import Parser, ParserError
+from analisador_sintatico.interpretador import Interpretador
 
 
 def _descricao_fases(executar_saida_lexica: bool, executar_sintatico: bool) -> str:
@@ -184,6 +185,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Imprime o codigo intermediario gerado durante a analise sintatica.",
     )
     parser.add_argument(
+        "--executar",
+        action="store_true",
+        dest="executar_codigo",
+        help="Executa o codigo intermediario usando o interpretador.",
+    )
+    parser.add_argument(
         "--automato",
         help="Caminho opcional para o arquivo de definicao do automato.",
     )
@@ -287,6 +294,9 @@ def run() -> int:
 
     if args.print_codigo and not executar_sintatico:
         parser.error("A opcao --print-codigo exige execucao da analise sintatica.")
+    
+    if args.executar_codigo and not executar_sintatico:
+        parser.error("A opcao --executar exige execucao da analise sintatica.")
 
     # Nao permite arquivo e --source ao mesmo tempo.
     if args.input is not None and args.source is not None:
@@ -341,6 +351,22 @@ def run() -> int:
                     detalhe=str(error),
                     stream=sys.stderr,
                 )
+                return 1
+        
+        # Executa código intermediário se solicitado
+        if args.executar_codigo and parser_sintatico is not None:
+            print("\nExecutando codigo intermediario...")
+            print("=" * 70)
+            interpretador = Interpretador(parser_sintatico.codigo)
+            sucesso = interpretador.executar()
+            
+            if sucesso:
+                saida = interpretador.get_saida()
+                if saida:
+                    print(saida)
+            else:
+                erros = interpretador.get_erros()
+                print(f"Erro durante execução: {erros}", file=sys.stderr)
                 return 1
 
         # Modo dedicado para validar apenas sintaxe, sem artefatos lexicos.

@@ -1,0 +1,106 @@
+== ANÁLISE LÉXICA ==
+Tokens identificados: 27
+
+Tokens (tupla):
+('bora_cumpade', 'FUNCTION_DEF', 1, 1)
+('main', 'MAIN', 1, 14)
+('(', 'LPAREN', 1, 18)
+(')', 'RPAREN', 1, 19)
+('simbora', 'BEGIN_BLOCK', 2, 1)
+('trem_di_numeru', 'INT', 3, 5)
+('n', 'IDENTIFIER', 3, 20)
+('uai', 'SEMICOLON', 3, 22)
+('oia_proce_ve', 'OUTPUT', 4, 5)
+('(', 'LPAREN', 4, 17)
+('"Digite um número:"', 'STRING_LITERAL', 4, 18)
+(')', 'RPAREN', 4, 37)
+('uai', 'SEMICOLON', 4, 39)
+('xove', 'INPUT', 5, 5)
+('(', 'LPAREN', 5, 9)
+('trem_di_numeru', 'INT', 5, 10)
+(',', 'COMMA', 5, 24)
+('n', 'IDENTIFIER', 5, 26)
+(')', 'RPAREN', 5, 27)
+('uai', 'SEMICOLON', 5, 29)
+('oia_proce_ve', 'OUTPUT', 6, 5)
+('(', 'LPAREN', 6, 17)
+('n', 'IDENTIFIER', 6, 18)
+(')', 'RPAREN', 6, 19)
+('uai', 'SEMICOLON', 6, 21)
+('cabo', 'END_BLOCK', 7, 1)
+('EOF', 'EOF', 8, 1)
+
+Resumo:
+-> Identificados: 27
+-> Não identificados: 0
+
+
+== ANÁLISE SINTÁTICA ==
+- Sucesso: True
+
+
+== TABELA DE VARIÁVEIS ==
+{'n': 'trem_di_numeru'}
+
+
+== CÓDIGO INTERMEDIÁRIO ==
+('call', 'print', None, '"Digite um número:"')
+('call', 'read', ('var', 'n'), None)
+('call', 'print', 'n', None)
+
+Passos do analisador sintático:
+ENTRAR function | pos=0 | atual=bora_cumpade (FUNCTION_DEF)
+CONSUMIR OK | pos=0 | esperado=bora_cumpade | encontrado=bora_cumpade (FUNCTION_DEF)
+CONSUMIR OK | pos=1 | esperado=main | encontrado=main (MAIN)
+CONSUMIR OK | pos=2 | esperado=( | encontrado=( (LPAREN)
+CONSUMIR OK | pos=3 | esperado=) | encontrado=) (RPAREN)
+ENTRAR bloco | pos=4 | atual=simbora (BEGIN_BLOCK)
+CONSUMIR OK | pos=4 | esperado=simbora | encontrado=simbora (BEGIN_BLOCK)
+ENTRAR stmtList | pos=5 | atual=trem_di_numeru (INT)
+ENTRAR stmt | pos=5 | atual=trem_di_numeru (INT)
+ENTRAR declaration | pos=5 | atual=trem_di_numeru (INT)
+ENTRAR type | pos=5 | atual=trem_di_numeru (INT)
+CONSUMIR OK | pos=5 | esperado=TYPE | encontrado=trem_di_numeru (INT)
+ENTRAR identList | pos=6 | atual=n (IDENTIFIER)
+CONSUMIR OK | pos=6 | esperado=IDENT | encontrado=n (IDENTIFIER)
+CONSUMIR OK | pos=7 | esperado=uai | encontrado=uai (SEMICOLON)
+ENTRAR stmt | pos=8 | atual=oia_proce_ve (OUTPUT)
+ENTRAR ioStmt | pos=8 | atual=oia_proce_ve (OUTPUT)
+CONSUMIR OK | pos=8 | esperado=oia_proce_ve | encontrado=oia_proce_ve (OUTPUT)
+CONSUMIR OK | pos=9 | esperado=( | encontrado=( (LPAREN)
+ENTRAR outList | pos=10 | atual="Digite um número:" (STRING_LITERAL)
+ENTRAR out | pos=10 | atual="Digite um número:" (STRING_LITERAL)
+ENTRAR fatorZin | pos=10 | atual="Digite um número:" (STRING_LITERAL)
+CONSUMIR OK | pos=10 | esperado=TokenType.STRING_LITERAL | encontrado="Digite um número:" (STRING_LITERAL)
+CONSUMIR OK | pos=11 | esperado=) | encontrado=) (RPAREN)
+CONSUMIR OK | pos=12 | esperado=uai | encontrado=uai (SEMICOLON)
+ENTRAR stmt | pos=13 | atual=xove (INPUT)
+ENTRAR ioStmt | pos=13 | atual=xove (INPUT)
+CONSUMIR OK | pos=13 | esperado=xove | encontrado=xove (INPUT)
+CONSUMIR OK | pos=14 | esperado=( | encontrado=( (LPAREN)
+ENTRAR type | pos=15 | atual=trem_di_numeru (INT)
+CONSUMIR OK | pos=15 | esperado=TYPE | encontrado=trem_di_numeru (INT)
+CONSUMIR OK | pos=16 | esperado=, | encontrado=, (COMMA)
+CONSUMIR OK | pos=17 | esperado=IDENT | encontrado=n (IDENTIFIER)
+CONSUMIR OK | pos=18 | esperado=) | encontrado=) (RPAREN)
+CONSUMIR OK | pos=19 | esperado=uai | encontrado=uai (SEMICOLON)
+ENTRAR stmt | pos=20 | atual=oia_proce_ve (OUTPUT)
+ENTRAR ioStmt | pos=20 | atual=oia_proce_ve (OUTPUT)
+CONSUMIR OK | pos=20 | esperado=oia_proce_ve | encontrado=oia_proce_ve (OUTPUT)
+CONSUMIR OK | pos=21 | esperado=( | encontrado=( (LPAREN)
+ENTRAR outList | pos=22 | atual=n (IDENTIFIER)
+ENTRAR out | pos=22 | atual=n (IDENTIFIER)
+ENTRAR fatorZin | pos=22 | atual=n (IDENTIFIER)
+CONSUMIR OK | pos=22 | esperado=TokenType.IDENTIFIER | encontrado=n (IDENTIFIER)
+CONSUMIR OK | pos=23 | esperado=) | encontrado=) (RPAREN)
+CONSUMIR OK | pos=24 | esperado=uai | encontrado=uai (SEMICOLON)
+CONSUMIR OK | pos=25 | esperado=cabo | encontrado=cabo (END_BLOCK)
+CONSUMIR OK | pos=26 | esperado=TokenType.EOF | encontrado=EOF (EOF)
+SUCESSO análise sintática finalizada
+
+
+== INTERPRETADOR ==
+- Sucesso: True
+- Saída:
+Digite um número:
+a

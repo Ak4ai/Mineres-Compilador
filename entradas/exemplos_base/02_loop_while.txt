@@ -1,0 +1,10 @@
+// Exemplo com while loop
+bora_cumpade main ( ) simbora
+  trem_di_numeru a;
+  a = 5;
+  enquanto_tiver_trem ( a > 0 ) simbora
+    oia_proce_ve ( a );
+    a = a - 1;
+  cabo
+  oia_proce_ve ( 0 );
+cabo

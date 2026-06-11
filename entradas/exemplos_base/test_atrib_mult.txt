@@ -1,0 +1,7 @@
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+    x = 5 uai
+    x = x * 2 uai
+    oia_proce_ve(x) uai
+cabo

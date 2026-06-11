@@ -1,0 +1,26 @@
+bora_cumpade main()
+simbora
+    trem_di_numeru x, y uai
+    trem_cum_virgula z uai
+
+    x fica_assim_entao 1 uai
+    y fica_assim_entao 2 uai
+
+    roda_esse_trem (x fica_assim_entao 0; x < 3; x fica_assim_entao x + 1)
+        simbora
+            uai_se (x mema_coisa 1)
+                oia_proce_ve("meio") uai
+            uai_senao
+                oia_proce_ve(x) uai
+        cabo
+
+    enquanto_tiver_trem (y < 5)
+        y fica_assim_entao y + 1 uai
+
+    dependenu (y) simbora
+        du_casu 5:
+            oia_proce_ve("cinco") uai
+        uai_so:
+            oia_proce_ve("outro") uai
+    cabo
+cabo

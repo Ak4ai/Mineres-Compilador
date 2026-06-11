@@ -521,8 +521,12 @@ class Parser:
 
     def resto_atrib(self, left: str) -> str:
         # Continua atribuicao (associativa a direita).
-        if self._matches(TokenType.FICA_ASSIM_ENTAO):
-            self.consume(TokenType.FICA_ASSIM_ENTAO)
+        # Aceita `fica_assim_entao` ou operador `=` como alternativa de atribuicao.
+        if self._matches(TokenType.FICA_ASSIM_ENTAO) or self._matches(TokenType.ASSIGN):
+            if self._matches(TokenType.FICA_ASSIM_ENTAO):
+                self.consume(TokenType.FICA_ASSIM_ENTAO)
+            else:
+                self.consume(TokenType.ASSIGN)
             right = self.atrib()
             self.emit("att", left, right)
             return left
@@ -656,8 +660,12 @@ class Parser:
 
     def resto_mult(self, left: str) -> str:
         # Encadeamento de veiz/sob///%.
-        if self._matches(TokenType.VEIZ):
-            self.consume(TokenType.VEIZ)
+        # Aceita operador palavra `veiz` ou simbolo '*' como multiplicacao.
+        if self._matches(TokenType.VEIZ) or self._matches(TokenType.MULT):
+            if self._matches(TokenType.VEIZ):
+                self.consume(TokenType.VEIZ)
+            else:
+                self.consume(TokenType.MULT)
             right = self.uno()
             temp = self.new_temp()
             self.emit("mult", temp, left, right)
@@ -735,11 +743,13 @@ class Parser:
 
     # Bloco 6: helpers de validacao
     def consume_delimiter(self) -> Token:
-        # Delimitador de comando fora do for.
+        # Delimitador de comando: aceita tanto 'uai' quanto ';'
         tok = self.current()
         if self._matches(TokenType.UAI):
             return self.consume(TokenType.UAI)
-        raise ParserError("uai", self._received_label(tok), tok.line, tok.column)
+        if self._matches(TokenType.SEMICOLON):
+            return self.consume(TokenType.SEMICOLON)
+        raise ParserError("uai ou ;", self._received_label(tok), tok.line, tok.column)
 
     def _is_type_start(self, tok: Token) -> bool:
         # Diz se o token pode iniciar declaracao de tipo.

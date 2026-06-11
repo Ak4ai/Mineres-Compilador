@@ -1,0 +1,17 @@
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+
+    x fica_assim_entao 2 uai
+
+    dependenu (x) simbora
+        du_casu 1:
+            oia_proce_ve("um") uai
+        du_casu 2:
+            oia_proce_ve("dois") uai
+        du_casu 3:
+            oia_proce_ve("tres") uai
+        uai_so:
+            oia_proce_ve("outro") uai
+    cabo
+cabo

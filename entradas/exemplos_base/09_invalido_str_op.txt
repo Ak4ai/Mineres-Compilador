@@ -1,0 +1,7 @@
+bora_cumpade main()
+simbora
+    trem_discrita s uai
+    trem_di_numeru n uai
+    n fica_assim_entao 5 uai
+    s fica_assim_entao "ola" + n uai
+cabo

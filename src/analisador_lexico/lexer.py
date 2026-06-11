@@ -176,19 +176,40 @@ class Lexer:
             restante = self.source[self.pos :]
 
             try:
-                # Detecta string nao fechada antes do automato.
+                # Reconhece string com suporte a Unicode e escapes.
                 if restante.startswith('"'):
-                    fechamento = restante.find('"', 1)
-                    fim_linha = restante.find("\n")
-
-                    if fechamento == -1 or (fim_linha != -1 and fim_linha < fechamento):
-                        lexeme = restante[:fim_linha] if fim_linha != -1 else restante
+                    i = 1
+                    while i < len(restante):
+                        ch = restante[i]
+                        if ch == '\\' and i + 1 < len(restante):
+                            # Escape: pula o próximo caractere
+                            i += 2
+                        elif ch == '"':
+                            # String fechada com sucesso
+                            lexema_bruto = restante[:i + 1]
+                            lexema_canonico = self._decodificar_escapes_literal(lexema_bruto)
+                            self.tokens.append(Token(TokenType.STRING_LITERAL, lexema_canonico, inicio_linha, inicio_coluna))
+                            self._advance_position(lexema_bruto)
+                            self.pos += len(lexema_bruto)
+                            break
+                        elif ch == '\n':
+                            raise LexicalError(
+                                restante[:i],
+                                inicio_linha,
+                                inicio_coluna,
+                                "STRING_NAO_FECHADA",
+                            )
+                        else:
+                            i += 1
+                    else:
+                        # Alcançou EOF sem fechar a string
                         raise LexicalError(
-                            lexeme,
+                            restante,
                             inicio_linha,
                             inicio_coluna,
                             "STRING_NAO_FECHADA",
                         )
+                    continue
 
                 # Valida char no formato canonico antes do automato.
                 # Aceita um caractere simples ('c') ou um escape valido ('\\n', '\\t', etc.).

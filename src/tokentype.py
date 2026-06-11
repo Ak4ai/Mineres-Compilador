@@ -79,6 +79,8 @@ class TokenType(Enum):
     GT = ">"
     LE = "<="
     GE = ">="
+    MULT = "*"
+    ASSIGN = "="
 
     # DELIMITADORES
     LEFT_PAREN = "("

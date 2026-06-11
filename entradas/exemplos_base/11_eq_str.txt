@@ -1,0 +1,22 @@
+bora_cumpade main()
+simbora
+    trem_discrita s1, s2 uai
+    s1 fica_assim_entao "abc" uai
+    s2 fica_assim_entao "abc" uai
+    // Teste 1: variável vs variável (iguais)
+    uai_se (s1 mema_coisa s2)
+        oia_proce_ve("s1 == s2") uai
+    uai_senao
+        oia_proce_ve("s1 != s2") uai
+    // Teste 2: variável vs literal
+    uai_se (s1 mema_coisa "abc")
+        oia_proce_ve("s1 == \"abc\"") uai
+    uai_senao
+        oia_proce_ve("s1 != \"abc\"") uai
+    // Teste 3: desigualdade
+    s2 fica_assim_entao "def" uai
+    uai_se (s1 neh_nada s2)
+        oia_proce_ve("s1 != s2 (agora)") uai
+    uai_senao
+        oia_proce_ve("s1 == s2 (agora)") uai
+cabo
