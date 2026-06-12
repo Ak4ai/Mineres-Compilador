@@ -79,6 +79,12 @@ class ParserError(Exception):
         )
 
 
+class SemanticError(Exception):
+    # Erro semantico: para na primeira inconsistencia detectada.
+    def __init__(self, message: str, line: int, column: int) -> None:
+        super().__init__(f"Erro semantico: {message} na linha {line}, coluna {column}")
+
+
 class Parser:
     # Parser recursivo: valida a estrutura do programa.
 
@@ -93,6 +99,132 @@ class Parser:
         self.codigo = []
         self.temp_count = 0
         self.label_count = 0
+        self.vars_table = {}
+        self.temp_types = {}
+
+    def _raise_semantic_error(self, message: str, tok: Token) -> None:
+        raise SemanticError(message, tok.line, tok.column)
+
+    def _type_family(self, tipo) -> str | None:
+        if tipo in (TokenType.TREM_DI_NUMERU, TokenType.TREM_CUM_VIRGULA):
+            return "num"
+        if tipo == TokenType.TREM_DISCRITA:
+            return "str"
+        if tipo == TokenType.TREM_DISCOLHE:
+            return "bool"
+        if tipo == TokenType.TROSSO:
+            return "char"
+        if tipo in {"num", "str", "bool", "char"}:
+            return tipo
+        return None
+
+    def _literal_type_family(self, valor: str) -> str:
+        if valor in {"eh", "num_eh"}:
+            return "bool"
+        if valor.startswith('"'):
+            return "str"
+        if valor.startswith("'"):
+            return "char"
+        return "num"
+
+    def _operand_type_family(self, operando: str, tok: Token | None = None) -> str | None:
+        if operando == "null":
+            return None
+        if operando.startswith("var:"):
+            nome = operando[4:]
+            tipo = self.vars_table.get(nome)
+            if tipo is None and tok is not None:
+                self._raise_semantic_error(f"variavel '{nome}' nao declarada", tok)
+            return self._type_family(tipo)
+        if operando.startswith("lit:"):
+            return self._literal_type_family(operando[4:])
+        if self.is_temp(operando):
+            tipo = self.temp_types.get(operando)
+            if tipo is None and tok is not None:
+                self._raise_semantic_error(
+                    f"tipo desconhecido para temporario '{operando}'",
+                    tok,
+                )
+            return tipo
+        return None
+
+    def _register_temp_type(self, temp: str, tipo: str) -> None:
+        if self.is_temp(temp):
+            self.temp_types[temp] = tipo
+
+    def _declare_identifier(self, ident: Token, tipo) -> None:
+        if ident.lexeme in self.vars_table:
+            self._raise_semantic_error(
+                f"variavel '{ident.lexeme}' ja declarada",
+                ident,
+            )
+        self.vars_table[ident.lexeme] = tipo
+
+    def _ensure_declared_identifier(self, ident: Token) -> None:
+        if ident.lexeme not in self.vars_table:
+            self._raise_semantic_error(
+                f"variavel '{ident.lexeme}' nao declarada",
+                ident,
+            )
+
+    def _ensure_assignable(self, operando: str, tok: Token) -> None:
+        if not operando.startswith("var:"):
+            self._raise_semantic_error(
+                "lado esquerdo da atribuicao deve ser uma variavel",
+                tok,
+            )
+
+    def _ensure_same_family(self, left: str, right: str, tok: Token, contexto: str) -> str:
+        left_type = self._operand_type_family(left, tok)
+        right_type = self._operand_type_family(right, tok)
+
+        if left_type != right_type:
+            self._raise_semantic_error(
+                f"tipos incompativeis em {contexto}: {left_type} e {right_type}",
+                tok,
+            )
+
+        return left_type
+
+    def _ensure_numeric(self, operando: str, tok: Token, contexto: str) -> None:
+        tipo = self._operand_type_family(operando, tok)
+        if tipo != "num":
+            self._raise_semantic_error(
+                f"{contexto} exige operando numerico, mas recebeu {tipo}",
+                tok,
+            )
+
+    def _ensure_add_types(self, left: str, right: str, tok: Token) -> str:
+        left_type = self._operand_type_family(left, tok)
+        right_type = self._operand_type_family(right, tok)
+
+        if left_type == right_type and left_type in {"num", "str"}:
+            return left_type
+
+        self._raise_semantic_error(
+            f"tipos incompativeis em soma: {left_type} e {right_type}",
+            tok,
+        )
+
+    def _ensure_boolean(self, operando: str, tok: Token, contexto: str) -> None:
+        tipo = self._operand_type_family(operando, tok)
+        if tipo != "bool":
+            self._raise_semantic_error(
+                f"{contexto} exige expressao booleana, mas recebeu {tipo}",
+                tok,
+            )
+
+    def _ensure_read_type(self, ident: Token, tipo_lido) -> None:
+        self._ensure_declared_identifier(ident)
+        tipo_variavel = self.vars_table[ident.lexeme]
+        if tipo_variavel != tipo_lido:
+            self._raise_semantic_error(
+                (
+                    f"tipo de leitura incompativel para '{ident.lexeme}': "
+                    f"{tipo_lido.value} em variavel {tipo_variavel.value}"
+                ),
+                ident,
+            )
 
     def new_temp(self) -> str:
         self.temp_count += 1
@@ -224,12 +356,12 @@ class Parser:
         self.consume(TokenType.RIGHT_PAREN)
         self.bloco()
 
-    def type_rule(self) -> None:
+    def type_rule(self):
         # Aceita um dos tipos primitivos da linguagem.
         tok = self.current()
         if tok.type in TYPE_START_TOKEN_TYPES:
             self.consume(tok.type)
-            return
+            return tok.type
         raise ParserError("<type>", self._received_label(tok), tok.line, tok.column)
 
     def bloco(self) -> None:
@@ -311,21 +443,23 @@ class Parser:
 
     def declaration(self) -> None:
         # Declaracao: tipo + lista de nomes + uai.
-        self.type_rule()
-        self.ident_list()
+        tipo = self.type_rule()
+        self.ident_list(tipo)
         self.consume_delimiter()
 
-    def ident_list(self) -> None:
+    def ident_list(self, tipo) -> None:
         # Primeiro identificador da declaracao.
-        self.consume(TokenType.IDENTIFIER)
-        self.resto_ident_list()
+        ident = self.consume(TokenType.IDENTIFIER)
+        self._declare_identifier(ident, tipo)
+        self.resto_ident_list(tipo)
 
-    def resto_ident_list(self) -> None:
+    def resto_ident_list(self, tipo) -> None:
         # Continua lista de identificadores separados por virgula.
         if self._matches(TokenType.COMMA):
             self.consume(TokenType.COMMA)
-            self.consume(TokenType.IDENTIFIER)
-            self.resto_ident_list()
+            ident = self.consume(TokenType.IDENTIFIER)
+            self._declare_identifier(ident, tipo)
+            self.resto_ident_list(tipo)
 
     def for_stmt(self) -> None:
         # For: roda_esse_trem(expr; expr; expr) + comando/bloco.
@@ -339,6 +473,7 @@ class Parser:
         cond = self.make_lit("eh")
         if self._is_expr_start(self.current()):
             codigo_cond, cond = self._capture_expr_code()
+            self._ensure_boolean(cond, self.current(), "condicao do for")
         self.consume(TokenType.SEMICOLON)
         codigo_inc = []
         if self._is_expr_start(self.current()):
@@ -372,9 +507,10 @@ class Parser:
         if self._matches(TokenType.XOVE):
             self.consume(TokenType.XOVE)
             self.consume(TokenType.LEFT_PAREN)
-            self.type_rule()
+            tipo_lido = self.type_rule()
             self.consume(TokenType.COMMA)
             ident = self.consume(TokenType.IDENTIFIER)
+            self._ensure_read_type(ident, tipo_lido)
             self.consume(TokenType.RIGHT_PAREN)
             self.consume_delimiter()
             self.emit("call", "read", self.make_var(ident.lexeme))
@@ -414,6 +550,7 @@ class Parser:
         self.consume(TokenType.LEFT_PAREN)
         self.emit("label", label_start)
         cond = self.expr()
+        self._ensure_boolean(cond, self.current(), "condicao do enquanto")
         self.consume(TokenType.RIGHT_PAREN)
         self.emit("if", cond, label_body, label_end)
         self.emit("label", label_body)
@@ -426,6 +563,7 @@ class Parser:
         self.consume(TokenType.UAI_SE)
         self.consume(TokenType.LEFT_PAREN)
         cond = self.expr()
+        self._ensure_boolean(cond, self.current(), "condicao do if")
         self.consume(TokenType.RIGHT_PAREN)
 
         codigo_if = self._capture_stmt_code()
@@ -465,7 +603,9 @@ class Parser:
         # Estrutura dependenu/du_casu/uai_so.
         self.consume(TokenType.DEPENDENU)
         self.consume(TokenType.LEFT_PAREN)
-        ident = self.make_var(self.consume(TokenType.IDENTIFIER).lexeme)
+        ident_tok = self.consume(TokenType.IDENTIFIER)
+        self._ensure_declared_identifier(ident_tok)
+        ident = self.make_var(ident_tok.lexeme)
         self.consume(TokenType.RIGHT_PAREN)
         self.consume(TokenType.SIMBORA)
         label_end = self.new_label()
@@ -482,10 +622,12 @@ class Parser:
         # Um bloco du_casu.
         self.consume(TokenType.DU_CASU)
         valor = self.fator_zin()
+        self._ensure_same_family(ident, valor, self.current(), "case")
         self.consume(TokenType.COLON)
         codigo_case = self._capture_stmt_code()
 
         temp = self.new_temp()
+        self._register_temp_type(temp, "bool")
         label_case = self.new_label()
         label_next = self.new_label()
 
@@ -524,10 +666,12 @@ class Parser:
         # Aceita `fica_assim_entao` ou operador `=` como alternativa de atribuicao.
         if self._matches(TokenType.FICA_ASSIM_ENTAO) or self._matches(TokenType.ASSIGN):
             if self._matches(TokenType.FICA_ASSIM_ENTAO):
-                self.consume(TokenType.FICA_ASSIM_ENTAO)
+                op_tok = self.consume(TokenType.FICA_ASSIM_ENTAO)
             else:
-                self.consume(TokenType.ASSIGN)
+                op_tok = self.consume(TokenType.ASSIGN)
+            self._ensure_assignable(left, op_tok)
             right = self.atrib()
+            self._ensure_same_family(left, right, op_tok, "atribuicao")
             self.emit("att", left, right)
             return left
         return left
@@ -540,9 +684,12 @@ class Parser:
     def resto_or(self, left: str) -> str:
         # Encadeamento de OR.
         if self._matches(TokenType.QUARQUE_UM):
-            self.consume(TokenType.QUARQUE_UM)
+            op_tok = self.consume(TokenType.QUARQUE_UM)
             right = self.xor_rule()
+            self._ensure_boolean(left, op_tok, "operacao logica")
+            self._ensure_boolean(right, op_tok, "operacao logica")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("or", temp, left, right)
             return self.resto_or(temp)
         return left
@@ -555,9 +702,12 @@ class Parser:
     def resto_xor(self, left: str) -> str:
         # Encadeamento de XOR.
         if self._matches(TokenType.UM_O_OTO):
-            self.consume(TokenType.UM_O_OTO)
+            op_tok = self.consume(TokenType.UM_O_OTO)
             right = self.and_rule()
+            self._ensure_boolean(left, op_tok, "operacao logica")
+            self._ensure_boolean(right, op_tok, "operacao logica")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("xor", temp, left, right)
             return self.resto_xor(temp)
         return left
@@ -570,9 +720,12 @@ class Parser:
     def resto_and(self, left: str) -> str:
         # Encadeamento de AND.
         if self._matches(TokenType.TAMEM):
-            self.consume(TokenType.TAMEM)
+            op_tok = self.consume(TokenType.TAMEM)
             right = self.not_rule()
+            self._ensure_boolean(left, op_tok, "operacao logica")
+            self._ensure_boolean(right, op_tok, "operacao logica")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("and", temp, left, right)
             return self.resto_and(temp)
         return left
@@ -580,9 +733,11 @@ class Parser:
     def not_rule(self) -> str:
         # Operador logico NOT unario.
         if self._matches(TokenType.VAM_MARCA):
-            self.consume(TokenType.VAM_MARCA)
+            op_tok = self.consume(TokenType.VAM_MARCA)
             value = self.not_rule()
+            self._ensure_boolean(value, op_tok, "operacao not")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("not", temp, value)
             return temp
         return self.rel()
@@ -595,39 +750,55 @@ class Parser:
     def resto_rel(self, left: str) -> str:
         # Operadores ==, !=, <, <=, >, >=.
         if self._matches(TokenType.MEMA_COISA):
-            self.consume(TokenType.MEMA_COISA)
+            op_tok = self.consume(TokenType.MEMA_COISA)
             right = self.add()
+            self._ensure_same_family(left, right, op_tok, "comparacao")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("eq", temp, left, right)
             return temp
         if self._matches(TokenType.NEH_NADA):
-            self.consume(TokenType.NEH_NADA)
+            op_tok = self.consume(TokenType.NEH_NADA)
             right = self.add()
+            self._ensure_same_family(left, right, op_tok, "comparacao")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("dif", temp, left, right)
             return temp
         if self._matches(TokenType.LT):
-            self.consume(TokenType.LT)
+            op_tok = self.consume(TokenType.LT)
             right = self.add()
+            self._ensure_numeric(left, op_tok, "comparacao relacional")
+            self._ensure_numeric(right, op_tok, "comparacao relacional")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("les", temp, left, right)
             return temp
         if self._matches(TokenType.LE):
-            self.consume(TokenType.LE)
+            op_tok = self.consume(TokenType.LE)
             right = self.add()
+            self._ensure_numeric(left, op_tok, "comparacao relacional")
+            self._ensure_numeric(right, op_tok, "comparacao relacional")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("leq", temp, left, right)
             return temp
         if self._matches(TokenType.GT):
-            self.consume(TokenType.GT)
+            op_tok = self.consume(TokenType.GT)
             right = self.add()
+            self._ensure_numeric(left, op_tok, "comparacao relacional")
+            self._ensure_numeric(right, op_tok, "comparacao relacional")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("grt", temp, left, right)
             return temp
         if self._matches(TokenType.GE):
-            self.consume(TokenType.GE)
+            op_tok = self.consume(TokenType.GE)
             right = self.add()
+            self._ensure_numeric(left, op_tok, "comparacao relacional")
+            self._ensure_numeric(right, op_tok, "comparacao relacional")
             temp = self.new_temp()
+            self._register_temp_type(temp, "bool")
             self.emit("geq", temp, left, right)
             return temp
         return left
@@ -640,15 +811,20 @@ class Parser:
     def resto_add(self, left: str) -> str:
         # Encadeamento de + e -.
         if self._matches(TokenType.PLUS):
-            self.consume(TokenType.PLUS)
+            op_tok = self.consume(TokenType.PLUS)
             right = self.mult()
+            result_type = self._ensure_add_types(left, right, op_tok)
             temp = self.new_temp()
+            self._register_temp_type(temp, result_type)
             self.emit("add", temp, left, right)
             return self.resto_add(temp)
         if self._matches(TokenType.MINUS):
-            self.consume(TokenType.MINUS)
+            op_tok = self.consume(TokenType.MINUS)
             right = self.mult()
+            self._ensure_numeric(left, op_tok, "operacao aritmetica")
+            self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
+            self._register_temp_type(temp, "num")
             self.emit("sub", temp, left, right)
             return self.resto_add(temp)
         return left
@@ -663,29 +839,41 @@ class Parser:
         # Aceita operador palavra `veiz` ou simbolo '*' como multiplicacao.
         if self._matches(TokenType.VEIZ) or self._matches(TokenType.MULT):
             if self._matches(TokenType.VEIZ):
-                self.consume(TokenType.VEIZ)
+                op_tok = self.consume(TokenType.VEIZ)
             else:
-                self.consume(TokenType.MULT)
+                op_tok = self.consume(TokenType.MULT)
             right = self.uno()
+            self._ensure_numeric(left, op_tok, "operacao aritmetica")
+            self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
+            self._register_temp_type(temp, "num")
             self.emit("mult", temp, left, right)
             return self.resto_mult(temp)
         if self._matches(TokenType.SOB):
-            self.consume(TokenType.SOB)
+            op_tok = self.consume(TokenType.SOB)
             right = self.uno()
+            self._ensure_numeric(left, op_tok, "operacao aritmetica")
+            self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
+            self._register_temp_type(temp, "num")
             self.emit("div", temp, left, right)
             return self.resto_mult(temp)
         if self._matches(TokenType.INT_DIV):
-            self.consume(TokenType.INT_DIV)
+            op_tok = self.consume(TokenType.INT_DIV)
             right = self.uno()
+            self._ensure_numeric(left, op_tok, "operacao aritmetica")
+            self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
+            self._register_temp_type(temp, "num")
             self.emit("divI", temp, left, right)
             return self.resto_mult(temp)
         if self._matches(TokenType.MOD):
-            self.consume(TokenType.MOD)
+            op_tok = self.consume(TokenType.MOD)
             right = self.uno()
+            self._ensure_numeric(left, op_tok, "operacao aritmetica")
+            self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
+            self._register_temp_type(temp, "num")
             self.emit("divI", temp, left, right)
             return self.resto_mult(temp)
         return left
@@ -693,12 +881,16 @@ class Parser:
     def uno(self) -> str:
         # Unarios + e -.
         if self._matches(TokenType.PLUS):
-            self.consume(TokenType.PLUS)
-            return self.uno()
-        if self._matches(TokenType.MINUS):
-            self.consume(TokenType.MINUS)
+            op_tok = self.consume(TokenType.PLUS)
             value = self.uno()
+            self._ensure_numeric(value, op_tok, "sinal unario")
+            return value
+        if self._matches(TokenType.MINUS):
+            op_tok = self.consume(TokenType.MINUS)
+            value = self.uno()
+            self._ensure_numeric(value, op_tok, "sinal unario")
             temp = self.new_temp()
+            self._register_temp_type(temp, "num")
             self.emit("sub", temp, self.make_lit("0"), value)
             return temp
         return self.fator_zao()
@@ -717,7 +909,9 @@ class Parser:
         if self._matches(TokenType.STRING_LITERAL):
             return self.make_lit(self.consume(TokenType.STRING_LITERAL).lexeme)
         if self._matches(TokenType.IDENTIFIER):
-            return self.make_var(self.consume(TokenType.IDENTIFIER).lexeme)
+            ident = self.consume(TokenType.IDENTIFIER)
+            self._ensure_declared_identifier(ident)
+            return self.make_var(ident.lexeme)
         if self._matches(TokenType.INTEGER_LITERAL):
             return self.make_lit(self.consume(TokenType.INTEGER_LITERAL).lexeme)
         if self._matches(TokenType.HEX_LITERAL):

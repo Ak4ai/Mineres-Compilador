@@ -18,7 +18,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from analisador_lexico.lexer import Lexer
-from analisador_sintatico.analisador_sintatico import Parser, ParserError
+from analisador_sintatico.analisador_sintatico import Parser, ParserError, SemanticError
 
 
 class TestAnalisadorSintatico(unittest.TestCase):
@@ -186,12 +186,23 @@ class TestAnalisadorSintatico(unittest.TestCase):
         if expected_msg_part:
             self.assertIn(expected_msg_part, str(ctx.exception))
 
+    def _assert_erro_semantico(self, fonte: str, expected_msg_part: str = None):
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        with self.assertRaises(SemanticError) as ctx:
+            Parser(tokens).parse()
+
+        if expected_msg_part:
+            self.assertIn(expected_msg_part, str(ctx.exception))
+
     # Casos focados em expressoes e precedencia.
 
     def test_precedencia_operadores(self):
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao 1 + 2 veiz 3 uai
 cabo
 """)
@@ -200,6 +211,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao 1 - 2 - 3 uai
 cabo
 """)
@@ -208,6 +220,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao (((((1))))) uai
 cabo
 """)
@@ -216,6 +229,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao - - + 5 uai
 cabo
 """)
@@ -226,6 +240,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_discolhe a uai
     a fica_assim_entao eh quarque_um num_eh tamem eh uai
 cabo
 """)
@@ -234,6 +249,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_discolhe a uai
     a fica_assim_entao vam_marca vam_marca eh uai
 cabo
 """)
@@ -267,6 +283,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru i uai
     roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
         simbora
             para_o_trem uai
@@ -280,6 +297,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
     dependenu(x) simbora
         du_casu 1: para_o_trem uai
         du_casu 2: toca_o_trem uai
@@ -292,6 +310,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru x, y uai
     dependenu(x) simbora
         du_casu 1:
             dependenu(y) simbora
@@ -316,6 +335,7 @@ cabo
         self._assert_erro_sintatico("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao () uai
 cabo
 """, "fator")
@@ -324,6 +344,7 @@ cabo
         self._assert_erro_sintatico("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao 1 + uai
 cabo
 """, "fator")
@@ -332,6 +353,7 @@ cabo
         self._assert_erro_sintatico("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao (1 uai
 cabo
 """, "RIGHT_PAREN")
@@ -362,9 +384,36 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao (((((((((((1))))))))))) uai
 cabo
 """)
+
+    def test_erro_semantico_variavel_nao_declarada(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    a fica_assim_entao 1 uai
+cabo
+""", "nao declarada")
+
+    def test_erro_semantico_redeclaracao(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    trem_di_numeru a uai
+    trem_di_numeru a uai
+cabo
+""", "ja declarada")
+
+    def test_erro_semantico_tipos_incompativeis(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    trem_di_numeru a uai
+    a fica_assim_entao "texto" uai
+cabo
+""", "tipos incompativeis")
 
     # Casos de borda.
 

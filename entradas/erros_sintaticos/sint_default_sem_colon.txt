@@ -1,5 +1,6 @@
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
     dependenu(x) simbora
         du_casu 1: para_o_trem uai
         uai_so para_o_trem uai

@@ -1,4 +1,5 @@
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
     x fica_assim_entao 1 + uai
 cabo

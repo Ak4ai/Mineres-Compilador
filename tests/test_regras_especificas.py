@@ -16,7 +16,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from analisador_lexico.lexer import Lexer
-from analisador_sintatico.analisador_sintatico import Parser, ParserError
+from analisador_sintatico.analisador_sintatico import Parser, ParserError, SemanticError
 from main import _linhas_codigo_intermediario
 from tokentype import TokenType
 
@@ -44,11 +44,22 @@ class TestRegrasEspecificas(unittest.TestCase):
         if trecho_msg:
             self.assertIn(trecho_msg, str(ctx.exception))
 
+    def _assert_erro_semantico(self, fonte: str, trecho_msg: str = None):
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        with self.assertRaises(SemanticError) as ctx:
+            Parser(tokens).parse()
+
+        if trecho_msg:
+            self.assertIn(trecho_msg, str(ctx.exception))
+
     # Casos focados em expressoes e precedencia.
     def test_precedencia(self):
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao 1 + 2 veiz 3 uai
 cabo
 """)
@@ -57,6 +68,7 @@ cabo
         fonte = """
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
     x fica_assim_entao 1 + 2 veiz 3 uai
 cabo
 """
@@ -104,6 +116,7 @@ cabo
         fonte = """
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
     uai_se(x < 10)
         oia_proce_ve(x) uai
 cabo
@@ -128,6 +141,7 @@ cabo
         fonte = """
 bora_cumpade main()
 simbora
+    trem_di_numeru x, y uai
     uai_se(eh)
         oia_proce_ve(x) uai
     uai_senao
@@ -156,6 +170,7 @@ cabo
         fonte = """
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
     enquanto_tiver_trem(x < 3)
         x fica_assim_entao x + 1 uai
 cabo
@@ -183,6 +198,7 @@ cabo
         fonte = """
 bora_cumpade main()
 simbora
+    trem_di_numeru i uai
     roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
         oia_proce_ve(i) uai
 cabo
@@ -212,6 +228,7 @@ cabo
         fonte = """
 bora_cumpade main()
 simbora
+    trem_di_numeru i uai
     roda_esse_trem(i fica_assim_entao 0; ; i fica_assim_entao i + 1)
         oia_proce_ve(i) uai
 cabo
@@ -276,6 +293,7 @@ cabo
         fonte = """
 bora_cumpade main()
 simbora
+    trem_di_numeru i, x, y uai
     roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
         simbora
             x fica_assim_entao x + 1 uai
@@ -311,6 +329,7 @@ cabo
         fonte = """
 bora_cumpade main()
 simbora
+    trem_di_numeru x, y uai
     dependenu(x) simbora
         du_casu 1: y fica_assim_entao 10 uai
         du_casu 2: y fica_assim_entao 20 uai
@@ -347,6 +366,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao (1 + 2) veiz 3 uai
 cabo
 """)
@@ -355,6 +375,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao 1 - 2 - 3 uai
 cabo
 """)
@@ -363,6 +384,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao - - + 5 uai
 cabo
 """)
@@ -371,6 +393,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao (((((((((1))))))))) uai
 cabo
 """)
@@ -380,6 +403,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_discolhe a uai
     a fica_assim_entao eh quarque_um num_eh tamem eh uai
 cabo
 """)
@@ -388,6 +412,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_discolhe a uai
     a fica_assim_entao vam_marca vam_marca eh uai
 cabo
 """)
@@ -427,6 +452,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru i uai
     roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
         para_o_trem uai
 cabo
@@ -437,6 +463,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
     dependenu(x) simbora
         du_casu 1: para_o_trem uai
         du_casu 2: toca_o_trem uai
@@ -449,6 +476,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru x, y uai
     dependenu(x) simbora
         du_casu 1:
             dependenu(y) simbora
@@ -463,6 +491,7 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
     dependenu(x) simbora
         du_casu 1: para_o_trem uai
     cabo
@@ -490,6 +519,7 @@ cabo
         self._assert_erro("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao 1 + uai
 cabo
 """, "fator")
@@ -498,6 +528,7 @@ cabo
         self._assert_erro("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao (1 uai
 cabo
 """, "RIGHT_PAREN")
@@ -515,6 +546,7 @@ cabo
         self._assert_erro("""
 bora_cumpade main()
 simbora
+    trem_di_numeru i uai
     roda_esse_trem(i 0 i < 10 i++)
         para_o_trem uai
 cabo
@@ -544,9 +576,29 @@ cabo
         self._assert_valido("""
 bora_cumpade main()
 simbora
+    trem_di_numeru a uai
     a fica_assim_entao (((((((((((((1))))))))))))) uai
 cabo
 """)
+
+    def test_erro_semantico_variavel_nao_declarada(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    a fica_assim_entao 1 uai
+cabo
+""", "nao declarada")
+
+    def test_erro_semantico_condicao_nao_booleana(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    trem_di_numeru a uai
+    a fica_assim_entao 1 uai
+    uai_se(a)
+        para_o_trem uai
+cabo
+""", "booleana")
 
     # Casos de borda.
     def test_vazio(self):

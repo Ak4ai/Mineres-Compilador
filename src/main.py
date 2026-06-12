@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 from analisador_lexico.lexer import LexicalError, Lexer
-from analisador_sintatico.analisador_sintatico import Parser, ParserError
+from analisador_sintatico.analisador_sintatico import Parser, ParserError, SemanticError
 from analisador_sintatico.interpretador import Interpretador
 
 
@@ -343,7 +343,7 @@ def run() -> int:
             try:
                 parser_sintatico = Parser(tokens)
                 parser_sintatico.parse()
-            except ParserError as error:
+            except (ParserError, SemanticError) as error:
                 _imprimir_resultado(
                     status="erro",
                     executar_saida_lexica=executar_saida_lexica,
