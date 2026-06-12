@@ -5,6 +5,8 @@ Formato: (op, result, arg1, arg2)
 Operandos: var:nome, lit:valor, tempN, labelN, null
 """
 
+from __future__ import annotations
+
 
 class ErroExecucao(Exception):
     """Exceção disparada durante execução do código intermediário."""
@@ -119,20 +121,43 @@ class Interpretador:
 
         valor_str = operando[4:]  # Remove "lit:" prefix
 
-        # Se for string com aspas, remove as aspas
+        if valor_str == "eh":
+            return 1
+
+        if valor_str == "num_eh":
+            return 0
+
+        # Se for string ou char com aspas, remove apenas os delimitadores.
         if (valor_str.startswith('"') and valor_str.endswith('"')) or \
            (valor_str.startswith("'") and valor_str.endswith("'")):
             return valor_str[1:-1]
 
-        # Tenta converter para número
+        # Hexadecimal
+        if valor_str.lower().startswith("-0x"):
+            return -int(valor_str[3:], 16)
+
+        if valor_str.lower().startswith("0x"):
+            return int(valor_str, 16)
+
+        # Octal
+        if len(valor_str) > 1 and valor_str.startswith("-0") and valor_str[2:].isdigit():
+            if all(char in "01234567" for char in valor_str[2:]):
+                return -int(valor_str[2:], 8)
+
+        if len(valor_str) > 1 and valor_str.startswith("0") and valor_str.isdigit():
+            if all(char in "01234567" for char in valor_str[1:]):
+                return int(valor_str, 8)
+
+        # Inteiro decimal
         if valor_str.isdigit() or (valor_str.startswith('-') and valor_str[1:].isdigit()):
             return int(valor_str)
 
-        try:
-            if '.' in valor_str:
+        # Float decimal
+        if "." in valor_str:
+            try:
                 return float(valor_str)
-        except ValueError:
-            pass
+            except ValueError:
+                pass
 
         # Retorna como string se não conseguir converter
         return valor_str
@@ -235,7 +260,6 @@ class Interpretador:
                     self.saida.append('')
                 else:
                     valor = self._avaliar_operando(operando)
-                    print(valor, flush=True)
                     self.saida.append(str(valor))
                 return
 
@@ -306,67 +330,72 @@ class Interpretador:
         Raises:
             ErroExecucao: Se houver erro na avaliação
         """
-        # Operador unário NOT
-        if op == "not":
-            valor = self._avaliar_operando(arg1)
-            return 0 if valor != 0 else 1
+        try:
+            # Operador unário NOT
+            if op == "not":
+                valor = self._avaliar_operando(arg1)
+                return 0 if valor != 0 else 1
 
-        # Operadores binários
-        esq = self._avaliar_operando(arg1)
-        dir = self._avaliar_operando(arg2)
+            # Operadores binários
+            esq = self._avaliar_operando(arg1)
+            dir = self._avaliar_operando(arg2)
 
-        if op == "add":
-            # Concatenação de strings ou adição numérica
-            if isinstance(esq, str) and isinstance(dir, str):
+            if op == "add":
+                # Concatenação de strings ou adição numérica
+                if isinstance(esq, str) and isinstance(dir, str):
+                    return esq + dir
                 return esq + dir
-            return esq + dir
 
-        if op == "sub":
-            return esq - dir
+            if op == "sub":
+                return esq - dir
 
-        if op == "mult":
-            return esq * dir
+            if op == "mult":
+                return esq * dir
 
-        if op in {"div", "divI", "mod"}:
-            if dir == 0:
-                raise ErroExecucao("Divisão por zero")
-            if op == "div":
-                return esq / dir
-            if op == "divI":
-                return esq // dir
-            if op == "mod":
-                return esq % dir
+            if op in {"div", "divI", "mod"}:
+                if dir == 0:
+                    raise ErroExecucao("Divisão por zero")
+                if op == "div":
+                    return esq / dir
+                if op == "divI":
+                    return esq // dir
+                if op == "mod":
+                    return esq % dir
 
-        # Operadores relacionais
-        if op == "eq":
-            return 1 if esq == dir else 0
+            # Operadores relacionais
+            if op == "eq":
+                return 1 if esq == dir else 0
 
-        if op == "dif":
-            return 1 if esq != dir else 0
+            if op == "dif":
+                return 1 if esq != dir else 0
 
-        if op == "les":
-            return 1 if esq < dir else 0
+            if op == "les":
+                return 1 if esq < dir else 0
 
-        if op == "leq":
-            return 1 if esq <= dir else 0
+            if op == "leq":
+                return 1 if esq <= dir else 0
 
-        if op == "grt":
-            return 1 if esq > dir else 0
+            if op == "grt":
+                return 1 if esq > dir else 0
 
-        if op == "geq":
-            return 1 if esq >= dir else 0
+            if op == "geq":
+                return 1 if esq >= dir else 0
 
-        # Operadores lógicos
-        if op == "and":
-            return 1 if (esq != 0 and dir != 0) else 0
+            # Operadores lógicos
+            if op == "and":
+                return 1 if (esq != 0 and dir != 0) else 0
 
-        if op == "or":
-            return 1 if (esq != 0 or dir != 0) else 0
+            if op == "or":
+                return 1 if (esq != 0 or dir != 0) else 0
 
-        if op == "xor":
-            return 1 if ((esq != 0) ^ (dir != 0)) else 0
+            if op == "xor":
+                return 1 if ((esq != 0) ^ (dir != 0)) else 0
 
-        raise ErroExecucao(f"Operação inválida: '{op}'")
+            raise ErroExecucao(f"Operação inválida: '{op}'")
+        except ErroExecucao:
+            raise
+        except Exception as exc:
+            raise ErroExecucao(f"Erro na operação '{op}': {exc}") from exc
 
     def get_saida(self) -> str:
         """Retorna saída do programa como string."""

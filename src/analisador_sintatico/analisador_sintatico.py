@@ -743,13 +743,11 @@ class Parser:
 
     # Bloco 6: helpers de validacao
     def consume_delimiter(self) -> Token:
-        # Delimitador de comando: aceita tanto 'uai' quanto ';'
+        # Delimitador de comando fora do for.
         tok = self.current()
         if self._matches(TokenType.UAI):
             return self.consume(TokenType.UAI)
-        if self._matches(TokenType.SEMICOLON):
-            return self.consume(TokenType.SEMICOLON)
-        raise ParserError("uai ou ;", self._received_label(tok), tok.line, tok.column)
+        raise ParserError("uai", self._received_label(tok), tok.line, tok.column)
 
     def _is_type_start(self, tok: Token) -> bool:
         # Diz se o token pode iniciar declaracao de tipo.
