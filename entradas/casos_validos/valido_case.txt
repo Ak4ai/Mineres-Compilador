@@ -1,9 +1,10 @@
 bora_cumpade main()
 simbora
     trem_di_numeru x uai
+    x fica_assim_entao 1 uai
     dependenu(x) simbora
-        du_casu 1: para_o_trem uai
-        du_casu 2: toca_o_trem uai
-        uai_so: para_o_trem uai
+        du_casu 1: uai
+        du_casu 2: uai
+        uai_so: uai
     cabo
 cabo

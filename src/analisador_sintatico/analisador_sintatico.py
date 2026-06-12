@@ -99,22 +99,26 @@ class Parser:
         self.codigo = []
         self.temp_count = 0
         self.label_count = 0
-        self.vars_table = {}
+        self.scopes = [{}]
+        self.vars_table = self.scopes[0]
         self.temp_types = {}
+        self.loop_depth = 0
 
     def _raise_semantic_error(self, message: str, tok: Token) -> None:
         raise SemanticError(message, tok.line, tok.column)
 
     def _type_family(self, tipo) -> str | None:
-        if tipo in (TokenType.TREM_DI_NUMERU, TokenType.TREM_CUM_VIRGULA):
-            return "num"
+        if tipo == TokenType.TREM_DI_NUMERU:
+            return "int"
+        if tipo == TokenType.TREM_CUM_VIRGULA:
+            return "float"
         if tipo == TokenType.TREM_DISCRITA:
             return "str"
         if tipo == TokenType.TREM_DISCOLHE:
             return "bool"
         if tipo == TokenType.TROSSO:
             return "char"
-        if tipo in {"num", "str", "bool", "char"}:
+        if tipo in {"int", "float", "str", "bool", "char"}:
             return tipo
         return None
 
@@ -125,17 +129,57 @@ class Parser:
             return "str"
         if valor.startswith("'"):
             return "char"
-        return "num"
+        if "." in valor:
+            return "float"
+        return "int"
 
-    def _operand_type_family(self, operando: str, tok: Token | None = None) -> str | None:
+    def _is_numeric_type(self, tipo: str | None) -> bool:
+        return tipo in {"int", "float"}
+
+    def _numeric_result_type(self, left_type: str, right_type: str) -> str:
+        if "float" in {left_type, right_type}:
+            return "float"
+        return "int"
+
+    def _push_scope(self) -> None:
+        self.scopes.append({})
+
+    def _pop_scope(self) -> None:
+        if len(self.scopes) > 1:
+            self.scopes.pop()
+
+    def _lookup_symbol(self, nome: str):
+        for scope in reversed(self.scopes):
+            if nome in scope:
+                return scope[nome]
+        return None
+
+    def _operand_type_family(
+        self,
+        operando: str,
+        tok: Token | None = None,
+        require_initialized: bool = False,
+    ) -> str | None:
         if operando == "null":
             return None
         if operando.startswith("var:"):
             nome = operando[4:]
-            tipo = self.vars_table.get(nome)
-            if tipo is None and tok is not None:
+            symbol = self._lookup_symbol(nome)
+            if symbol is None and tok is not None:
                 self._raise_semantic_error(f"variavel '{nome}' nao declarada", tok)
-            return self._type_family(tipo)
+            if (
+                symbol is not None
+                and require_initialized
+                and not symbol["initialized"]
+                and tok is not None
+            ):
+                self._raise_semantic_error(
+                    f"variavel '{nome}' usada antes de receber valor",
+                    tok,
+                )
+            if symbol is None:
+                return None
+            return self._type_family(symbol["type"])
         if operando.startswith("lit:"):
             return self._literal_type_family(operando[4:])
         if self.is_temp(operando):
@@ -153,19 +197,27 @@ class Parser:
             self.temp_types[temp] = tipo
 
     def _declare_identifier(self, ident: Token, tipo) -> None:
-        if ident.lexeme in self.vars_table:
+        current_scope = self.scopes[-1]
+        if ident.lexeme in current_scope:
             self._raise_semantic_error(
                 f"variavel '{ident.lexeme}' ja declarada",
                 ident,
             )
-        self.vars_table[ident.lexeme] = tipo
+        current_scope[ident.lexeme] = {"type": tipo, "initialized": False}
 
     def _ensure_declared_identifier(self, ident: Token) -> None:
-        if ident.lexeme not in self.vars_table:
+        if self._lookup_symbol(ident.lexeme) is None:
             self._raise_semantic_error(
                 f"variavel '{ident.lexeme}' nao declarada",
                 ident,
             )
+
+    def _mark_initialized(self, operando: str) -> None:
+        if not operando.startswith("var:"):
+            return
+        symbol = self._lookup_symbol(operando[4:])
+        if symbol is not None:
+            symbol["initialized"] = True
 
     def _ensure_assignable(self, operando: str, tok: Token) -> None:
         if not operando.startswith("var:"):
@@ -174,9 +226,17 @@ class Parser:
                 tok,
             )
 
-    def _ensure_same_family(self, left: str, right: str, tok: Token, contexto: str) -> str:
-        left_type = self._operand_type_family(left, tok)
-        right_type = self._operand_type_family(right, tok)
+    def _ensure_same_family(
+        self,
+        left: str,
+        right: str,
+        tok: Token,
+        contexto: str,
+        check_left_initialized: bool = True,
+        check_right_initialized: bool = True,
+    ) -> str:
+        left_type = self._operand_type_family(left, tok, check_left_initialized)
+        right_type = self._operand_type_family(right, tok, check_right_initialized)
 
         if left_type != right_type:
             self._raise_semantic_error(
@@ -187,19 +247,21 @@ class Parser:
         return left_type
 
     def _ensure_numeric(self, operando: str, tok: Token, contexto: str) -> None:
-        tipo = self._operand_type_family(operando, tok)
-        if tipo != "num":
+        tipo = self._operand_type_family(operando, tok, True)
+        if not self._is_numeric_type(tipo):
             self._raise_semantic_error(
                 f"{contexto} exige operando numerico, mas recebeu {tipo}",
                 tok,
             )
 
     def _ensure_add_types(self, left: str, right: str, tok: Token) -> str:
-        left_type = self._operand_type_family(left, tok)
-        right_type = self._operand_type_family(right, tok)
+        left_type = self._operand_type_family(left, tok, True)
+        right_type = self._operand_type_family(right, tok, True)
 
-        if left_type == right_type and left_type in {"num", "str"}:
-            return left_type
+        if self._is_numeric_type(left_type) and self._is_numeric_type(right_type):
+            return self._numeric_result_type(left_type, right_type)
+        if left_type == right_type and left_type == "str":
+            return "str"
 
         self._raise_semantic_error(
             f"tipos incompativeis em soma: {left_type} e {right_type}",
@@ -207,7 +269,7 @@ class Parser:
         )
 
     def _ensure_boolean(self, operando: str, tok: Token, contexto: str) -> None:
-        tipo = self._operand_type_family(operando, tok)
+        tipo = self._operand_type_family(operando, tok, True)
         if tipo != "bool":
             self._raise_semantic_error(
                 f"{contexto} exige expressao booleana, mas recebeu {tipo}",
@@ -216,7 +278,8 @@ class Parser:
 
     def _ensure_read_type(self, ident: Token, tipo_lido) -> None:
         self._ensure_declared_identifier(ident)
-        tipo_variavel = self.vars_table[ident.lexeme]
+        symbol = self._lookup_symbol(ident.lexeme)
+        tipo_variavel = symbol["type"]
         if tipo_variavel != tipo_lido:
             self._raise_semantic_error(
                 (
@@ -224,6 +287,14 @@ class Parser:
                     f"{tipo_lido.value} em variavel {tipo_variavel.value}"
                 ),
                 ident,
+            )
+        symbol["initialized"] = True
+
+    def _ensure_loop_control(self, tok: Token) -> None:
+        if self.loop_depth == 0:
+            self._raise_semantic_error(
+                f"'{tok.lexeme}' so pode ser usado dentro de laco",
+                tok,
             )
 
     def new_temp(self) -> str:
@@ -367,8 +438,10 @@ class Parser:
     def bloco(self) -> None:
         # Bloco: abre com simbora e fecha com cabo.
         self.consume(TokenType.SIMBORA)
+        self._push_scope()
         self.stmt_list()
         self.consume(TokenType.CABO)
+        self._pop_scope()
 
     def stmt_list(self) -> None:
         # Lista de comandos: repete enquanto houver inicio de stmt.
@@ -413,13 +486,15 @@ class Parser:
 
         # PARA_O_TREM
         if tok.type == TokenType.PARA_O_TREM:
-            self.consume(TokenType.PARA_O_TREM)
+            control_tok = self.consume(TokenType.PARA_O_TREM)
+            self._ensure_loop_control(control_tok)
             self.consume_delimiter()
             return
 
         # TOCA_O_TREM
         if tok.type == TokenType.TOCA_O_TREM:
-            self.consume(TokenType.TOCA_O_TREM)
+            control_tok = self.consume(TokenType.TOCA_O_TREM)
+            self._ensure_loop_control(control_tok)
             self.consume_delimiter()
             return
 
@@ -481,7 +556,9 @@ class Parser:
             codigo_inc, _ = self._capture_expr_code()
             self.temp_count = temp_count_before_inc
         self.consume(TokenType.RIGHT_PAREN)
+        self.loop_depth += 1
         codigo_body = self._capture_stmt_code()
+        self.loop_depth -= 1
 
         label_start = self.new_label()
         label_body = self.new_label()
@@ -554,7 +631,9 @@ class Parser:
         self.consume(TokenType.RIGHT_PAREN)
         self.emit("if", cond, label_body, label_end)
         self.emit("label", label_body)
+        self.loop_depth += 1
         self.stmt()
+        self.loop_depth -= 1
         self.emit("jump", label_start)
         self.emit("label", label_end)
 
@@ -671,8 +750,15 @@ class Parser:
                 op_tok = self.consume(TokenType.ASSIGN)
             self._ensure_assignable(left, op_tok)
             right = self.atrib()
-            self._ensure_same_family(left, right, op_tok, "atribuicao")
+            self._ensure_same_family(
+                left,
+                right,
+                op_tok,
+                "atribuicao",
+                check_left_initialized=False,
+            )
             self.emit("att", left, right)
+            self._mark_initialized(left)
             return left
         return left
 
@@ -824,7 +910,9 @@ class Parser:
             self._ensure_numeric(left, op_tok, "operacao aritmetica")
             self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
-            self._register_temp_type(temp, "num")
+            left_type = self._operand_type_family(left, op_tok, True)
+            right_type = self._operand_type_family(right, op_tok, True)
+            self._register_temp_type(temp, self._numeric_result_type(left_type, right_type))
             self.emit("sub", temp, left, right)
             return self.resto_add(temp)
         return left
@@ -846,7 +934,9 @@ class Parser:
             self._ensure_numeric(left, op_tok, "operacao aritmetica")
             self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
-            self._register_temp_type(temp, "num")
+            left_type = self._operand_type_family(left, op_tok, True)
+            right_type = self._operand_type_family(right, op_tok, True)
+            self._register_temp_type(temp, self._numeric_result_type(left_type, right_type))
             self.emit("mult", temp, left, right)
             return self.resto_mult(temp)
         if self._matches(TokenType.SOB):
@@ -855,7 +945,7 @@ class Parser:
             self._ensure_numeric(left, op_tok, "operacao aritmetica")
             self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
-            self._register_temp_type(temp, "num")
+            self._register_temp_type(temp, "float")
             self.emit("div", temp, left, right)
             return self.resto_mult(temp)
         if self._matches(TokenType.INT_DIV):
@@ -864,7 +954,7 @@ class Parser:
             self._ensure_numeric(left, op_tok, "operacao aritmetica")
             self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
-            self._register_temp_type(temp, "num")
+            self._register_temp_type(temp, "int")
             self.emit("divI", temp, left, right)
             return self.resto_mult(temp)
         if self._matches(TokenType.MOD):
@@ -873,7 +963,7 @@ class Parser:
             self._ensure_numeric(left, op_tok, "operacao aritmetica")
             self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
-            self._register_temp_type(temp, "num")
+            self._register_temp_type(temp, "int")
             self.emit("divI", temp, left, right)
             return self.resto_mult(temp)
         return left
@@ -890,7 +980,7 @@ class Parser:
             value = self.uno()
             self._ensure_numeric(value, op_tok, "sinal unario")
             temp = self.new_temp()
-            self._register_temp_type(temp, "num")
+            self._register_temp_type(temp, self._operand_type_family(value, op_tok, True))
             self.emit("sub", temp, self.make_lit("0"), value)
             return temp
         return self.fator_zao()

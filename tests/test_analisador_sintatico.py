@@ -262,9 +262,9 @@ bora_cumpade main()
 simbora
     uai_se(eh)
         uai_se(num_eh)
-            para_o_trem uai
+            uai
         uai_senao
-            toca_o_trem uai
+            uai
 cabo
 """)
 
@@ -298,10 +298,11 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x uai
+    x fica_assim_entao 1 uai
     dependenu(x) simbora
-        du_casu 1: para_o_trem uai
-        du_casu 2: toca_o_trem uai
-        uai_so: para_o_trem uai
+        du_casu 1: uai
+        du_casu 2: uai
+        uai_so: uai
     cabo
 cabo
 """)
@@ -311,11 +312,13 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x, y uai
+    x fica_assim_entao 1 uai
+    y fica_assim_entao 2 uai
     dependenu(x) simbora
         du_casu 1:
             dependenu(y) simbora
-                du_casu 2: para_o_trem uai
-                uai_so: toca_o_trem uai
+                du_casu 2: uai
+                uai_so: uai
             cabo
     cabo
 cabo
@@ -374,8 +377,8 @@ simbora
             para_o_trem uai
 
     dependenu(c) simbora
-        du_casu 1: para_o_trem uai
-        uai_so: toca_o_trem uai
+        du_casu 1: uai
+        uai_so: uai
     cabo
 cabo
 """)

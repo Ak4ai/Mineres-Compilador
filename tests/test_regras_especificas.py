@@ -117,6 +117,7 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x uai
+    x fica_assim_entao 0 uai
     uai_se(x < 10)
         oia_proce_ve(x) uai
 cabo
@@ -129,6 +130,7 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
+                ("att", "var:x", "lit:0", "null"),
                 ("les", "temp1", "var:x", "lit:10"),
                 ("if", "temp1", "label1", "label2"),
                 ("label", "label1", "null", "null"),
@@ -142,6 +144,8 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x, y uai
+    x fica_assim_entao 1 uai
+    y fica_assim_entao 2 uai
     uai_se(eh)
         oia_proce_ve(x) uai
     uai_senao
@@ -156,6 +160,8 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
+                ("att", "var:x", "lit:1", "null"),
+                ("att", "var:y", "lit:2", "null"),
                 ("if", "lit:eh", "label1", "label2"),
                 ("label", "label1", "null", "null"),
                 ("call", "print", "var:x", "null"),
@@ -171,6 +177,7 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x uai
+    x fica_assim_entao 0 uai
     enquanto_tiver_trem(x < 3)
         x fica_assim_entao x + 1 uai
 cabo
@@ -183,6 +190,7 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
+                ("att", "var:x", "lit:0", "null"),
                 ("label", "label1", "null", "null"),
                 ("les", "temp1", "var:x", "lit:3"),
                 ("if", "temp1", "label2", "label3"),
@@ -294,6 +302,8 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru i, x, y uai
+    x fica_assim_entao 0 uai
+    y fica_assim_entao 0 uai
     roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
         simbora
             x fica_assim_entao x + 1 uai
@@ -309,6 +319,8 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
+                ("att", "var:x", "lit:0", "null"),
+                ("att", "var:y", "lit:0", "null"),
                 ("att", "var:i", "lit:0", "null"),
                 ("label", "label1", "null", "null"),
                 ("les", "temp1", "var:i", "lit:10"),
@@ -330,6 +342,7 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x, y uai
+    x fica_assim_entao 1 uai
     dependenu(x) simbora
         du_casu 1: y fica_assim_entao 10 uai
         du_casu 2: y fica_assim_entao 20 uai
@@ -345,6 +358,7 @@ cabo
         self.assertEqual(
             parser.codigo,
             [
+                ("att", "var:x", "lit:1", "null"),
                 ("eq", "temp1", "var:x", "lit:1"),
                 ("if", "temp1", "label2", "label3"),
                 ("label", "label2", "null", "null"),
@@ -423,9 +437,9 @@ cabo
 bora_cumpade main()
 simbora
     uai_se(eh)
-        para_o_trem uai
+        uai
     uai_senao
-        toca_o_trem uai
+        uai
 cabo
 """)
 
@@ -435,7 +449,7 @@ bora_cumpade main()
 simbora
     uai_se(eh)
         uai_se(num_eh)
-            para_o_trem uai
+            uai
 cabo
 """)
 
@@ -464,10 +478,11 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x uai
+    x fica_assim_entao 1 uai
     dependenu(x) simbora
-        du_casu 1: para_o_trem uai
-        du_casu 2: toca_o_trem uai
-        uai_so: para_o_trem uai
+        du_casu 1: uai
+        du_casu 2: uai
+        uai_so: uai
     cabo
 cabo
 """)
@@ -477,11 +492,13 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x, y uai
+    x fica_assim_entao 1 uai
+    y fica_assim_entao 2 uai
     dependenu(x) simbora
         du_casu 1:
             dependenu(y) simbora
-                du_casu 2: para_o_trem uai
-                uai_so: toca_o_trem uai
+                du_casu 2: uai
+                uai_so: uai
             cabo
     cabo
 cabo
@@ -492,8 +509,9 @@ cabo
 bora_cumpade main()
 simbora
     trem_di_numeru x uai
+    x fica_assim_entao 1 uai
     dependenu(x) simbora
-        du_casu 1: para_o_trem uai
+        du_casu 1: uai
     cabo
 cabo
 """)
@@ -566,8 +584,8 @@ simbora
             para_o_trem uai
 
     dependenu(a) simbora
-        du_casu 1: para_o_trem uai
-        uai_so: toca_o_trem uai
+        du_casu 1: uai
+        uai_so: uai
     cabo
 cabo
 """)
@@ -599,6 +617,68 @@ simbora
         para_o_trem uai
 cabo
 """, "booleana")
+
+    def test_escopo_permite_sombrear_variavel_em_bloco_interno(self):
+        self._assert_valido("""
+bora_cumpade main()
+simbora
+    trem_di_numeru a uai
+    a fica_assim_entao 1 uai
+    simbora
+        trem_di_numeru a uai
+        a fica_assim_entao 2 uai
+    cabo
+    a fica_assim_entao a + 1 uai
+cabo
+""")
+
+    def test_erro_semantico_variavel_fora_do_escopo(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    simbora
+        trem_di_numeru a uai
+        a fica_assim_entao 1 uai
+    cabo
+    a fica_assim_entao 2 uai
+cabo
+""", "nao declarada")
+
+    def test_erro_semantico_variavel_nao_inicializada(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    trem_di_numeru a, b uai
+    b fica_assim_entao a + 1 uai
+cabo
+""", "antes de receber valor")
+
+    def test_erro_semantico_para_o_trem_fora_de_laco(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    para_o_trem uai
+cabo
+""", "dentro de laco")
+
+    def test_erro_semantico_int_recebe_float(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    trem_di_numeru a uai
+    a fica_assim_entao 1.5 uai
+cabo
+""", "tipos incompativeis")
+
+    def test_float_com_operacao_float_valido(self):
+        self._assert_valido("""
+bora_cumpade main()
+simbora
+    trem_cum_virgula a, b uai
+    a fica_assim_entao 1.5 uai
+    b fica_assim_entao a + 2.5 uai
+cabo
+""")
 
     # Casos de borda.
     def test_vazio(self):
