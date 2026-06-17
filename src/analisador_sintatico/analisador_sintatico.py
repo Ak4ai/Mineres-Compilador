@@ -103,6 +103,8 @@ class Parser:
         self.vars_table = self.scopes[0]
         self.temp_types = {}
         self.loop_depth = 0
+        self.loop_stack = []
+        self.loop_placeholder_count = 0
 
     def _raise_semantic_error(self, message: str, tok: Token) -> None:
         raise SemanticError(message, tok.line, tok.column)
@@ -291,11 +293,43 @@ class Parser:
         symbol["initialized"] = True
 
     def _ensure_loop_control(self, tok: Token) -> None:
-        if self.loop_depth == 0:
+        if not self.loop_stack:
             self._raise_semantic_error(
                 f"'{tok.lexeme}' so pode ser usado dentro de laco",
                 tok,
             )
+
+    def _push_loop_context(self, break_label: str, continue_label: str) -> None:
+        self.loop_stack.append({"break": break_label, "continue": continue_label})
+
+    def _pop_loop_context(self) -> None:
+        if self.loop_stack:
+            self.loop_stack.pop()
+
+    def _current_loop_label(self, kind: str, tok: Token) -> str:
+        self._ensure_loop_control(tok)
+        return self.loop_stack[-1][kind]
+
+    def _new_loop_placeholder(self, kind: str) -> str:
+        self.loop_placeholder_count += 1
+        return f"__{kind}_{self.loop_placeholder_count}"
+
+    def _replace_loop_placeholders(
+        self,
+        codigo: list[tuple[str, str, str, str]],
+        replacements: dict[str, str],
+    ) -> list[tuple[str, str, str, str]]:
+        codigo_atualizado = []
+        for op, result, arg1, arg2 in codigo:
+            codigo_atualizado.append(
+                (
+                    op,
+                    replacements.get(result, result),
+                    replacements.get(arg1, arg1),
+                    replacements.get(arg2, arg2),
+                )
+            )
+        return codigo_atualizado
 
     def new_temp(self) -> str:
         self.temp_count += 1
@@ -487,14 +521,16 @@ class Parser:
         # PARA_O_TREM
         if tok.type == TokenType.PARA_O_TREM:
             control_tok = self.consume(TokenType.PARA_O_TREM)
-            self._ensure_loop_control(control_tok)
+            break_label = self._current_loop_label("break", control_tok)
+            self.emit("jump", break_label)
             self.consume_delimiter()
             return
 
         # TOCA_O_TREM
         if tok.type == TokenType.TOCA_O_TREM:
             control_tok = self.consume(TokenType.TOCA_O_TREM)
-            self._ensure_loop_control(control_tok)
+            continue_label = self._current_loop_label("continue", control_tok)
+            self.emit("jump", continue_label)
             self.consume_delimiter()
             return
 
@@ -556,13 +592,24 @@ class Parser:
             codigo_inc, _ = self._capture_expr_code()
             self.temp_count = temp_count_before_inc
         self.consume(TokenType.RIGHT_PAREN)
+        break_placeholder = self._new_loop_placeholder("break")
+        continue_placeholder = self._new_loop_placeholder("continue")
         self.loop_depth += 1
+        self._push_loop_context(break_placeholder, continue_placeholder)
         codigo_body = self._capture_stmt_code()
+        self._pop_loop_context()
         self.loop_depth -= 1
 
         label_start = self.new_label()
         label_body = self.new_label()
         label_end = self.new_label()
+        replacements = {break_placeholder: label_end}
+        continue_used = any(continue_placeholder in instr for instr in codigo_body)
+        label_continue = None
+        if continue_used:
+            label_continue = self.new_label()
+            replacements[continue_placeholder] = label_continue
+        codigo_body = self._replace_loop_placeholders(codigo_body, replacements)
 
         self.codigo.extend(codigo_init)
         self.emit("label", label_start)
@@ -570,6 +617,8 @@ class Parser:
         self.emit("if", cond, label_body, label_end)
         self.emit("label", label_body)
         self.codigo.extend(codigo_body)
+        if label_continue is not None:
+            self.emit("label", label_continue)
         self.codigo.extend(self._refresh_temp_names(codigo_inc))
         self.emit("jump", label_start)
         self.emit("label", label_end)
@@ -632,7 +681,9 @@ class Parser:
         self.emit("if", cond, label_body, label_end)
         self.emit("label", label_body)
         self.loop_depth += 1
+        self._push_loop_context(label_end, label_start)
         self.stmt()
+        self._pop_loop_context()
         self.loop_depth -= 1
         self.emit("jump", label_start)
         self.emit("label", label_end)

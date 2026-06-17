@@ -223,6 +223,35 @@ cabo
             ],
         )
 
+    def test_codigo_intermediario_while_com_para_o_trem(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+    x fica_assim_entao 0 uai
+    enquanto_tiver_trem(x < 3)
+        para_o_trem uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("att", "var:x", "lit:0", "null"),
+                ("label", "label1", "null", "null"),
+                ("les", "temp1", "var:x", "lit:3"),
+                ("if", "temp1", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("jump", "label3", "null", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+            ],
+        )
+
     def test_codigo_intermediario_for_completo(self):
         fonte = """
 bora_cumpade main()
@@ -246,6 +275,37 @@ cabo
                 ("if", "temp1", "label2", "label3"),
                 ("label", "label2", "null", "null"),
                 ("call", "print", "var:i", "null"),
+                ("add", "temp2", "var:i", "lit:1"),
+                ("att", "var:i", "temp2", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_for_com_toca_o_trem(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    trem_di_numeru i uai
+    roda_esse_trem(i fica_assim_entao 0; i < 10; i fica_assim_entao i + 1)
+        toca_o_trem uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("att", "var:i", "lit:0", "null"),
+                ("label", "label1", "null", "null"),
+                ("les", "temp1", "var:i", "lit:10"),
+                ("if", "temp1", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("jump", "label4", "null", "null"),
+                ("label", "label4", "null", "null"),
                 ("add", "temp2", "var:i", "lit:1"),
                 ("att", "var:i", "temp2", "null"),
                 ("jump", "label1", "null", "null"),
