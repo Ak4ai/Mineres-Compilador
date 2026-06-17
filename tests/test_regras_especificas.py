@@ -755,14 +755,38 @@ simbora
 cabo
 """, "dentro de laco")
 
-    def test_erro_semantico_int_recebe_float(self):
-        self._assert_erro_semantico("""
+    def test_int_recebe_float_por_familia_numerica(self):
+        self._assert_valido("""
 bora_cumpade main()
 simbora
     trem_di_numeru a uai
     a fica_assim_entao 1.5 uai
 cabo
-""", "tipos incompativeis")
+""")
+
+    def test_comparacao_entre_int_e_float_valida(self):
+        self._assert_valido("""
+bora_cumpade main()
+simbora
+    trem_di_numeru a uai
+    trem_cum_virgula b uai
+    trem_discolhe resultado uai
+    a fica_assim_entao 1 uai
+    b fica_assim_entao 1.5 uai
+    resultado fica_assim_entao a < b uai
+cabo
+""")
+
+    def test_atribuicao_entre_variaveis_numericas_valida(self):
+        self._assert_valido("""
+bora_cumpade main()
+simbora
+    trem_di_numeru a uai
+    trem_cum_virgula b uai
+    b fica_assim_entao 1.5 uai
+    a fica_assim_entao b uai
+cabo
+""")
 
     def test_float_com_operacao_float_valido(self):
         self._assert_valido("""

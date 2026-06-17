@@ -103,6 +103,7 @@ class Parser:
         self.vars_table = self.scopes[0]
         self.temp_types = {}
         self.loop_depth = 0
+        # Pilha usada para traduzir para_o_trem/toca_o_trem em jumps.
         self.loop_stack = []
         self.loop_placeholder_count = 0
 
@@ -137,6 +138,12 @@ class Parser:
 
     def _is_numeric_type(self, tipo: str | None) -> bool:
         return tipo in {"int", "float"}
+
+    def _semantic_group(self, tipo: str | None) -> str | None:
+        # Para compatibilidade, int e float pertencem a mesma familia numerica.
+        if self._is_numeric_type(tipo):
+            return "num"
+        return tipo
 
     def _numeric_result_type(self, left_type: str, right_type: str) -> str:
         if "float" in {left_type, right_type}:
@@ -240,7 +247,7 @@ class Parser:
         left_type = self._operand_type_family(left, tok, check_left_initialized)
         right_type = self._operand_type_family(right, tok, check_right_initialized)
 
-        if left_type != right_type:
+        if self._semantic_group(left_type) != self._semantic_group(right_type):
             self._raise_semantic_error(
                 f"tipos incompativeis em {contexto}: {left_type} e {right_type}",
                 tok,
@@ -282,7 +289,11 @@ class Parser:
         self._ensure_declared_identifier(ident)
         symbol = self._lookup_symbol(ident.lexeme)
         tipo_variavel = symbol["type"]
-        if tipo_variavel != tipo_lido:
+        tipo_variavel_familia = self._type_family(tipo_variavel)
+        tipo_lido_familia = self._type_family(tipo_lido)
+        if self._semantic_group(tipo_variavel_familia) != self._semantic_group(
+            tipo_lido_familia
+        ):
             self._raise_semantic_error(
                 (
                     f"tipo de leitura incompativel para '{ident.lexeme}': "
@@ -300,6 +311,7 @@ class Parser:
             )
 
     def _push_loop_context(self, break_label: str, continue_label: str) -> None:
+        # Labels podem ser definitivas ou placeholders resolvidos apos capturar o corpo.
         self.loop_stack.append({"break": break_label, "continue": continue_label})
 
     def _pop_loop_context(self) -> None:
@@ -319,6 +331,7 @@ class Parser:
         codigo: list[tuple[str, str, str, str]],
         replacements: dict[str, str],
     ) -> list[tuple[str, str, str, str]]:
+        # Resolve jumps emitidos durante captura de corpo de for.
         codigo_atualizado = []
         for op, result, arg1, arg2 in codigo:
             codigo_atualizado.append(
