@@ -68,6 +68,42 @@ class TestInterpretador(unittest.TestCase):
         self.assertFalse(interpretador.executar())
         self.assertIn("Erro na operação 'add'", interpretador.get_erros())
 
+    def test_variavel_nao_declarada_nao_e_inicializada_por_uso(self):
+        codigo = [
+            ("call", "print", "var:x", "null"),
+        ]
+
+        interpretador = Interpretador(codigo)
+        self.assertFalse(interpretador.executar())
+        self.assertIn("Variável não declarada: 'x'", interpretador.get_erros())
+
+    def test_operacao_com_variavel_nao_declarada_falha(self):
+        codigo = [
+            ("add", "temp1", "var:x", "lit:1"),
+        ]
+
+        interpretador = Interpretador(codigo)
+        self.assertFalse(interpretador.executar())
+        self.assertIn("Variável não declarada: 'x'", interpretador.get_erros())
+
+    def test_temporario_nao_inicializado_falha(self):
+        codigo = [
+            ("call", "print", "temp1", "null"),
+        ]
+
+        interpretador = Interpretador(codigo)
+        self.assertFalse(interpretador.executar())
+        self.assertIn("Temporário não inicializado: 'temp1'", interpretador.get_erros())
+
+    def test_divisao_por_zero_falha(self):
+        codigo = [
+            ("div", "temp1", "lit:10", "lit:0"),
+        ]
+
+        interpretador = Interpretador(codigo)
+        self.assertFalse(interpretador.executar())
+        self.assertIn("Divisão por zero", interpretador.get_erros())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -40,33 +40,20 @@ class Interpretador:
     def iniciar_dicionario(self) -> None:
         """
         Inicializa dicionário de variáveis.
-        Varre o código procurando por todas as variáveis referenciadas
-        e inicializa com 0.
+        Varre o código procurando destinos de escrita e inicializa com 0.
         """
-        # Procura variáveis em atribuições
         for instrucao in self.codigo_fonte:
-            if instrucao[0] == "att":
-                destino = instrucao[1]
-                var_nome = self._extrair_nome_var(destino)
+            op, result, arg1, _ = instrucao
+
+            if op == "att":
+                var_nome = self._extrair_nome_var(result)
                 if var_nome:
                     self.variaveis[var_nome] = 0
-        
-        # Procura variáveis em operações (arg1 e arg2)
-        for instrucao in self.codigo_fonte:
-            op, result, arg1, arg2 = instrucao
-            
-            # Coleta variáveis do resultado
-            if result and isinstance(result, str):
-                var_nome = self._extrair_nome_var(result)
-                if var_nome and var_nome not in self.variaveis:
+
+            if op == "call" and result == "read":
+                var_nome = self._extrair_nome_var(arg1)
+                if var_nome:
                     self.variaveis[var_nome] = 0
-            
-            # Coleta variáveis dos argumentos
-            for arg in [arg1, arg2]:
-                if arg and isinstance(arg, str):
-                    var_nome = self._extrair_nome_var(arg)
-                    if var_nome and var_nome not in self.variaveis:
-                        self.variaveis[var_nome] = 0
 
     def executar(self) -> bool:
         """
@@ -193,7 +180,7 @@ class Interpretador:
             # Operando é temporário (resultado de expressão anterior)
             if operando.startswith("temp") and operando[4:].isdigit():
                 if operando not in self.variaveis:
-                    return 0  # Temporários começam em 0
+                    raise ErroExecucao(f"Temporário não inicializado: '{operando}'")
                 return self.variaveis[operando]
 
             # Label: retorna o próprio nome (não deveria ser avaliado)
