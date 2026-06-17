@@ -86,6 +86,27 @@ cabo
             ],
         )
 
+    def test_codigo_intermediario_modulo(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+    x fica_assim_entao 5 % 2 uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("mod", "temp1", "lit:5", "lit:2"),
+                ("att", "var:x", "temp1", "null"),
+            ],
+        )
+
     def test_codigo_intermediario_diferencia_variavel_de_literal(self):
         fonte = """
 bora_cumpade main()

@@ -964,7 +964,7 @@ class Parser:
             self._ensure_numeric(right, op_tok, "operacao aritmetica")
             temp = self.new_temp()
             self._register_temp_type(temp, "int")
-            self.emit("divI", temp, left, right)
+            self.emit("mod", temp, left, right)
             return self.resto_mult(temp)
         return left
 
