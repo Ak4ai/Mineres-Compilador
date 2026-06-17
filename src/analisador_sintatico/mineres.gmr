@@ -51,7 +51,7 @@
 <caseStmt> -> 'dependenu' '(' 'IDENT' ')' 'simbora' <dosCasos> 'cabo' ;
 <dosCasos> -> <doCaso> <restoDosCasos>
 <doCaso> -> 'du_casu' <fatorZinMenorAinda> ':' <stmt>
-<restoDosCasos> -> <doCaso><restoDosCasos> | 'uai_so' ':' <stmt> | &
+<restoDosCasos> -> <doCaso><restoDosCasos> | 'default' ':' <stmt> | &
 
 #------------------------------
 # expressoes
@@ -82,7 +82,6 @@
 <fatorZao> -> <fatorZin> | '(' <atrib> ')' ;
 <fatorZin> -> 'STR' | 'IDENT' | 'NUMint' | 'NUMfloat' | 'valorBooleano' | 'valorChar'
 <fatorZinMenorAinda> -> 'STR' | 'NUMint' | 'NUMfloat' | 'valorBooleano' | 'valorChar'
-
 #---------
 # the end
 #---------	  

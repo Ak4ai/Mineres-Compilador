@@ -799,8 +799,12 @@ class Parser:
             self.resto_dos_casos(ident, label_end)
             return
 
-        if self._matches(TokenType.UAI_SO):
-            self.consume(TokenType.UAI_SO)
+        if self._matches(TokenType.DEFAULT) or self._matches(TokenType.UAI_SO):
+            # Aceita uai_so por compatibilidade com entradas antigas.
+            if self._matches(TokenType.DEFAULT):
+                self.consume(TokenType.DEFAULT)
+            else:
+                self.consume(TokenType.UAI_SO)
             self.consume(TokenType.COLON)
             codigo_default = self._capture_stmt_code()
             self.codigo.extend(codigo_default)

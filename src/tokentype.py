@@ -34,6 +34,7 @@ class TokenType(Enum):
     # Estrutura de selecao por casos
     DEPENDENU = "dependenu"
     DU_CASU = "du_casu"
+    DEFAULT = "default"
     UAI_SO = "uai_so"
 
     # Comandos de fluxo simples
@@ -115,6 +116,7 @@ KEYWORD_TOKENS = {
 
     "dependenu": TokenType.DEPENDENU,
     "du_casu": TokenType.DU_CASU,
+    "default": TokenType.DEFAULT,
     "uai_so": TokenType.UAI_SO,
 
     "ta_bao": TokenType.TA_BAO,

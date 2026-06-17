@@ -499,6 +499,38 @@ cabo
             ],
         )
 
+    def test_codigo_intermediario_case_com_default_literal(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    trem_di_numeru x, y uai
+    x fica_assim_entao 3 uai
+    dependenu(x) simbora
+        du_casu 1: y fica_assim_entao 10 uai
+        default: y fica_assim_entao 30 uai
+    cabo
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("att", "var:x", "lit:3", "null"),
+                ("eq", "temp1", "var:x", "lit:1"),
+                ("if", "temp1", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("att", "var:y", "lit:10", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+                ("att", "var:y", "lit:30", "null"),
+                ("label", "label1", "null", "null"),
+            ],
+        )
+
     def test_codigo_intermediario_case_hex_octal_em_decimal(self):
         fonte = """
 bora_cumpade main()
