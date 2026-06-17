@@ -107,6 +107,27 @@ cabo
             ],
         )
 
+    def test_codigo_intermediario_hex_octal_em_decimal(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    trem_di_numeru x uai
+    x fica_assim_entao 0x10 + 010 uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("add", "temp1", "lit:16", "lit:8"),
+                ("att", "var:x", "temp1", "null"),
+            ],
+        )
+
     def test_codigo_intermediario_diferencia_variavel_de_literal(self):
         fonte = """
 bora_cumpade main()
@@ -453,6 +474,43 @@ cabo
                 ("jump", "label1", "null", "null"),
                 ("label", "label5", "null", "null"),
                 ("att", "var:y", "lit:30", "null"),
+                ("label", "label1", "null", "null"),
+            ],
+        )
+
+    def test_codigo_intermediario_case_hex_octal_em_decimal(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    trem_di_numeru x, y uai
+    x fica_assim_entao 16 uai
+    dependenu(x) simbora
+        du_casu 0x10: y fica_assim_entao 1 uai
+        du_casu 010: y fica_assim_entao 2 uai
+    cabo
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("att", "var:x", "lit:16", "null"),
+                ("eq", "temp1", "var:x", "lit:16"),
+                ("if", "temp1", "label2", "label3"),
+                ("label", "label2", "null", "null"),
+                ("att", "var:y", "lit:1", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label3", "null", "null"),
+                ("eq", "temp2", "var:x", "lit:8"),
+                ("if", "temp2", "label4", "label5"),
+                ("label", "label4", "null", "null"),
+                ("att", "var:y", "lit:2", "null"),
+                ("jump", "label1", "null", "null"),
+                ("label", "label5", "null", "null"),
                 ("label", "label1", "null", "null"),
             ],
         )

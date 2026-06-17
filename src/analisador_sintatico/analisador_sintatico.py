@@ -358,6 +358,14 @@ class Parser:
     def make_lit(self, valor: str) -> str:
         return f"lit:{valor}"
 
+    def make_numeric_lit(self, tok: Token) -> str:
+        # Hex e octal aparecem em decimal no codigo intermediario.
+        if tok.type == TokenType.HEX_LITERAL:
+            return self.make_lit(str(int(tok.lexeme, 16)))
+        if tok.type == TokenType.OCTAL_LITERAL:
+            return self.make_lit(str(int(tok.lexeme, 8)))
+        return self.make_lit(tok.lexeme)
+
     def is_temp(self, valor: str) -> bool:
         return valor.startswith("temp") and valor[4:].isdigit()
 
@@ -1067,13 +1075,13 @@ class Parser:
             self._ensure_declared_identifier(ident)
             return self.make_var(ident.lexeme)
         if self._matches(TokenType.INTEGER_LITERAL):
-            return self.make_lit(self.consume(TokenType.INTEGER_LITERAL).lexeme)
+            return self.make_numeric_lit(self.consume(TokenType.INTEGER_LITERAL))
         if self._matches(TokenType.HEX_LITERAL):
-            return self.make_lit(self.consume(TokenType.HEX_LITERAL).lexeme)
+            return self.make_numeric_lit(self.consume(TokenType.HEX_LITERAL))
         if self._matches(TokenType.OCTAL_LITERAL):
-            return self.make_lit(self.consume(TokenType.OCTAL_LITERAL).lexeme)
+            return self.make_numeric_lit(self.consume(TokenType.OCTAL_LITERAL))
         if self._matches(TokenType.FLOAT_LITERAL):
-            return self.make_lit(self.consume(TokenType.FLOAT_LITERAL).lexeme)
+            return self.make_numeric_lit(self.consume(TokenType.FLOAT_LITERAL))
         if self._matches(TokenType.EH):
             return self.make_lit(self.consume(TokenType.EH).lexeme)
         if self._matches(TokenType.NUM_EH):
@@ -1094,13 +1102,13 @@ class Parser:
         if self._matches(TokenType.STRING_LITERAL):
             return self.make_lit(self.consume(TokenType.STRING_LITERAL).lexeme)
         if self._matches(TokenType.INTEGER_LITERAL):
-            return self.make_lit(self.consume(TokenType.INTEGER_LITERAL).lexeme)
+            return self.make_numeric_lit(self.consume(TokenType.INTEGER_LITERAL))
         if self._matches(TokenType.HEX_LITERAL):
-            return self.make_lit(self.consume(TokenType.HEX_LITERAL).lexeme)
+            return self.make_numeric_lit(self.consume(TokenType.HEX_LITERAL))
         if self._matches(TokenType.OCTAL_LITERAL):
-            return self.make_lit(self.consume(TokenType.OCTAL_LITERAL).lexeme)
+            return self.make_numeric_lit(self.consume(TokenType.OCTAL_LITERAL))
         if self._matches(TokenType.FLOAT_LITERAL):
-            return self.make_lit(self.consume(TokenType.FLOAT_LITERAL).lexeme)
+            return self.make_numeric_lit(self.consume(TokenType.FLOAT_LITERAL))
         if self._matches(TokenType.EH):
             return self.make_lit(self.consume(TokenType.EH).lexeme)
         if self._matches(TokenType.NUM_EH):
