@@ -700,7 +700,7 @@ class Parser:
     def do_caso(self, ident: str, label_end: str) -> None:
         # Um bloco du_casu.
         self.consume(TokenType.DU_CASU)
-        valor = self.fator_zin()
+        valor = self.fator_zin_menor_ainda()
         self._ensure_same_family(ident, valor, self.current(), "case")
         self.consume(TokenType.COLON)
         codigo_case = self._capture_stmt_code()
@@ -1020,6 +1020,33 @@ class Parser:
         tok = self.current()
         raise ParserError(
             "fator (STR | IDENT | NUMint | NUMfloat | valorBooleano | valorChar)",
+            self._received_label(tok),
+            tok.line,
+            tok.column,
+        )
+
+    def fator_zin_menor_ainda(self) -> str:
+        # Fator usado no case: aceita apenas literais, nunca identificador.
+        if self._matches(TokenType.STRING_LITERAL):
+            return self.make_lit(self.consume(TokenType.STRING_LITERAL).lexeme)
+        if self._matches(TokenType.INTEGER_LITERAL):
+            return self.make_lit(self.consume(TokenType.INTEGER_LITERAL).lexeme)
+        if self._matches(TokenType.HEX_LITERAL):
+            return self.make_lit(self.consume(TokenType.HEX_LITERAL).lexeme)
+        if self._matches(TokenType.OCTAL_LITERAL):
+            return self.make_lit(self.consume(TokenType.OCTAL_LITERAL).lexeme)
+        if self._matches(TokenType.FLOAT_LITERAL):
+            return self.make_lit(self.consume(TokenType.FLOAT_LITERAL).lexeme)
+        if self._matches(TokenType.EH):
+            return self.make_lit(self.consume(TokenType.EH).lexeme)
+        if self._matches(TokenType.NUM_EH):
+            return self.make_lit(self.consume(TokenType.NUM_EH).lexeme)
+        if self._matches(TokenType.CHAR_LITERAL):
+            return self.make_lit(self.consume(TokenType.CHAR_LITERAL).lexeme)
+
+        tok = self.current()
+        raise ParserError(
+            "fatorZinMenorAinda (STR | NUMint | NUMfloat | valorBooleano | valorChar)",
             self._received_label(tok),
             tok.line,
             tok.column,

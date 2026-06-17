@@ -516,6 +516,19 @@ simbora
 cabo
 """)
 
+    def test_case_nao_aceita_identificador_como_caso(self):
+        self._assert_erro("""
+bora_cumpade main()
+simbora
+    trem_di_numeru x, y uai
+    x fica_assim_entao 1 uai
+    y fica_assim_entao 1 uai
+    dependenu(x) simbora
+        du_casu y: uai
+    cabo
+cabo
+""", "fatorZinMenorAinda")
+
     # Casos de erro sintatico.
     def test_falta_delimitador(self):
         self._assert_erro("""
