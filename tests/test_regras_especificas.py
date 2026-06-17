@@ -154,6 +154,27 @@ cabo
             ],
         )
 
+    def test_codigo_intermediario_char_mais_char_vira_string(self):
+        fonte = """
+bora_cumpade main()
+simbora
+    trem_discrita texto uai
+    texto fica_assim_entao 'A' + 'B' uai
+cabo
+"""
+        tokens, erros = self._parse_string(fonte)
+        self.assertEqual(erros, [], "Erro lexico inesperado")
+
+        parser = Parser(tokens)
+        self.assertTrue(parser.parse())
+        self.assertEqual(
+            parser.codigo,
+            [
+                ("add", "temp1", "lit:'A'", "lit:'B'"),
+                ("att", "var:texto", "temp1", "null"),
+            ],
+        )
+
     def test_codigo_intermediario_if_sem_else(self):
         fonte = """
 bora_cumpade main()
@@ -845,6 +866,15 @@ simbora
     a fica_assim_entao b uai
 cabo
 """)
+
+    def test_erro_semantico_char_mais_char_em_char(self):
+        self._assert_erro_semantico("""
+bora_cumpade main()
+simbora
+    trosso c uai
+    c fica_assim_entao 'A' + 'B' uai
+cabo
+""", "tipos incompativeis")
 
     def test_float_com_operacao_float_valido(self):
         self._assert_valido("""

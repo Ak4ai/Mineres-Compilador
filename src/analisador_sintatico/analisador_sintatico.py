@@ -271,6 +271,9 @@ class Parser:
             return self._numeric_result_type(left_type, right_type)
         if left_type == right_type and left_type == "str":
             return "str"
+        if left_type == right_type and left_type == "char":
+            # Dois chars concatenados formam uma string.
+            return "str"
 
         self._raise_semantic_error(
             f"tipos incompativeis em soma: {left_type} e {right_type}",
