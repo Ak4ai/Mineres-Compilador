@@ -1,0 +1,5 @@
+bora_cumpade main()
+simbora
+    trem_discrita nome uai
+    nome fica_assim_entao 10 uai
+cabo

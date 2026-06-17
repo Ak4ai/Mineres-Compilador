@@ -1,0 +1,5 @@
+bora_cumpade main()
+simbora
+    trem_discrita texto uai
+    texto fica_assim_entao "uai" - "so" uai
+cabo

@@ -224,11 +224,17 @@ def _selecionar_arquivo_entrada_interativo() -> Path | None:
         print("Nenhum arquivo encontrado em entradas/", file=sys.stderr)
         return None
 
-    grupos_ordenados = ["casos_validos", "erros_lexicos", "erros_sintaticos"]
+    grupos_ordenados = [
+        "casos_validos",
+        "erros_lexicos",
+        "erros_sintaticos",
+        "erros_semanticos",
+    ]
     titulos_grupo = {
         "casos_validos": "CASOS_VALIDOS",
         "erros_lexicos": "ERROS LEXICOS",
         "erros_sintaticos": "ERROS SINTATICOS",
+        "erros_semanticos": "ERROS SEMANTICOS",
     }
 
     arquivos_por_grupo: dict[str, list[Path]] = {}

@@ -87,6 +87,23 @@ class TestAnalisadorSintatico(unittest.TestCase):
                     f"Formato de erro sintatico inesperado em {arquivo.name}: {msg}",
                 )
 
+    def test_erros_semanticos_falham_no_parser(self):
+        pasta = ENTRADAS_DIR / "erros_semanticos"
+        arquivos = sorted(p for p in pasta.iterdir() if p.is_file())
+        self.assertGreater(len(arquivos), 0, "Nao ha arquivos em entradas/erros_semanticos")
+
+        for arquivo in arquivos:
+            with self.subTest(arquivo=arquivo.name):
+                tokens, erros_lexicos = self._analisar_arquivo(arquivo)
+                self.assertEqual(
+                    erros_lexicos,
+                    [],
+                    f"Arquivo de erro semantico nao deveria falhar no lexer: {arquivo.name}",
+                )
+
+                with self.assertRaises(SemanticError):
+                    Parser(tokens).parse()
+
     def test_formato_do_erro_sintatico(self):
         # Sem 'cabo' para forcar erro sintatico previsivel.
         fonte = "bora_cumpade main()\nsimbora\n    uai\n"
