@@ -1,5 +1,8 @@
 bora_cumpade main()
 simbora
+    trem_di_numeru i, x, y uai
+    x fica_assim_entao 0 uai
+    y fica_assim_entao 0 uai
     roda_esse_trem(i fica_assim_entao 0; i < 3; i fica_assim_entao i + 1)
         simbora
             x fica_assim_entao x + 1 uai

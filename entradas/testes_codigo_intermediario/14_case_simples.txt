@@ -1,5 +1,7 @@
 bora_cumpade main()
 simbora
+    trem_di_numeru x, y uai
+    x fica_assim_entao 1 uai
     dependenu(x) simbora
         du_casu 1: y fica_assim_entao 10 uai
         du_casu 2: y fica_assim_entao 20 uai

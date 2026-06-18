@@ -1,4 +1,5 @@
 bora_cumpade main()
 simbora
+    trem_discolhe resultado uai
     resultado fica_assim_entao vam_marca eh uai
 cabo

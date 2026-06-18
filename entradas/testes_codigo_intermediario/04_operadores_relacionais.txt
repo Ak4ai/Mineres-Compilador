@@ -1,4 +1,7 @@
 bora_cumpade main()
 simbora
+    trem_di_numeru x uai
+    trem_discolhe resultado uai
+    x fica_assim_entao 1 uai
     resultado fica_assim_entao x < 10 uai
 cabo
