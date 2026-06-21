@@ -2,7 +2,7 @@ bora_cumpade main()
 simbora
     trem_di_numeru x uai
     dependenu(x) simbora
-        uai_so: para_o_trem uai
-        uai_so: toca_o_trem uai
+        default: para_o_trem uai
+        default: toca_o_trem uai
     cabo
 cabo

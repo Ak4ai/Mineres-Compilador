@@ -4,6 +4,6 @@ simbora
     x fica_assim_entao 1 uai
     dependenu(x) simbora
         du_casu 1: uai
-        uai_so para_o_trem uai
+        default para_o_trem uai
     cabo
 cabo

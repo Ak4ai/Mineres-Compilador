@@ -5,6 +5,6 @@ simbora
     dependenu(x) simbora
         du_casu 1: uai
         du_casu 2: uai
-        uai_so: uai
+        default: uai
     cabo
 cabo

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script elegante para rodar todos os testes do compilador Mineres.
-Integra testes válidos, erros léxicos, erros sintáticos e código intermediário.
+Integra testes válidos, erros léxicos, sintáticos, semânticos e código intermediário.
 """
 
 import subprocess
@@ -17,6 +17,7 @@ class TestCategory(Enum):
     VALIDOS = ("Testes Válidos", "entradas/casos_validos")
     ERROS_LEXICOS = ("Erros Léxicos", "entradas/erros_lexicos")
     ERROS_SINTATICOS = ("Erros Sintáticos", "entradas/erros_sintaticos")
+    ERROS_SEMANTICOS = ("Erros Semânticos", "entradas/erros_semanticos")
     CODIGO_INTERMEDIARIO = ("Código Intermediário", "entradas/testes_codigo_intermediario")
     EXEMPLOS_BASE = ("Exemplos do Projeto Base", "entradas/exemplos_base")
     

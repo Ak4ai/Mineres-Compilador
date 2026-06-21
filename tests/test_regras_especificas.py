@@ -469,7 +469,7 @@ simbora
     dependenu(x) simbora
         du_casu 1: y fica_assim_entao 10 uai
         du_casu 2: y fica_assim_entao 20 uai
-        uai_so: y fica_assim_entao 30 uai
+        default: y fica_assim_entao 30 uai
     cabo
 cabo
 """
@@ -664,7 +664,7 @@ simbora
 cabo
 """)
 
-    # Casos da estrutura dependenu/du_casu/uai_so.
+    # Casos da estrutura dependenu/du_casu/default.
     def test_case_completo(self):
         self._assert_valido("""
 bora_cumpade main()
@@ -674,7 +674,7 @@ simbora
     dependenu(x) simbora
         du_casu 1: uai
         du_casu 2: uai
-        uai_so: uai
+        default: uai
     cabo
 cabo
 """)
@@ -690,7 +690,7 @@ simbora
         du_casu 1:
             dependenu(y) simbora
                 du_casu 2: uai
-                uai_so: uai
+                default: uai
             cabo
     cabo
 cabo
@@ -790,7 +790,7 @@ simbora
 
     dependenu(a) simbora
         du_casu 1: uai
-        uai_so: uai
+        default: uai
     cabo
 cabo
 """)

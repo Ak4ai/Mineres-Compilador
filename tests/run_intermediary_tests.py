@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 def run_tests():
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).resolve().parents[1]
     tests_dir = project_root / "entradas" / "testes_codigo_intermediario"
     
     if not tests_dir.exists():

@@ -177,7 +177,7 @@ class TestAnalisadorSintatico(unittest.TestCase):
 
     def test_case_dois_default(self):
         arquivo = ENTRADAS_DIR / "erros_sintaticos" / "erro_dois_default.txt"
-        self.assertParserErrorContains(arquivo, "uai_so")
+        self.assertParserErrorContains(arquivo, "DU_CASU")
 
     # Helpers de apoio para montar cenarios de teste em memoria.
 
@@ -308,7 +308,7 @@ simbora
 cabo
 """)
 
-    # Casos da estrutura dependenu/du_casu/uai_so.
+    # Casos da estrutura dependenu/du_casu/default.
 
     def test_case_completo(self):
         self._assert_valido("""
@@ -319,7 +319,7 @@ simbora
     dependenu(x) simbora
         du_casu 1: uai
         du_casu 2: uai
-        uai_so: uai
+        default: uai
     cabo
 cabo
 """)
@@ -335,7 +335,7 @@ simbora
         du_casu 1:
             dependenu(y) simbora
                 du_casu 2: uai
-                uai_so: uai
+                default: uai
             cabo
     cabo
 cabo
@@ -395,7 +395,7 @@ simbora
 
     dependenu(c) simbora
         du_casu 1: uai
-        uai_so: uai
+        default: uai
     cabo
 cabo
 """)

@@ -754,7 +754,7 @@ class Parser:
             self.stmt()
 
     def case_stmt(self) -> None:
-        # Estrutura dependenu/du_casu/uai_so.
+        # Estrutura dependenu/du_casu/default.
         self.consume(TokenType.DEPENDENU)
         self.consume(TokenType.LEFT_PAREN)
         ident_tok = self.consume(TokenType.IDENTIFIER)
@@ -793,7 +793,7 @@ class Parser:
         self.emit("label", label_next)
 
     def resto_dos_casos(self, ident: str, label_end: str) -> None:
-        # Casos seguintes e opcional uai_so.
+        # Casos seguintes e default opcional.
         if self._matches(TokenType.DU_CASU):
             self.do_caso(ident, label_end)
             self.resto_dos_casos(ident, label_end)
