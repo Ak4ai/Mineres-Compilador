@@ -1,50 +1,36 @@
-"""
-Interpretador de código intermediário de 3 endereços.
-Executa código gerado pelo parser recursivo descendente.
-Formato: (op, result, arg1, arg2)
-Operandos: var:nome, lit:valor, tempN, labelN, null
-"""
-
 from __future__ import annotations
 
 
 class ErroExecucao(Exception):
-    """Exceção disparada durante execução do código intermediário."""
+    # Erro controlado durante execucao do codigo intermediario.
     pass
 
 
 class Interpretador:
-    """Executa código intermediário de 3 endereços."""
+    # Executa codigo intermediario gerado pelo parser.
 
     def __init__(self, codigo_fonte: list):
-        """
-        Inicializa o interpretador.
-        
-        Args:
-            codigo_fonte: Lista de tuplas (op, result, arg1, arg2)
-        """
+        # Estado principal de execucao.
         self.codigo_fonte = codigo_fonte
-        self.labels = {}  # Mapeamento label -> índice
-        self.variaveis = {}  # Dicionário de valores de variáveis
-        self.saida = []  # Buffer de saída (prints)
+        self.labels = {}  # Mapeamento label -> indice
+        self.variaveis = {}  # Valores de variaveis e temporarios
+        self.saida = []  # Buffer de saida (prints)
         self.erros = []  # Buffer de erros
         self.pc = 0  # Program counter (instruction pointer)
 
     def mapear_labels(self) -> None:
-        """Cria mapeamento de labels para índices de instruções."""
+        # Cria mapeamento de labels para indices de instrucoes.
         for idx, instrucao in enumerate(self.codigo_fonte):
             if instrucao[0] == "label":
                 label_nome = instrucao[1]
                 self.labels[label_nome] = idx
 
     def iniciar_dicionario(self) -> None:
-        """
-        Inicializa dicionário de variáveis.
-        Varre o código procurando destinos de escrita e inicializa com 0.
-        """
+        # Inicializa variaveis que recebem escrita direta no codigo.
         for instrucao in self.codigo_fonte:
             op, result, arg1, _ = instrucao
 
+            # So destinos reais de escrita entram como variaveis conhecidas.
             if op == "att":
                 var_nome = self._extrair_nome_var(result)
                 if var_nome:
@@ -56,12 +42,7 @@ class Interpretador:
                     self.variaveis[var_nome] = 0
 
     def executar(self) -> bool:
-        """
-        Executa o código intermediário.
-        
-        Returns:
-            True se execução bem-sucedida, False se houver erro.
-        """
+        # Executa instrucoes ate o fim ou ate um erro controlado.
         try:
             self.mapear_labels()
             self.iniciar_dicionario()
@@ -78,35 +59,19 @@ class Interpretador:
             return False
 
     def _extrair_nome_var(self, operando: str) -> str:
-        """
-        Extrai nome de variável de um operando.
-        
-        Args:
-            operando: String no formato "var:nome" ou "null"
-            
-        Returns:
-            Nome da variável ou None se não for uma variável.
-        """
+        # Extrai nome de operando no formato var:nome.
         if operando is None or operando == "null":
             return None
         if isinstance(operando, str) and operando.startswith("var:"):
-            return operando[4:]  # Remove "var:" prefix
+            return operando[4:]
         return None
 
     def _extrair_valor_literal(self, operando: str):
-        """
-        Extrai valor literal de um operando.
-        
-        Args:
-            operando: String no formato "lit:valor"
-            
-        Returns:
-            Valor literal (int, float ou string)
-        """
+        # Converte operando lit:valor para valor Python.
         if not isinstance(operando, str) or not operando.startswith("lit:"):
             return None
 
-        valor_str = operando[4:]  # Remove "lit:" prefix
+        valor_str = operando[4:]
 
         if valor_str == "eh":
             return 1
@@ -150,18 +115,7 @@ class Interpretador:
         return valor_str
 
     def _avaliar_operando(self, operando: str):
-        """
-        Avalia um operando e retorna seu valor.
-        
-        Args:
-            operando: Pode ser "var:nome", "lit:valor", "tempN", "labelN", ou "null"
-            
-        Returns:
-            Valor do operando
-            
-        Raises:
-            ErroExecucao: Se variável não existe ou operando inválido
-        """
+        # Resolve operandos var/lit/temp para valores concretos.
         if operando is None or operando == "null":
             return 0
 
@@ -190,15 +144,7 @@ class Interpretador:
         raise ErroExecucao(f"Operando inválido: '{operando}'")
 
     def _executar_instrucao(self, instrucao: tuple) -> None:
-        """
-        Executa uma instrução de código intermediário.
-        
-        Args:
-            instrucao: Tupla (op, result, arg1, arg2)
-            
-        Raises:
-            ErroExecucao: Se houver erro na execução
-        """
+        # Despacha uma quadrupla para sua operacao correspondente.
         op, result, arg1, arg2 = instrucao
 
         # Instrução de label: não faz nada (apenas marca posição)
@@ -303,20 +249,7 @@ class Interpretador:
         raise ErroExecucao(f"Instrução desconhecida: '{op}'")
 
     def _avaliar_operacao(self, op: str, arg1: str, arg2: str = None):
-        """
-        Avalia uma operação aritmética ou lógica.
-        
-        Args:
-            op: Operador (add, sub, mult, etc)
-            arg1: Primeiro operando
-            arg2: Segundo operando (None para operadores unários)
-            
-        Returns:
-            Resultado da operação
-            
-        Raises:
-            ErroExecucao: Se houver erro na avaliação
-        """
+        # Avalia operacoes aritmeticas, relacionais e logicas.
         try:
             # Operador unário NOT
             if op == "not":
@@ -385,15 +318,15 @@ class Interpretador:
             raise ErroExecucao(f"Erro na operação '{op}': {exc}") from exc
 
     def get_saida(self) -> str:
-        """Retorna saída do programa como string."""
+        # Retorna saida acumulada pelo print.
         return "\n".join(self.saida)
 
     def get_erros(self) -> str:
-        """Retorna erros como string ou None se sem erros."""
+        # Retorna erros acumulados, quando existirem.
         return "\n".join(self.erros) if self.erros else None
 
     def printar_info(self) -> None:
-        """Imprime informações de debug sobre a execução."""
+        # Imprime estado interno para depuracao manual.
         print("\n== INTERPRETADOR ==")
         print("Código intermediário:")
         for i, instr in enumerate(self.codigo_fonte):

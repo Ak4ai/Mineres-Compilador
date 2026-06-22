@@ -169,6 +169,7 @@ class Parser:
         tok: Token | None = None,
         require_initialized: bool = False,
     ) -> str | None:
+        # Operandos do codigo intermediario carregam a origem no prefixo.
         if operando == "null":
             return None
         if operando.startswith("var:"):
@@ -602,16 +603,19 @@ class Parser:
         self.consume(TokenType.LEFT_PAREN)
         codigo_init = []
         if self._is_expr_start(self.current()):
+            # A inicializacao roda uma vez antes do primeiro teste.
             codigo_init, _ = self._capture_expr_code()
         self.consume(TokenType.SEMICOLON)
         codigo_cond = []
         cond = self.make_lit("eh")
         if self._is_expr_start(self.current()):
+            # Condicao vazia equivale a verdadeiro, como um for infinito.
             codigo_cond, cond = self._capture_expr_code()
             self._ensure_boolean(cond, self.current(), "condicao do for")
         self.consume(TokenType.SEMICOLON)
         codigo_inc = []
         if self._is_expr_start(self.current()):
+            # Incremento e emitido depois do corpo, mas aparece antes dele na gramatica.
             temp_count_before_inc = self.temp_count
             codigo_inc, _ = self._capture_expr_code()
             self.temp_count = temp_count_before_inc
@@ -631,6 +635,7 @@ class Parser:
         continue_used = any(continue_placeholder in instr for instr in codigo_body)
         label_continue = None
         if continue_used:
+            # Continue pula para um label proprio antes do incremento do for.
             label_continue = self.new_label()
             replacements[continue_placeholder] = label_continue
         codigo_body = self._replace_loop_placeholders(codigo_body, replacements)
@@ -778,6 +783,7 @@ class Parser:
         valor = self.fator_zin_menor_ainda()
         self._ensure_same_family(ident, valor, self.current(), "case")
         self.consume(TokenType.COLON)
+        # O corpo e lido agora, mas emitido apos o teste do literal.
         codigo_case = self._capture_stmt_code()
 
         temp = self.new_temp()
