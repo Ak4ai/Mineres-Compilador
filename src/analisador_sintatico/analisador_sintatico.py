@@ -86,7 +86,7 @@ class SemanticError(Exception):
 
 
 class Parser:
-    # Parser recursivo: valida a estrutura do programa.
+    # Parser recursivo: valida sintaxe, semantica e gera codigo intermediario.
 
     def __init__(self, tokens: list[Token]):
         # Ignora comentarios: eles nao entram na analise sintatica.
@@ -107,6 +107,9 @@ class Parser:
         self.loop_stack = []
         self.loop_placeholder_count = 0
 
+    # ------------------------------------------------------------------
+    # Analise semantica
+    # ------------------------------------------------------------------
     def _raise_semantic_error(self, message: str, tok: Token) -> None:
         raise SemanticError(message, tok.line, tok.column)
 
@@ -314,6 +317,7 @@ class Parser:
                 tok,
             )
 
+    # Controle de laços usado pela semântica e pela geração de código
     def _push_loop_context(self, break_label: str, continue_label: str) -> None:
         # Labels podem ser definitivas ou placeholders resolvidos apos capturar o corpo.
         self.loop_stack.append({"break": break_label, "continue": continue_label})
@@ -348,6 +352,9 @@ class Parser:
             )
         return codigo_atualizado
 
+    # ------------------------------------------------------------------
+    # Codigo intermediario
+    # ------------------------------------------------------------------
     def new_temp(self) -> str:
         self.temp_count += 1
         return f"temp{self.temp_count}"
@@ -449,7 +456,7 @@ class Parser:
 
         return codigo_atualizado
 
-    # Parte 1: navegacao na lista de tokens
+    # Navegação na lista de tokens
     def current(self) -> Token:
         if self.pos < len(self.tokens):
             return self.tokens[self.pos]
@@ -470,16 +477,16 @@ class Parser:
         expected_label = self._expected_label(expected_type)
         raise ParserError(expected_label, self._received_label(tok), tok.line, tok.column)
 
-    # Parte 2: porta de entrada do parser
+    # Porta de entrada do parser
     def parse(self) -> bool:
         # Regra inicial + EOF: garante que todo o arquivo foi consumido.
         self.function()
         self.consume(TokenType.EOF)
         return True
 
-    # Parte 3: estrutura geral do programa
+    # Regras sintáticas: estrutura geral do programa
     def function(self) -> None:
-        # Programa obrigatorio: bora_cumpade main() seguido de bloco.
+        # Programa obrigatório: bora_cumpade main() seguido de bloco.
         self.consume(TokenType.BORA_CUMPADE)
         self.consume(TokenType.MAIN)
         self.consume(TokenType.LEFT_PAREN)
@@ -508,7 +515,7 @@ class Parser:
             self.stmt()
             self.stmt_list()
 
-    # Parte 4: comandos
+    # Regras sintaticas: comandos
     def stmt(self) -> None:
         # Escolhe qual comando parsear olhando o token atual.
         tok = self.current()
@@ -815,9 +822,9 @@ class Parser:
             codigo_default = self._capture_stmt_code()
             self.codigo.extend(codigo_default)
 
-    # Parte 5: expressoes (com precedencia)
+    # Regras sintáticas: expressões (com precedência)
     def expr(self) -> str:
-        # Entrada da expressao.
+        # Entrada da expressão.
         return self.atrib()
 
     def atrib(self) -> str:
@@ -1137,7 +1144,7 @@ class Parser:
             tok.column,
         )
 
-    # Bloco 6: helpers de validacao
+    # Helpers sintaticos
     def consume_delimiter(self) -> Token:
         # Delimitador de comando fora do for.
         tok = self.current()

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from analisador_lexico.lexer import LexicalError, Lexer
 from analisador_sintatico.analisador_sintatico import Parser, ParserError, SemanticError
-from analisador_sintatico.interpretador import Interpretador
+from interpretador import Interpretador
 
 
 def _descricao_fases(executar_saida_lexica: bool, executar_sintatico: bool) -> str:

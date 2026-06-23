@@ -40,7 +40,8 @@ Visão geral do repositório e do que é compartilhado entre as fases:
 │   ├── tokentype.py                 # TokenType + mapa de palavras da linguagem
 │   ├── mineires_token.py            # Modelo de Token (lexema, tipo, linha, coluna)
 │   ├── analisador_lexico/           # Implementação do analisador léxico
-│   └── analisador_sintatico/        # Parser, semântica, código intermediário e interpretador
+│   ├── analisador_sintatico/        # Parser, semântica e código intermediário
+│   └── interpretador.py             # Execução do código intermediário
 ├── automatos/                       # Definição do AFD usado no léxico
 ├── entradas/                        # Casos válidos e exemplos de erros léxicos, sintáticos e semânticos
 ├── saida/                           # Artefatos gerados (TXT/JSON) quando aplicável
@@ -418,7 +419,7 @@ O interpretador percorre as quádruplas, mapeia labels, mantém um dicionário d
 ### 🏗️ Estrutura da Fase
 Principal arquivo desta fase:
 
-- `src/analisador_sintatico/interpretador.py`
+- `src/interpretador.py`
   - Implementa a classe `Interpretador`.
   - Executa as quádruplas geradas pelo parser.
   - Mantém `variaveis`, `labels`, `pc`, `saida` e `erros`.
